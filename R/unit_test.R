@@ -56,9 +56,9 @@ unit_test <- function()
   # Results of the unit test
   unit_test_results <- list()
   # Rounding to 7 digits prevents disagreements because of different numbers of reported digits
-  unit_test_results[1] <- Score == round(Test$Score, 7)
-  unit_test_results[2] <- Score_with_Padding == round(Test$Score_with_Padding, 7)
-  unit_test_results[3] <- sum(Alignment_with_Padding == round(Test$Alignment_with_Padding, 7)) == 30 # All 30 elements of the alignment must be the same
+  unit_test_results[1] <- Score == round(Test$score, 7)
+  unit_test_results[2] <- Score_with_Padding == round(Test$score_with_padding, 7)
+  unit_test_results[3] <- sum(Alignment_with_Padding == round(Test$alignment_with_padding, 7)) == 30 # All 30 elements of the alignment must be the same
 
   if (sum(unit_test_results == TRUE) == 3) {
     print("Unit test results: PASS")
