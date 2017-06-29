@@ -1,4 +1,4 @@
-Package: NetCom
+Package: netcom
 Type: Package
 Title: Dynamic Network alignment
 Version: 0.1.0
