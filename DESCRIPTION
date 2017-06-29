@@ -1,0 +1,27 @@
+Package: NetCom
+Type: Package
+Title: Dynamic Network alignment
+Version: 0.1.0
+Date: 2016-12-08
+Author: Ryan E. Langendorf, Debra S. Goldberg
+Maintainer: Ryan E. Langendorf <ryan.langendorf@colorado.edu>
+Authors@R: as.person(c(
+    "Ryan E. Langendorf <ryan.langendorf@colorado.edu> [aut, cre]", 
+    "Debra S. Goldberg <debra@colorado.edu> [aut]"
+  ))
+Description: Functions to take two networks, either matrices or linked lists, and return 
+    a node-level injection between them (bijection if the input networks are of the same size). The alignment
+    is made by giving the Hungarian algorithm a symmetric cost matrix where entries are the numerical difference in 
+    the distributions over time of diffusion within each network originating from particular nodes.
+Depends: R (>= 3.1.0)
+Imports:
+    clue,
+    expm,    
+    igraph,
+    Matrix,
+    tibble,
+    vegan
+License: file LICENSE
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.0.1
