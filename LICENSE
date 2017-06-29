@@ -1,5 +1,5 @@
-NetCom: An R package for permforming global pairwise node alignment using the predictability of network dynamics
-Copyright (C) 2016  Ryan E. Langendorf
+netcom: An R package for permforming network alignment by comparing the entropies of diffusion kernels simulated on two networks.
+Copyright (C) 2017  Ryan E. Langendorf
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

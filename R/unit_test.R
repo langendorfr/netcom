@@ -1,32 +1,17 @@
-UnitTest <- function()
+#' @title Test of the align.R function
+#'
+#' @description Compared the output of align.R to a hand curated output.
+#'
+#' @return Either "Unit test results: PASS" or "Unit test results: FAIL"
+#'
+#' @examples
+#' unit_test()
+#' netcom::unit_test()
+#'
+
+#' @export
+unit_test <- function()
 {
-# Takes two networks, either matrices or linked lists, and returns a node-level alignment between them.
-#
-# Args:
-#   matrix_1_input: The first network being aligned, either as a matrix or linked list. If the two
-#     networks are of different sizes, it will be easier to interpret the output if this is the smaller one.
-#
-#   matrix_2_input: The second network. Should be the same type (matrix or linked list) as matrix_1_input.
-#
-#   base: The base in the series of time steps to sample the diffusion kernels at. If base = 1 every time step
-#     is sampled. If base = 2, only time steps that are powers of 2 are sampled, etc.
-#
-#   characterization: Determines how the diffusion kernels are characterized. Either "entropy" or "Gini".
-#
-#   normalization: Determines if self-loops should be augmented such that edge weights in network.1 and network.2 are
-#     proportional to those in matrix.1.input and matrix.2.input. FALSE by default because this is innapropriate for
-#     unweighted binary/logical networks where edges indicate only the presense of an interaction.
-#
-# Returns:
-#   A list containing 4 pieces: Score = mean of all alignment scores between nodes in both original networks matrix_1_input and matrix_2_input.
-#                               Alignment = data frame of the nodes in both networks, sorted numerically by the first network (why it helps to make the smaller network the first one), and the corresponding alignment score
-#                               Score_with_Padding = same as Score but includes the padding nodes in the smaller network, which can be thought of as a size gap penalty for aligning differently sized networks
-#                               Alignment_with_Padding = same as Alignment but includes the padding nodes in the smaller network
-
-  # devtools::load.all()
-
-  # Algorithm ================================================================================================================
-
   # Unweighted and directed test matrices
   matrix_1_input <- matrix(c(1,0,1,1,0,
                              0,1,0,1,0,

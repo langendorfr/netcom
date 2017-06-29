@@ -1,19 +1,25 @@
-ICS <- function(matrix_1_input, matrix_2_input, alignment, flip = FALSE)
-{
-  # Calculates the Induced Conserved Structure (Patro and Kingsford, 2012) of an alignment between two networks.
-  #
-  # Args:
-  #   matrix_1_input: The first network being aligned, either as a matrix or linked list. If the two
-  #     networks are of different sizes, it will be easier to interpret the output if this is the smaller one.
-  #
-  #   matrix_2_input: The second network. Should be the same type (matrix or linked list) as matrix_1_input.
-  #
-  #   alignment: A matrix, such as is output by the function NetCom, where the first two columns contain corresponding node IDs for the two networks
-  #     that were aligned.
-  #
-  # Returns:
-  #   A number ranging between 0 and 1. If the Induced Conserved Structure is 1, the two networks are isomorphic (identical) under the given alignment.
+#' @title Induced Conserved Structure (ICS)
+#'
+#' @description Calculates the Induced Conserved Structure (Patro and Kingsford, 2012) of an alignment between two networks.
+#'
+#' @param matrix_1_input The first network being aligned, either as a matrix or linked list. If the two
+#' networks are of different sizes, it will be easier to interpret the output if this is the smaller one.
+#'
+#' @param matrix_2_input The second network. Should be the same type (matrix or linked list) as matrix_1_input.
+#'
+#' @param alignment: A matrix, such as is output by the function NetCom, where the first two columns contain
+#' corresponding node IDs for the two networks that were aligned.
+#'
+#' @return A number ranging between 0 and 1. If the Induced Conserved Structure is 1, the two networks are
+#' isomorphic (identical) under the given alignment.
+#'
+#' @examples
+#' ics()
+#' netcom::ics()
+#'
 
+ics <- function(matrix_1_input, matrix_2_input, alignment, flip = FALSE)
+{
   # Ensure inputs are matrices, and if they are linked lists convert them to matrices (NOTE: this assumes the same data type for the two input networks)
   if (input == "list" | dim(matrix_1_input)[1] != dim(matrix_1_input)[2] | dim(matrix_2_input)[1] != dim(matrix_2_input)[2]) {
 

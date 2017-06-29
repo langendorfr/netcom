@@ -1,13 +1,18 @@
-Gini <- function(input)
-{
-  # Takes a matrix and returns the Gini coefficient of each row.
-  #
-  # Args:
-  #   input: A row-stochastic matrix, meaning each row is a multinomial distribution.
-  #
-  # Returns:
-  #   A vector of the Gini coefficient of each row.
+#' @title Gini coefficient
+#'
+#' @description Takes a matrix and returns the Gini coefficient of each row.
+#'
+#' @param input A row-stochastic matrix, meaning each row is a multinomial distribution.
+#'
+#' @return A vector of the Gini coefficient of each row.
+#'
+#' @examples
+#' gini(matrix(runif(25, 0, 1), nrow = 5, ncol = 5))
+#' netcom::gini(matrix(runif(25, 0, 1), nrow = 5, ncol = 5))
+#'
 
+gini <- function(input)
+{
   # The input should be a row-stochastic matrix
   size <- nrow(input)
 

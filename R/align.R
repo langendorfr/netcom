@@ -34,7 +34,8 @@
 #' NetCom(NetOne, NetTwo, input = "matrix", base = 2, characterization = "entropy", normalization = FALSE)
 #'
 
-NetCom <- function(matrix_1_input, matrix_2_input, input = "matrix", base = 2, characterization = "entropy", normalization = FALSE)
+#' @export
+align <- function(matrix_1_input, matrix_2_input, input = "matrix", base = 2, characterization = "entropy", normalization = FALSE)
 {
   # Ensure inputs are matrices, and if they are linked lists convert them to matrices (NOTE: this assumes the same data type for the two input networks)
   if (input == "list" | dim(matrix_1_input)[1] != dim(matrix_1_input)[2] | dim(matrix_2_input)[1] != dim(matrix_2_input)[2]) {
