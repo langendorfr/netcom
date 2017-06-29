@@ -19,8 +19,11 @@
 #' isomorphic (identical) under the given alignment.
 #'
 #' @examples
-#' ics()
+#' NetOne <- matrix(runif(25,0,1), nrow=5, ncol=5)
+#' NetTwo <- matrix(runif(25,0,1), nrow=5, ncol=5)
+#' align(NetOne, NetTwo, align(NetOne, NetTwo)$alignment)
 
+#' @export
 ics <- function(matrix_1_input, matrix_2_input, alignment, input = "matrix", flip = FALSE)
 {
   # Check to make sure the networks are unweighted. ICS is not defined on weighted networks.

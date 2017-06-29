@@ -9,6 +9,7 @@
 #' @examples
 #' gini(matrix(runif(25, 0, 1), nrow = 5, ncol = 5))
 
+#' @export
 gini <- function(input)
 {
   # The input should be a row-stochastic matrix
