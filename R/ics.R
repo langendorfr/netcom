@@ -21,7 +21,7 @@
 #' @examples
 #' ics()
 
-ics <- function(matrix_1_input, matrix_2_input, alignment, input == "matrix", flip = FALSE)
+ics <- function(matrix_1_input, matrix_2_input, alignment, input = "matrix", flip = FALSE)
 {
   # Check if inputs are square matrices. If not, they are linked lists which need to be converted to 
   # their respective matrix representations. (NOTE: this assumes the same data type for the two input networks)
