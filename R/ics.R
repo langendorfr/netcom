@@ -25,7 +25,7 @@ ics <- function(matrix_1_input, matrix_2_input, alignment, input = "matrix", fli
 {
   # Check if inputs are square matrices. If not, they are linked lists which need to be converted to 
   # their respective matrix representations. (NOTE: this assumes the same data type for the two input networks)
-  if (input == "list", (dim(matrix_1_input)[1] != dim(matrix_1_input)[2]) | (dim(matrix_2_input)[1] != dim(matrix_2_input)[2])) {
+  if (input == "list" | (dim(matrix_1_input)[1] != dim(matrix_1_input)[2]) | (dim(matrix_2_input)[1] != dim(matrix_2_input)[2])) {
 
     # R starts counting at one, not zero
     if (min(matrix_1_input) == 0) {
