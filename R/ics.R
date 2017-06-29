@@ -7,8 +7,11 @@
 #'
 #' @param matrix_2_input The second network. Should be the same type (matrix or linked list) as matrix_1_input.
 #'
-#' @param alignment: A matrix, such as is output by the function NetCom, where the first two columns contain
+#' @param alignment A matrix, such as is output by the function NetCom, where the first two columns contain
 #' corresponding node IDs for the two networks that were aligned.
+#' 
+#' @param flip Defaults to FALSE. Set to TRUE if the first network is larger than the second. This is necessary 
+#' because ICS is not a symmetric measure of alignment quality. 
 #'
 #' @return A number ranging between 0 and 1. If the Induced Conserved Structure is 1, the two networks are
 #' isomorphic (identical) under the given alignment.
@@ -21,19 +24,19 @@
 ics <- function(matrix_1_input, matrix_2_input, alignment, flip = FALSE)
 {
   # Ensure inputs are matrices, and if they are linked lists convert them to matrices (NOTE: this assumes the same data type for the two input networks)
-  if (input == "list" | dim(matrix_1_input)[1] != dim(matrix_1_input)[2] | dim(matrix_2_input)[1] != dim(matrix_2_input)[2]) {
+  if (matrix_1_input == "list" | dim(matrix_1_input)[1] != dim(matrix_1_input)[2] | dim(matrix_2_input)[1] != dim(matrix_2_input)[2]) {
 
     # R starts counting at one, not zero
     if (min(matrix_1_input) == 0) {
-      matrix_1_input <- as_adjacency_matrix(graph_from_edgelist(as.matrix(matrix_1_input + 1), directed = TRUE), sparse = FALSE)
+      matrix_1_input <- igraph::as_adjacency_matrix(igraph::graph_from_edgelist(as.matrix(matrix_1_input + 1), directed = TRUE), sparse = FALSE)
     } else {
-      matrix_1_input <- as_adjacency_matrix(graph_from_edgelist(as.matrix(matrix_1_input), directed = TRUE), sparse = FALSE)
+      matrix_1_input <- igraph::as_adjacency_matrix(igraph::graph_from_edgelist(as.matrix(matrix_1_input), directed = TRUE), sparse = FALSE)
     }
 
     if (min(matrix_2_input) == 0) {
-      matrix_2_input <- as_adjacency_matrix(graph_from_edgelist(as.matrix(matrix_2_input + 1), directed = TRUE), sparse = FALSE)
+      matrix_2_input <- igraph::as_adjacency_matrix(igraph::graph_from_edgelist(as.matrix(matrix_2_input + 1), directed = TRUE), sparse = FALSE)
     } else {
-      matrix_2_input <- as_adjacency_matrix(graph_from_edgelist(as.matrix(matrix_2_input), directed = TRUE), sparse = FALSE)
+      matrix_2_input <- igraph::as_adjacency_matrix(igraph::graph_from_edgelist(as.matrix(matrix_2_input), directed = TRUE), sparse = FALSE)
     }
 
   }
@@ -42,13 +45,14 @@ ics <- function(matrix_1_input, matrix_2_input, alignment, flip = FALSE)
   ICS_1 <- matrix_1_input[alignment[ , 1], alignment[ , 1]]
   ICS_2 <- matrix_2_input[alignment[ , 2], alignment[ , 2]]
 
-  ICS_numerator <- sum(ICS_1 == ICS_2 & ICS_1 != 0) # Do not count similar absences of edges
+  ICS_numerator <- sum((ICS_1 == ICS_2) & ICS_1 != 0) # Do not count similar absences of edges
 
-  # This is necessary because ICS is not a symmetric measure of alignment quality
+  # This is necessary because ICS is not a symmetric measure of alignment quality.
   if (flip == TRUE) {
     ICS_denominator <- sum(ICS_1)
   } else {
-    ICS_denominator <- sum(ICS_2)
+    # The default behavior
+    ICS_denominator <- sum(ICS_2)   
   }
 
   ICS <- ICS_numerator/ICS_denominator

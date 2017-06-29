@@ -30,8 +30,8 @@
 #' @examples
 #' NetOne <- matrix(runif(25,0,1), nrow=5, ncol=5)
 #' NetTwo <- matrix(runif(25,0,1), nrow=5, ncol=5)
-#' NetCom(NetOne, NetTwo)
-#' NetCom(NetOne, NetTwo, input = "matrix", base = 2, characterization = "entropy", normalization = FALSE)
+#' align(NetOne, NetTwo)
+#' netcom::align(NetOne, NetTwo, input = "matrix", base = 2, characterization = "entropy", normalization = FALSE)
 #'
 
 #' @export
@@ -42,15 +42,15 @@ align <- function(matrix_1_input, matrix_2_input, input = "matrix", base = 2, ch
 
     # R starts counting at one, not zero
     if (min(matrix_1_input) == 0) {
-      matrix_1_input <- as_adjacency_matrix(graph_from_edgelist(as.matrix(matrix_1_input + 1), directed = TRUE), sparse = FALSE)
+      matrix_1_input <- igraph::as_adjacency_matrix(igraph::graph_from_edgelist(as.matrix(matrix_1_input + 1), directed = TRUE), sparse = FALSE)
     } else {
-      matrix_1_input <- as_adjacency_matrix(graph_from_edgelist(as.matrix(matrix_1_input), directed = TRUE), sparse = FALSE)
+      matrix_1_input <- igraph::as_adjacency_matrix(igraph::graph_from_edgelist(as.matrix(matrix_1_input), directed = TRUE), sparse = FALSE)
     }
 
     if (min(matrix_2_input) == 0) {
-      matrix_2_input <- as_adjacency_matrix(graph_from_edgelist(as.matrix(matrix_2_input + 1), directed = TRUE), sparse = FALSE)
+      matrix_2_input <- igraph::as_adjacency_matrix(igraph::graph_from_edgelist(as.matrix(matrix_2_input + 1), directed = TRUE), sparse = FALSE)
     } else {
-      matrix_2_input <- as_adjacency_matrix(graph_from_edgelist(as.matrix(matrix_2_input), directed = TRUE), sparse = FALSE)
+      matrix_2_input <- igraph::as_adjacency_matrix(igraph::graph_from_edgelist(as.matrix(matrix_2_input), directed = TRUE), sparse = FALSE)
     }
 
   }
@@ -141,12 +141,12 @@ align <- function(matrix_1_input, matrix_2_input, input = "matrix", base = 2, ch
         network_1_output[, 1] <- c(vegan::diversity(network_1_diffusion[1:matrix_sizes[1], 1:matrix_sizes[1]]) / vegan::diversity(rep(1, matrix_sizes[1])), rep(0, max(matrix_sizes) - matrix_sizes[1]))
       }
       if (characterization == "Gini") {
-        network_1_output[, 1] <- c(Gini(network_1_diffusion[1:matrix_sizes[1], 1:matrix_sizes[1]]), rep(0, max(matrix_sizes) - matrix_sizes[1]))
+        network_1_output[, 1] <- c(gini(network_1_diffusion[1:matrix_sizes[1], 1:matrix_sizes[1]]), rep(0, max(matrix_sizes) - matrix_sizes[1]))
       }
 
       # Characterize the remaining time steps
       for (t in 2:length(kernel_sampling)) {
-        network_1_diffusion <- network_1_diffusion %*% (network_1 %^% (kernel_sampling[t] - kernel_sampling[t - 1])) # Speeds up the algorithm by eliminating the need to recalculate previous time steps
+        network_1_diffusion <- network_1_diffusion %*% (expm::"%^%"(network_1, (kernel_sampling[t] - kernel_sampling[t - 1])))# Speeds up the algorithm by eliminating the need to recalculate previous time steps
 
         # For those interested in speeding things up, the following commented-out line proved to be slower
         # network_1_diffusion <- abs(Re(eig$vectors %*% diag(eig$values ^ t) %*% inverse))
@@ -155,7 +155,7 @@ align <- function(matrix_1_input, matrix_2_input, input = "matrix", base = 2, ch
           network_1_output[, t] <- c(vegan::diversity(network_1_diffusion[1:matrix_sizes[1], 1:matrix_sizes[1]]) / vegan::diversity(rep(1, matrix_sizes[1])), rep(0, max(matrix_sizes) - matrix_sizes[1]))
         }
         if (characterization == "Gini") {
-          network_1_output[, t] <- c(Gini(network_1_diffusion[1:matrix_sizes[1], 1:matrix_sizes[1]]), rep(0, max(matrix_sizes) - matrix_sizes[1]))
+          network_1_output[, t] <- c(gini(network_1_diffusion[1:matrix_sizes[1], 1:matrix_sizes[1]]), rep(0, max(matrix_sizes) - matrix_sizes[1]))
         }
       }
 
@@ -168,16 +168,16 @@ align <- function(matrix_1_input, matrix_2_input, input = "matrix", base = 2, ch
         network_2_output[, 1] <- c(vegan::diversity(network_2_diffusion[1:matrix_sizes[2], 1:matrix_sizes[2]]) / vegan::diversity(rep(1, matrix_sizes[2])), rep(0, max(matrix_sizes) - matrix_sizes[2]))
       }
       if (characterization == "Gini") {
-        network_2_output[, 1] <- c(Gini(network_2_diffusion[1:matrix_sizes[2], 1:matrix_sizes[2]]), rep(0, max(matrix_sizes) - matrix_sizes[2]))
+        network_2_output[, 1] <- c(gini(network_2_diffusion[1:matrix_sizes[2], 1:matrix_sizes[2]]), rep(0, max(matrix_sizes) - matrix_sizes[2]))
       }
 
       for (t in 2:length(kernel_sampling)) {
-        network_2_diffusion <- network_2_diffusion %*% (network_2 %^% (kernel_sampling[t] - kernel_sampling[t - 1]))
+        network_2_diffusion <- network_2_diffusion %*% (expm::"%^%"(network_2, (kernel_sampling[t] - kernel_sampling[t - 1])))
         if (characterization == "entropy") {
           network_2_output[, t] <- c(vegan::diversity(network_2_diffusion[1:matrix_sizes[2], 1:matrix_sizes[2]]) / vegan::diversity(rep(1, matrix_sizes[2])), rep(0, max(matrix_sizes) - matrix_sizes[2]))
         }
         if (characterization == "Gini") {
-          network_2_output[, t] <- c(Gini(network_2_diffusion[1:matrix_sizes[2], 1:matrix_sizes[2]]), rep(0, max(matrix_sizes) - matrix_sizes[2]))
+          network_2_output[, t] <- c(gini(network_2_diffusion[1:matrix_sizes[2], 1:matrix_sizes[2]]), rep(0, max(matrix_sizes) - matrix_sizes[2]))
         }
 
       }

@@ -53,7 +53,7 @@ unit_test <- function()
   Score_with_Padding <- 0.2931176
 
   # Run the alignment algorithm
-  Test <- NetComFast(matrix_1_input, matrix_2_input, input = "matrix", base = 2, characterization = "entropy", normalization = FALSE)
+  Test <- align(matrix_1_input, matrix_2_input, input = "matrix", base = 2, characterization = "entropy", normalization = FALSE)
 
   # Results of the unit test
   unit_test_results <- list()

@@ -12,8 +12,10 @@ networks are of different sizes, it will be easier to interpret the output if th
 
 \item{matrix_2_input}{The second network. Should be the same type (matrix or linked list) as matrix_1_input.}
 
-\item{alignment:}{A matrix, such as is output by the function NetCom, where the first two columns contain
+\item{alignment}{A matrix, such as is output by the function NetCom, where the first two columns contain
 corresponding node IDs for the two networks that were aligned.}
+
+\item{flip}{Defaults to FALSE. Set to TRUE if the first network is larger than the second.}
 }
 \value{
 A number ranging between 0 and 1. If the Induced Conserved Structure is 1, the two networks are
