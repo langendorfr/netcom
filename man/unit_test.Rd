@@ -14,6 +14,4 @@ Compared the output of align.R to a hand curated output.
 }
 \examples{
 unit_test()
-netcom::unit_test()
-
 }

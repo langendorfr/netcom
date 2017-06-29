@@ -33,7 +33,7 @@
 #' NetOne <- matrix(runif(25,0,1), nrow=5, ncol=5)
 #' NetTwo <- matrix(runif(25,0,1), nrow=5, ncol=5)
 #' align(NetOne, NetTwo)
-#' align(NetOne, NetTwo, input = "matrix", base = 2, characterization = "entropy", normalization = FALSE)
+#' align(NetOne, NetTwo, base = 1, characterization = "gini", normalization = TRUE)
 
 #' @export
 align <- function(matrix_1_input, matrix_2_input, input = "matrix", base = 2, characterization = "entropy", normalization = FALSE)

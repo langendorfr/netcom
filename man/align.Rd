@@ -13,25 +13,27 @@ networks are of different sizes, it will be easier to interpret the output if th
 
 \item{matrix_2_input}{The second network. Should be the same type (matrix or linked list) as matrix_1_input.}
 
-\item{base}{The base in the series of time steps to sample the diffusion kernels at. If base = 1 every time step
+\item{input}{Defaults to "matrix". Can be set to "list" if the two networks are stored as linked lists.}
+
+\item{base}{Defaults to 2. The base in the series of time steps to sample the diffusion kernels at. If base = 1 every time step
 is sampled. If base = 2, only time steps that are powers of 2 are sampled, etc.}
 
-\item{characterization}{Determines how the diffusion kernels are characterized. Either "entropy" or "Gini".}
+\item{characterization}{Defaults to "entropy". Determines how the diffusion kernels are characterized. Either "entropy" or "gini".}
 
-\item{normalization}{Determines if self-loops should be augmented such that edge weights in network.1 and network.2 are
+\item{normalization}{Defaults to FALSE. Determines if self-loops should be augmented such that edge weights in network.1 and network.2 are
 proportional to those in matrix.1.input and matrix.2.input. FALSE by default because this is innapropriate for
 unweighted binary/logical networks where edges indicate only the presense of an interaction.}
 }
 \value{
-A list containing 4 pieces:
+A list containing 4 pieces.
 
-Score = mean of all alignment scores between nodes in both original networks matrix_1_input and matrix_2_input.
+score: mean of all alignment scores between nodes in both original networks matrix_1_input and matrix_2_input.
 
-Alignment = data frame of the nodes in both networks, sorted numerically by the first network (why it helps to make the smaller network the first one), and the corresponding alignment score
+alignment: data frame of the nodes in both networks, sorted numerically by the first network (why it helps to make the smaller network the first one), and the corresponding alignment score
 
-Score_with_Padding = same as Score but includes the padding nodes in the smaller network, which can be thought of as a size gap penalty for aligning differently sized networks
+score_with_Padding: same as Score but includes the padding nodes in the smaller network, which can be thought of as a size gap penalty for aligning differently sized networks
 
-Alignment_with_Padding = same as Alignment but includes the padding nodes in the smaller network
+alignment_with_Padding: same as Alignment but includes the padding nodes in the smaller network
 }
 \description{
 Network alignment by comparing the entropies of diffusion kernels simulated on two networks.
@@ -41,6 +43,5 @@ Functions to take two networks, either matrices or linked lists, and return a no
 NetOne <- matrix(runif(25,0,1), nrow=5, ncol=5)
 NetTwo <- matrix(runif(25,0,1), nrow=5, ncol=5)
 align(NetOne, NetTwo)
-netcom::align(NetOne, NetTwo, input = "matrix", base = 2, characterization = "entropy", normalization = FALSE)
-
+align(NetOne, NetTwo, base = 1, characterization = "gini", normalization = TRUE)
 }

@@ -4,7 +4,8 @@
 \alias{ics}
 \title{Induced Conserved Structure (ICS)}
 \usage{
-ics(matrix_1_input, matrix_2_input, alignment, flip = FALSE)
+ics(matrix_1_input, matrix_2_input, alignment, input = "matrix",
+  flip = FALSE)
 }
 \arguments{
 \item{matrix_1_input}{The first network being aligned, either as a matrix or linked list. If the two
@@ -14,6 +15,8 @@ networks are of different sizes, it will be easier to interpret the output if th
 
 \item{alignment}{A matrix, such as is output by the function NetCom, where the first two columns contain
 corresponding node IDs for the two networks that were aligned.}
+
+\item{input}{Defaults to "matrix". Can be set to "list" if the two networks are stored as linked lists.}
 
 \item{flip}{Defaults to FALSE. Set to TRUE if the first network is larger than the second. This is necessary 
 because ICS is not a symmetric measure of alignment quality.}
@@ -27,6 +30,4 @@ Calculates the Induced Conserved Structure (Patro and Kingsford, 2012) of an ali
 }
 \examples{
 ics()
-netcom::ics()
-
 }

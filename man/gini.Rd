@@ -17,6 +17,4 @@ Takes a matrix and returns the Gini coefficient of each row.
 }
 \examples{
 gini(matrix(runif(25, 0, 1), nrow = 5, ncol = 5))
-netcom::gini(matrix(runif(25, 0, 1), nrow = 5, ncol = 5))
-
 }
