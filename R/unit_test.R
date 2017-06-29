@@ -6,8 +6,6 @@
 #'
 #' @examples
 #' unit_test()
-#' netcom::unit_test()
-#'
 
 #' @export
 unit_test <- function()

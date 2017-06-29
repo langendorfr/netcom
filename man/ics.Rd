@@ -15,7 +15,8 @@ networks are of different sizes, it will be easier to interpret the output if th
 \item{alignment}{A matrix, such as is output by the function NetCom, where the first two columns contain
 corresponding node IDs for the two networks that were aligned.}
 
-\item{flip}{Defaults to FALSE. Set to TRUE if the first network is larger than the second.}
+\item{flip}{Defaults to FALSE. Set to TRUE if the first network is larger than the second. This is necessary 
+because ICS is not a symmetric measure of alignment quality.}
 }
 \value{
 A number ranging between 0 and 1. If the Induced Conserved Structure is 1, the two networks are

@@ -40,7 +40,7 @@ Functions to take two networks, either matrices or linked lists, and return a no
 \examples{
 NetOne <- matrix(runif(25,0,1), nrow=5, ncol=5)
 NetTwo <- matrix(runif(25,0,1), nrow=5, ncol=5)
-NetCom(NetOne, NetTwo)
-NetCom(NetOne, NetTwo, input = "matrix", base = 2, characterization = "entropy", normalization = FALSE)
+align(NetOne, NetTwo)
+netcom::align(NetOne, NetTwo, input = "matrix", base = 2, characterization = "entropy", normalization = FALSE)
 
 }

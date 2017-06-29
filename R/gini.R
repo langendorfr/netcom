@@ -8,8 +8,6 @@
 #'
 #' @examples
 #' gini(matrix(runif(25, 0, 1), nrow = 5, ncol = 5))
-#' netcom::gini(matrix(runif(25, 0, 1), nrow = 5, ncol = 5))
-#'
 
 gini <- function(input)
 {

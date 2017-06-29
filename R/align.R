@@ -8,36 +8,38 @@
 #'
 #' @param matrix_2_input The second network. Should be the same type (matrix or linked list) as matrix_1_input.
 #'
-#' @param base The base in the series of time steps to sample the diffusion kernels at. If base = 1 every time step
+#' @param input Defaults to "matrix". Can be set to "list" if the two networks are stored as linked lists.
+#'
+#' @param base Defaults to 2. The base in the series of time steps to sample the diffusion kernels at. If base = 1 every time step
 #'     is sampled. If base = 2, only time steps that are powers of 2 are sampled, etc.
 #'
-#' @param characterization Determines how the diffusion kernels are characterized. Either "entropy" or "Gini".
+#' @param characterization Defaults to "entropy". Determines how the diffusion kernels are characterized. Either "entropy" or "gini".
 #'
-#' @param normalization Determines if self-loops should be augmented such that edge weights in network.1 and network.2 are
+#' @param normalization Defaults to FALSE. Determines if self-loops should be augmented such that edge weights in network.1 and network.2 are
 #'     proportional to those in matrix.1.input and matrix.2.input. FALSE by default because this is innapropriate for
 #'     unweighted binary/logical networks where edges indicate only the presense of an interaction.
 #'
-#' @return A list containing 4 pieces:
+#' @return A list containing 4 pieces.
 #'
-#' Score = mean of all alignment scores between nodes in both original networks matrix_1_input and matrix_2_input.
+#' score: mean of all alignment scores between nodes in both original networks matrix_1_input and matrix_2_input.
 #'
-#' Alignment = data frame of the nodes in both networks, sorted numerically by the first network (why it helps to make the smaller network the first one), and the corresponding alignment score
+#' alignment: data frame of the nodes in both networks, sorted numerically by the first network (why it helps to make the smaller network the first one), and the corresponding alignment score
 #'
-#' Score_with_Padding = same as Score but includes the padding nodes in the smaller network, which can be thought of as a size gap penalty for aligning differently sized networks
+#' score_with_Padding: same as Score but includes the padding nodes in the smaller network, which can be thought of as a size gap penalty for aligning differently sized networks
 #'
-#' Alignment_with_Padding = same as Alignment but includes the padding nodes in the smaller network
+#' alignment_with_Padding: same as Alignment but includes the padding nodes in the smaller network
 #'
 #' @examples
 #' NetOne <- matrix(runif(25,0,1), nrow=5, ncol=5)
 #' NetTwo <- matrix(runif(25,0,1), nrow=5, ncol=5)
 #' align(NetOne, NetTwo)
-#' netcom::align(NetOne, NetTwo, input = "matrix", base = 2, characterization = "entropy", normalization = FALSE)
-#'
+#' align(NetOne, NetTwo, input = "matrix", base = 2, characterization = "entropy", normalization = FALSE)
 
 #' @export
 align <- function(matrix_1_input, matrix_2_input, input = "matrix", base = 2, characterization = "entropy", normalization = FALSE)
 {
-  # Ensure inputs are matrices, and if they are linked lists convert them to matrices (NOTE: this assumes the same data type for the two input networks)
+  # Check if inputs are square matrices. If not, they are linked lists which need to be converted to 
+  # their respective matrix representations. (NOTE: this assumes the same data type for the two input networks)
   if (input == "list" | dim(matrix_1_input)[1] != dim(matrix_1_input)[2] | dim(matrix_2_input)[1] != dim(matrix_2_input)[2]) {
 
     # R starts counting at one, not zero
@@ -140,7 +142,7 @@ align <- function(matrix_1_input, matrix_2_input, input = "matrix", base = 2, ch
       if (characterization == "entropy") {
         network_1_output[, 1] <- c(vegan::diversity(network_1_diffusion[1:matrix_sizes[1], 1:matrix_sizes[1]]) / vegan::diversity(rep(1, matrix_sizes[1])), rep(0, max(matrix_sizes) - matrix_sizes[1]))
       }
-      if (characterization == "Gini") {
+      if (characterization == "gini") {
         network_1_output[, 1] <- c(gini(network_1_diffusion[1:matrix_sizes[1], 1:matrix_sizes[1]]), rep(0, max(matrix_sizes) - matrix_sizes[1]))
       }
 
@@ -154,7 +156,7 @@ align <- function(matrix_1_input, matrix_2_input, input = "matrix", base = 2, ch
         if (characterization == "entropy") {
           network_1_output[, t] <- c(vegan::diversity(network_1_diffusion[1:matrix_sizes[1], 1:matrix_sizes[1]]) / vegan::diversity(rep(1, matrix_sizes[1])), rep(0, max(matrix_sizes) - matrix_sizes[1]))
         }
-        if (characterization == "Gini") {
+        if (characterization == "gini") {
           network_1_output[, t] <- c(gini(network_1_diffusion[1:matrix_sizes[1], 1:matrix_sizes[1]]), rep(0, max(matrix_sizes) - matrix_sizes[1]))
         }
       }
@@ -202,7 +204,7 @@ align <- function(matrix_1_input, matrix_2_input, input = "matrix", base = 2, ch
   alignment_score_padding <- mean(alignment_padding[, 3]) # Taking the mean standardizes the alignment score across alignments between networks of varying sizes
   alignment_score <- mean(alignment[, 3]) # Ignore the padding nodes, which act as a penalty for aligning networks of different sizes
 
-  output <- list("Score" = alignment_score, "Alignment" = alignment, "Score_with_Padding" = alignment_score_padding, "Alignment_with_Padding" = alignment_padding)
+  output <- list("score" = alignment_score, "alignment" = alignment, "score_with_padding" = alignment_score_padding, "alignment_with_padding" = alignment_padding)
 
 
   return(output)

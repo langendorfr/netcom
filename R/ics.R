@@ -10,6 +10,8 @@
 #' @param alignment A matrix, such as is output by the function NetCom, where the first two columns contain
 #' corresponding node IDs for the two networks that were aligned.
 #' 
+#' @param input Defaults to "matrix". Can be set to "list" if the two networks are stored as linked lists.
+#' 
 #' @param flip Defaults to FALSE. Set to TRUE if the first network is larger than the second. This is necessary 
 #' because ICS is not a symmetric measure of alignment quality. 
 #'
@@ -18,13 +20,12 @@
 #'
 #' @examples
 #' ics()
-#' netcom::ics()
-#'
 
-ics <- function(matrix_1_input, matrix_2_input, alignment, flip = FALSE)
+ics <- function(matrix_1_input, matrix_2_input, alignment, input == "matrix", flip = FALSE)
 {
-  # Ensure inputs are matrices, and if they are linked lists convert them to matrices (NOTE: this assumes the same data type for the two input networks)
-  if (matrix_1_input == "list" | dim(matrix_1_input)[1] != dim(matrix_1_input)[2] | dim(matrix_2_input)[1] != dim(matrix_2_input)[2]) {
+  # Check if inputs are square matrices. If not, they are linked lists which need to be converted to 
+  # their respective matrix representations. (NOTE: this assumes the same data type for the two input networks)
+  if (input == "list", (dim(matrix_1_input)[1] != dim(matrix_1_input)[2]) | (dim(matrix_2_input)[1] != dim(matrix_2_input)[2])) {
 
     # R starts counting at one, not zero
     if (min(matrix_1_input) == 0) {
