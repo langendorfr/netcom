@@ -19,6 +19,7 @@ Imports:
     expm,    
     igraph,
     Matrix,
+    pdist,
     vegan
 License: file LICENSE
 Encoding: UTF-8
