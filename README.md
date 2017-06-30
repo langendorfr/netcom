@@ -1,2 +1,4 @@
 # netcom
 An R package to create dynamic network alignments.
+
+Consider network alignment as trying to compare two hypothetical cities of houses connected by roads. The approach implemented here is to pairwise compare each house with those in the other city by creating a house-specific signature. This is accomplished by quantifying the predictability of the location of a person at various times after they left their house, assuming they move randomly. This predictability across all houses captures much of the way each city is organized and functions. We aligned networks using this conceptual rationale, with nodes as houses, edges as roads, and random diffusion representing people leaving their houses and walking around the city to other houses. The mechanics of this, which are conceptually akin to flow algorithms and Laplacian dynamics, can be analytically expressed as a Markov chain raised to successive powers which are the durations of diffusion.
