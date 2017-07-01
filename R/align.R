@@ -1,60 +1,76 @@
 #' @title Dynamic Network Alignment
 #'
 #' @description Network alignment by comparing the entropies of diffusion kernels simulated on two networks.
-#' Functions to take two networks, either matrices or linked lists, and return a node-level alignment between them.
+#' Takes two networks, either matrices or linked lists, and returns a node-level alignment between them.
 #'
-#' @param matrix_1_input The first network being aligned, either as a matrix or linked list. If the two
+#' @param network_1_input The first network being aligned, either as a matrix or linked list. If the two
 #'     networks are of different sizes, it will be easier to interpret the output if this is the smaller one.
 #'
-#' @param matrix_2_input The second network. Should be the same type (matrix or linked list) as matrix_1_input.
+#' @param network_2_input The second network. Should be the same type (matrix or linked list) as network_1_input.
 #'
 #' @param input Defaults to "matrix". Can be set to "list" if the two networks are stored as linked lists.
 #'
-#' @param base Defaults to 2. The base in the series of time steps to sample the diffusion kernels at. If base = 1 every time step
-#'     is sampled. If base = 2, only time steps that are powers of 2 are sampled, etc.
+#' @param base Defaults to 1. The base in the series of time steps to sample the diffusion kernels at. If base = 1 every time step
+#'     is sampled. If base = 2, only time steps that are powers of 2 are sampled, etc. Larger values place more emphasis on 
+#'     earlier time steps. This can be helpful if the diffusion kernel quickly converges to an equilibrium, and also
+#'     runs faster. 
+#'     
+#' @param max_duration Defaults to twice the diameter of the larger network. Sets the number of time steps to allow the diffusion
+#'     kernel to spread for, which is the smallest power of base that is at least as large as max_duration.     
 #'
 #' @param characterization Defaults to "entropy". Determines how the diffusion kernels are characterized. Either "entropy" or "gini".
 #'
-#' @param normalization Defaults to FALSE. Determines if self-loops should be augmented such that edge weights in network.1 and network.2 are
-#'     proportional to those in matrix.1.input and matrix.2.input. FALSE by default because this is innapropriate for
+#' @param normalization Defaults to FALSE. Determines if self-loops should be augmented such that edge weights are
+#'     proportional to those in network_1_input and network_2_input. FALSE by default because this is innapropriate for
 #'     unweighted binary/logical networks where edges indicate only the presense of an interaction.
 #'
-#' @return A list containing 4 pieces.
+#' @details Consider network alignment as trying to compare two hypothetical cities of houses connected 
+#' by roads. The approach implemented here is to pairwise compare each house with those in the other city by 
+#' creating a house-specific signature. This is accomplished by quantifying the predictability of the location 
+#' of a person at various times after they left their house, assuming they move randomly. This 
+#' predictability across all houses captures much of the way each city is organized and functions. We aligned 
+#' networks using this conceptual rationale, with nodes as houses, edges as roads, and random diffusion 
+#' representing people leaving their houses and walking around the city to other houses. The mechanics of 
+#' this, which are conceptually akin to flow algorithms and Laplacian dynamics, can be analytically expressed 
+#' as a Markov chain raised to successive powers which are the durations of diffusion.
 #'
-#' score: mean of all alignment scores between nodes in both original networks matrix_1_input and matrix_2_input.
-#'
-#' alignment: data frame of the nodes in both networks, sorted numerically by the first network (why it helps to make the smaller network the first one), and the corresponding alignment score
-#'
-#' score_with_Padding: same as Score but includes the padding nodes in the smaller network, which can be thought of as a size gap penalty for aligning differently sized networks
-#'
-#' alignment_with_Padding: same as Alignment but includes the padding nodes in the smaller network
+#' @return 
+#' \item{score}{Mean of all alignment scores between nodes in both original networks network_1_input and network_2_input.}
+#' \item{alignment}{Data frame of the nodes in both networks, sorted numerically by the first network (why it helps to make the smaller network the first one), and the corresponding alignment score.}
+#' \item{score_with_padding}{Same as score but includes the padding nodes in the smaller network, which can be thought of as a size gap penalty for aligning differently sized networks.}
+#' \item{alignment_with_padding}{Same as alignment but includes the padding nodes in the smaller network.}
 #'
 #' @examples
-#' NetOne <- matrix(runif(25,0,1), nrow=5, ncol=5)
-#' NetTwo <- matrix(runif(25,0,1), nrow=5, ncol=5)
-#' align(NetOne, NetTwo)
-#' align(NetOne, NetTwo, base = 1, characterization = "gini", normalization = TRUE)
+#' net_one <- matrix(runif(25,0,1), nrow=5, ncol=5)
+#' net_two <- matrix(runif(25,0,1), nrow=5, ncol=5)
+#' align(net_one, net_two)
+#' align(net_one, net_two, base = 1, characterization = "gini", normalization = TRUE)
 
 #' @export
-align <- function(matrix_1_input, matrix_2_input, input = "matrix", base = 2, characterization = "entropy", normalization = FALSE)
+align <- function(network_1_input, network_2_input, input = "matrix", base = 2, characterization = "entropy", normalization = FALSE)
 {
   # Check if inputs are square matrices. If not, they are linked lists which need to be converted to 
   # their respective matrix representations. (NOTE: this assumes the same data type for the two input networks)
-  if (input == "list" | dim(matrix_1_input)[1] != dim(matrix_1_input)[2] | dim(matrix_2_input)[1] != dim(matrix_2_input)[2]) {
+  if (input == "list" | dim(network_1_input)[1] != dim(network_1_input)[2] | dim(network_2_input)[1] != dim(network_2_input)[2]) {
 
     # R starts counting at one, not zero
-    if (min(matrix_1_input) == 0) {
-      matrix_1_input <- igraph::as_adjacency_matrix(igraph::graph_from_edgelist(as.matrix(matrix_1_input + 1), directed = TRUE), sparse = FALSE)
+    if (min(network_1_input) == 0) {
+      matrix_1_input <- igraph::as_adjacency_matrix(igraph::graph_from_edgelist(as.matrix(network_1_input + 1), directed = TRUE), sparse = FALSE)
     } else {
-      matrix_1_input <- igraph::as_adjacency_matrix(igraph::graph_from_edgelist(as.matrix(matrix_1_input), directed = TRUE), sparse = FALSE)
+      matrix_1_input <- igraph::as_adjacency_matrix(igraph::graph_from_edgelist(as.matrix(network_1_input), directed = TRUE), sparse = FALSE)
     }
 
-    if (min(matrix_2_input) == 0) {
-      matrix_2_input <- igraph::as_adjacency_matrix(igraph::graph_from_edgelist(as.matrix(matrix_2_input + 1), directed = TRUE), sparse = FALSE)
+    if (min(network_2_input) == 0) {
+      matrix_2_input <- igraph::as_adjacency_matrix(igraph::graph_from_edgelist(as.matrix(network_2_input + 1), directed = TRUE), sparse = FALSE)
     } else {
-      matrix_2_input <- igraph::as_adjacency_matrix(igraph::graph_from_edgelist(as.matrix(matrix_2_input), directed = TRUE), sparse = FALSE)
+      matrix_2_input <- igraph::as_adjacency_matrix(igraph::graph_from_edgelist(as.matrix(network_2_input), directed = TRUE), sparse = FALSE)
     }
 
+  } else {
+    
+    # When the input networks are matrices
+    matrix_1_input <- network_1_input
+    matrix_2_input <- network_2_input
   }
 
   # Calculate the number of nodes in each network, which are used repeatedly
@@ -118,16 +134,20 @@ align <- function(matrix_1_input, matrix_2_input, input = "matrix", base = 2, ch
   }
 
   # Duration of the simulation (note: padded nodes are disconnected and therefore do not change a network's diameter)
-  network_1_duration <- length(igraph::get.diameter(igraph::graph.adjacency(network_1, weighted = TRUE, mode = 'directed', diag = TRUE))) - 1   # Subtract 1 because the number of steps in the diameter is one less than the number of nodes in it
-  network_2_duration <- length(igraph::get.diameter(igraph::graph.adjacency(network_2, weighted = TRUE, mode = 'directed', diag = TRUE))) - 1   # Subtract 1 because the number of steps in the diameter is one less than the number of nodes in it
-  duration_max <- max(2 * network_1_duration, 2 * network_2_duration, 2)                                                                    # The 2 at the end ensures at least two time steps, and the other 2's are for twice the diameter
-
+  if (missing(max_duration)) {
+    network_1_duration <- length(igraph::get.diameter(igraph::graph.adjacency(network_1, weighted = TRUE, mode = 'directed', diag = TRUE))) - 1   # Subtract 1 because the number of steps in the diameter is one less than the number of nodes in it
+    network_2_duration <- length(igraph::get.diameter(igraph::graph.adjacency(network_2, weighted = TRUE, mode = 'directed', diag = TRUE))) - 1   # Subtract 1 because the number of steps in the diameter is one less than the number of nodes in it
+    duration_upper_bound <- max(2 * network_1_duration, 2 * network_2_duration, 2)                                                                    # The 2 at the end ensures at least two time steps, and the other 2's are for twice the diameter
+  } else {
+    duration_upper_bound <- max_duration
+  }
+  
   # base = 1 is the most conservative (sample every time step) but also the most expensive computationally
   if (missing(base) | base == 1) {
     base <- 1
-    kernel_sampling <- 1:duration_max
+    kernel_sampling <- 1:duration_upper_bound
   } else {
-    kernel_sampling <- base^(0:ceiling(log(duration_max, base)))
+    kernel_sampling <- base^(0:ceiling(log(duration_upper_bound, base)))
   }
 
   for (network in 1:2) {

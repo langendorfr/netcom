@@ -4,44 +4,54 @@
 \alias{align}
 \title{Dynamic Network Alignment}
 \usage{
-align(matrix_1_input, matrix_2_input, input = "matrix", base = 2,
+align(network_1_input, network_2_input, input = "matrix", base = 2,
   characterization = "entropy", normalization = FALSE)
 }
 \arguments{
-\item{matrix_1_input}{The first network being aligned, either as a matrix or linked list. If the two
+\item{network_1_input}{The first network being aligned, either as a matrix or linked list. If the two
 networks are of different sizes, it will be easier to interpret the output if this is the smaller one.}
 
-\item{matrix_2_input}{The second network. Should be the same type (matrix or linked list) as matrix_1_input.}
+\item{network_2_input}{The second network. Should be the same type (matrix or linked list) as network_1_input.}
 
 \item{input}{Defaults to "matrix". Can be set to "list" if the two networks are stored as linked lists.}
 
 \item{base}{Defaults to 2. The base in the series of time steps to sample the diffusion kernels at. If base = 1 every time step
-is sampled. If base = 2, only time steps that are powers of 2 are sampled, etc.}
+is sampled. If base = 2, only time steps that are powers of 2 are sampled, etc. Larger values place more emphasis on 
+earlier time steps. This can be helpful if the diffusion kernel quickly converges to an equilibrium.}
 
 \item{characterization}{Defaults to "entropy". Determines how the diffusion kernels are characterized. Either "entropy" or "gini".}
 
-\item{normalization}{Defaults to FALSE. Determines if self-loops should be augmented such that edge weights in network.1 and network.2 are
-proportional to those in matrix.1.input and matrix.2.input. FALSE by default because this is innapropriate for
+\item{normalization}{Defaults to FALSE. Determines if self-loops should be augmented such that edge weights are
+proportional to those in network_1_input and network_2_input. FALSE by default because this is innapropriate for
 unweighted binary/logical networks where edges indicate only the presense of an interaction.}
+
+\item{max_duration}{Defaults to twice the diameter of the larger network. Sets the number of time steps to allow the diffusion
+kernel to spread for, which is the smallest power of base that is equal to or greater than max_duration.}
 }
 \value{
-A list containing 4 pieces.
-
-score: mean of all alignment scores between nodes in both original networks matrix_1_input and matrix_2_input.
-
-alignment: data frame of the nodes in both networks, sorted numerically by the first network (why it helps to make the smaller network the first one), and the corresponding alignment score
-
-score_with_Padding: same as Score but includes the padding nodes in the smaller network, which can be thought of as a size gap penalty for aligning differently sized networks
-
-alignment_with_Padding: same as Alignment but includes the padding nodes in the smaller network
+\item{score}{Mean of all alignment scores between nodes in both original networks network_1_input and network_2_input.}
+\item{alignment}{Data frame of the nodes in both networks, sorted numerically by the first network (why it helps to make the smaller network the first one), and the corresponding alignment score.}
+\item{score_with_padding}{Same as score but includes the padding nodes in the smaller network, which can be thought of as a size gap penalty for aligning differently sized networks.}
+\item{alignment_with_padding}{Same as alignment but includes the padding nodes in the smaller network.}
 }
 \description{
 Network alignment by comparing the entropies of diffusion kernels simulated on two networks.
-Functions to take two networks, either matrices or linked lists, and return a node-level alignment between them.
+Takes two networks, either matrices or linked lists, and returns a node-level alignment between them.
+}
+\details{
+Consider network alignment as trying to compare two hypothetical cities of houses connected 
+by roads. The approach implemented here is to pairwise compare each house with those in the other city by 
+creating a house-specific signature. This is accomplished by quantifying the predictability of the location 
+of a person at various times after they left their house, assuming they move randomly. This 
+predictability across all houses captures much of the way each city is organized and functions. We aligned 
+networks using this conceptual rationale, with nodes as houses, edges as roads, and random diffusion 
+representing people leaving their houses and walking around the city to other houses. The mechanics of 
+this, which are conceptually akin to flow algorithms and Laplacian dynamics, can be analytically expressed 
+as a Markov chain raised to successive powers which are the durations of diffusion.
 }
 \examples{
-NetOne <- matrix(runif(25,0,1), nrow=5, ncol=5)
-NetTwo <- matrix(runif(25,0,1), nrow=5, ncol=5)
-align(NetOne, NetTwo)
-align(NetOne, NetTwo, base = 1, characterization = "gini", normalization = TRUE)
+net_one <- matrix(runif(25,0,1), nrow=5, ncol=5)
+net_two <- matrix(runif(25,0,1), nrow=5, ncol=5)
+align(net_one, net_two)
+align(net_one, net_two, base = 1, characterization = "gini", normalization = TRUE)
 }
