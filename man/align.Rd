@@ -15,9 +15,10 @@ networks are of different sizes, it will be easier to interpret the output if th
 
 \item{input}{Defaults to "matrix". Can be set to "list" if the two networks are stored as linked lists.}
 
-\item{base}{Defaults to 2. The base in the series of time steps to sample the diffusion kernels at. If base = 1 every time step
+\item{base}{Defaults to 1. The base in the series of time steps to sample the diffusion kernels at. If base = 1 every time step
 is sampled. If base = 2, only time steps that are powers of 2 are sampled, etc. Larger values place more emphasis on 
-earlier time steps. This can be helpful if the diffusion kernel quickly converges to an equilibrium.}
+earlier time steps. This can be helpful if the diffusion kernel quickly converges to an equilibrium, and also
+runs faster.}
 
 \item{characterization}{Defaults to "entropy". Determines how the diffusion kernels are characterized. Either "entropy" or "gini".}
 
@@ -26,7 +27,7 @@ proportional to those in network_1_input and network_2_input. FALSE by default b
 unweighted binary/logical networks where edges indicate only the presense of an interaction.}
 
 \item{max_duration}{Defaults to twice the diameter of the larger network. Sets the number of time steps to allow the diffusion
-kernel to spread for, which is the smallest power of base that is equal to or greater than max_duration.}
+kernel to spread for, which is the smallest power of base that is at least as large as max_duration.}
 }
 \value{
 \item{score}{Mean of all alignment scores between nodes in both original networks network_1_input and network_2_input.}

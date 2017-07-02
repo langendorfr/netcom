@@ -47,7 +47,7 @@
 #' align(net_one, net_two, base = 1, characterization = "gini", normalization = TRUE)
 
 #' @export
-align <- function(network_1_input, network_2_input, input = "matrix", base = 2, characterization = "entropy", normalization = FALSE)
+align <- function(network_1_input, network_2_input, input = "matrix", base = 2, max_duration, characterization = "entropy", normalization = FALSE)
 {
   # Check if inputs are square matrices. If not, they are linked lists which need to be converted to 
   # their respective matrix representations. (NOTE: this assumes the same data type for the two input networks)
