@@ -7,6 +7,14 @@ The mechanics of this, which are conceptually akin to flow algorithms and Laplac
 
 
 ## Installation
-```R
-devtools::install_github("langendorfr/netcom")
-```
+Currently the only way to install `netcom` is from github:
+
+1. Install `devtools` from CRAN. 
+	```R
+	install.packages("devtools").
+	```
+
+2. Install `netcom` from GitHub.
+	```R
+	devtools::install_github("langendorfr/netcom")
+	```
