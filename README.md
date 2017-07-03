@@ -8,5 +8,5 @@ The mechanics of this, which are conceptually akin to flow algorithms and Laplac
 
 ## Installation
 ```R
-	devtools::install_github("langendorfr/netcom")
+devtools::install_github("langendorfr/netcom")
 ```
