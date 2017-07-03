@@ -5,7 +5,7 @@
 \title{Dynamic Network Alignment}
 \usage{
 align(network_1_input, network_2_input, input = "matrix", base = 2,
-  characterization = "entropy", normalization = FALSE)
+  max_duration, characterization = "entropy", normalization = FALSE)
 }
 \arguments{
 \item{network_1_input}{The first network being aligned, either as a matrix or linked list. If the two
@@ -20,14 +20,14 @@ is sampled. If base = 2, only time steps that are powers of 2 are sampled, etc. 
 earlier time steps. This can be helpful if the diffusion kernel quickly converges to an equilibrium, and also
 runs faster.}
 
+\item{max_duration}{Defaults to twice the diameter of the larger network. Sets the number of time steps to allow the diffusion
+kernel to spread for, which is the smallest power of base that is at least as large as max_duration.}
+
 \item{characterization}{Defaults to "entropy". Determines how the diffusion kernels are characterized. Either "entropy" or "gini".}
 
 \item{normalization}{Defaults to FALSE. Determines if self-loops should be augmented such that edge weights are
 proportional to those in network_1_input and network_2_input. FALSE by default because this is innapropriate for
 unweighted binary/logical networks where edges indicate only the presense of an interaction.}
-
-\item{max_duration}{Defaults to twice the diameter of the larger network. Sets the number of time steps to allow the diffusion
-kernel to spread for, which is the smallest power of base that is at least as large as max_duration.}
 }
 \value{
 \item{score}{Mean of all alignment scores between nodes in both original networks network_1_input and network_2_input.}
@@ -40,15 +40,19 @@ Network alignment by comparing the entropies of diffusion kernels simulated on t
 Takes two networks, either matrices or linked lists, and returns a node-level alignment between them.
 }
 \details{
-Consider network alignment as trying to compare two hypothetical cities of houses connected 
-by roads. The approach implemented here is to pairwise compare each house with those in the other city by 
-creating a house-specific signature. This is accomplished by quantifying the predictability of the location 
-of a person at various times after they left their house, assuming they move randomly. This 
-predictability across all houses captures much of the way each city is organized and functions. We aligned 
-networks using this conceptual rationale, with nodes as houses, edges as roads, and random diffusion 
-representing people leaving their houses and walking around the city to other houses. The mechanics of 
-this, which are conceptually akin to flow algorithms and Laplacian dynamics, can be analytically expressed 
-as a Markov chain raised to successive powers which are the durations of diffusion.
+Network alignment pairs nodes between two networks so as to maximize similarities in their edge structures. 
+    This allows information from well-studied systems to be used in poorly studied ones, such as to identify
+    unknown protein functions or ecosystems that will respond similarly to a given disturbance. Most network alignment
+    algorithms focus on measures of topological overlap between edges of the two networks. The method implemented here 
+    compares nodes using the predictability of dynamics originating from each node in each network. Consider network alignment 
+    as trying to compare two hypothetical cities of houses connected by roads. The approach implemented here is to pairwise 
+    compare each house with those in the other city by creating a house-specific signature. This is accomplished by quantifying 
+    the predictability of the location of a person at various times after they left their house, assuming they were moving randomly. 
+    This predictability across all houses captures much of the way each city is organized and functions. The function align 
+    uses this conceptual rationale to align two networks, with nodes as houses, edges as roads, and random diffusion representing people leaving 
+    their houses and walking around the city to other houses. The mechanics of this, which are conceptually akin to flow 
+    algorithms and Laplacian dynamics, can be analytically expressed as a Markov chain raised to successive powers which are 
+    the durations of diffusion.
 }
 \examples{
 net_one <- matrix(runif(25,0,1), nrow=5, ncol=5)

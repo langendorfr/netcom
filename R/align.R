@@ -24,15 +24,19 @@
 #'     proportional to those in network_1_input and network_2_input. FALSE by default because this is innapropriate for
 #'     unweighted binary/logical networks where edges indicate only the presense of an interaction.
 #'
-#' @details Consider network alignment as trying to compare two hypothetical cities of houses connected 
-#' by roads. The approach implemented here is to pairwise compare each house with those in the other city by 
-#' creating a house-specific signature. This is accomplished by quantifying the predictability of the location 
-#' of a person at various times after they left their house, assuming they move randomly. This 
-#' predictability across all houses captures much of the way each city is organized and functions. We aligned 
-#' networks using this conceptual rationale, with nodes as houses, edges as roads, and random diffusion 
-#' representing people leaving their houses and walking around the city to other houses. The mechanics of 
-#' this, which are conceptually akin to flow algorithms and Laplacian dynamics, can be analytically expressed 
-#' as a Markov chain raised to successive powers which are the durations of diffusion.
+#' @details Network alignment pairs nodes between two networks so as to maximize similarities in their edge structures. 
+#'     This allows information from well-studied systems to be used in poorly studied ones, such as to identify
+#'     unknown protein functions or ecosystems that will respond similarly to a given disturbance. Most network alignment
+#'     algorithms focus on measures of topological overlap between edges of the two networks. The method implemented here 
+#'     compares nodes using the predictability of dynamics originating from each node in each network. Consider network alignment 
+#'     as trying to compare two hypothetical cities of houses connected by roads. The approach implemented here is to pairwise 
+#'     compare each house with those in the other city by creating a house-specific signature. This is accomplished by quantifying 
+#'     the predictability of the location of a person at various times after they left their house, assuming they were moving randomly. 
+#'     This predictability across all houses captures much of the way each city is organized and functions. The function align 
+#'     uses this conceptual rationale to align two networks, with nodes as houses, edges as roads, and random diffusion representing people leaving 
+#'     their houses and walking around the city to other houses. The mechanics of this, which are conceptually akin to flow 
+#'     algorithms and Laplacian dynamics, can be analytically expressed as a Markov chain raised to successive powers which are 
+#'     the durations of diffusion.
 #'
 #' @return 
 #' \item{score}{Mean of all alignment scores between nodes in both original networks network_1_input and network_2_input.}
