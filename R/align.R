@@ -23,6 +23,8 @@
 #' @param normalization Defaults to FALSE. Determines if self-loops should be augmented such that edge weights are
 #'     proportional to those in network_1_input and network_2_input. FALSE by default because this is innapropriate for
 #'     unweighted binary/logical networks where edges indicate only the presense of an interaction.
+#'     
+#' @param unit_test Defaults to FALSE. Saves intermediate steps for the unit_test.R function, and to help with general troubleshooting.
 #'
 #' @details Network alignment pairs nodes between two networks so as to maximize similarities in their edge structures. 
 #'     This allows information from well-studied systems to be used in poorly studied ones, such as to identify
@@ -51,7 +53,7 @@
 #' align(net_one, net_two, base = 1, characterization = "gini", normalization = TRUE)
 
 #' @export
-align <- function(network_1_input, network_2_input, input = "matrix", base = 2, max_duration, characterization = "entropy", normalization = FALSE)
+align <- function(network_1_input, network_2_input, input = "matrix", base = 2, max_duration, characterization = "entropy", normalization = FALSE, unit_test = FALSE)
 {
   # Check if inputs are square matrices. If not, they are linked lists which need to be converted to 
   # their respective matrix representations. (NOTE: this assumes the same data type for the two input networks)
@@ -169,19 +171,31 @@ align <- function(network_1_input, network_2_input, input = "matrix", base = 2, 
       if (characterization == "gini") {
         network_1_output[, 1] <- c(gini(network_1_diffusion[1:matrix_sizes[1], 1:matrix_sizes[1]]), rep(0, max(matrix_sizes) - matrix_sizes[1]))
       }
+      
+      # unit_test.R functionality
+      if (unit_test == TRUE) {
+        network_1_diffusion_1 <- network_1_diffusion
+        network_1_output_1 <- network_1_output[, 1]
+      }
 
       # Characterize the remaining time steps
       for (t in 2:length(kernel_sampling)) {
-        network_1_diffusion <- network_1_diffusion %*% (expm::"%^%"(network_1, (kernel_sampling[t] - kernel_sampling[t - 1])))# Speeds up the algorithm by eliminating the need to recalculate previous time steps
+        network_1_diffusion <- expm::"%^%"(network_1, kernel_sampling[t]) 
 
         # For those interested in speeding things up, the following commented-out line proved to be slower
         # network_1_diffusion <- abs(Re(eig$vectors %*% diag(eig$values ^ t) %*% inverse))
-
+        
         if (characterization == "entropy") {
           network_1_output[, t] <- c(vegan::diversity(network_1_diffusion[1:matrix_sizes[1], 1:matrix_sizes[1]]) / vegan::diversity(rep(1, matrix_sizes[1])), rep(0, max(matrix_sizes) - matrix_sizes[1]))
         }
         if (characterization == "gini") {
           network_1_output[, t] <- c(gini(network_1_diffusion[1:matrix_sizes[1], 1:matrix_sizes[1]]), rep(0, max(matrix_sizes) - matrix_sizes[1]))
+        }
+        
+        # unit_test.R functionality
+        if (unit_test == TRUE) {
+          assign(paste("network_1_diffusion", kernel_sampling[t], sep = "_"), network_1_diffusion)
+          assign(paste("network_1_output", kernel_sampling[t], sep = "_"), network_1_output[, t])          
         }
       }
 
@@ -190,20 +204,34 @@ align <- function(network_1_input, network_2_input, input = "matrix", base = 2, 
       network_2_output <- matrix(NA, nrow = max(matrix_sizes), ncol = length(kernel_sampling))
 
       network_2_diffusion <- network_2
+      
       if (characterization == "entropy") {
         network_2_output[, 1] <- c(vegan::diversity(network_2_diffusion[1:matrix_sizes[2], 1:matrix_sizes[2]]) / vegan::diversity(rep(1, matrix_sizes[2])), rep(0, max(matrix_sizes) - matrix_sizes[2]))
       }
       if (characterization == "Gini") {
         network_2_output[, 1] <- c(gini(network_2_diffusion[1:matrix_sizes[2], 1:matrix_sizes[2]]), rep(0, max(matrix_sizes) - matrix_sizes[2]))
       }
+      
+      # unit_test.R functionality
+      if (unit_test == TRUE) {
+        network_2_diffusion_1 <- network_2_diffusion
+        network_2_output_1 <- network_2_output[, 1]
+      }
 
       for (t in 2:length(kernel_sampling)) {
-        network_2_diffusion <- network_2_diffusion %*% (expm::"%^%"(network_2, (kernel_sampling[t] - kernel_sampling[t - 1])))
+        network_2_diffusion <- expm::"%^%"(network_2, kernel_sampling[t])
+        
         if (characterization == "entropy") {
           network_2_output[, t] <- c(vegan::diversity(network_2_diffusion[1:matrix_sizes[2], 1:matrix_sizes[2]]) / vegan::diversity(rep(1, matrix_sizes[2])), rep(0, max(matrix_sizes) - matrix_sizes[2]))
         }
         if (characterization == "Gini") {
           network_2_output[, t] <- c(gini(network_2_diffusion[1:matrix_sizes[2], 1:matrix_sizes[2]]), rep(0, max(matrix_sizes) - matrix_sizes[2]))
+        }
+        
+        # unit_test.R functionality
+        if (unit_test == TRUE) {
+          assign(paste("network_2_diffusion", kernel_sampling[t], sep = "_"), network_2_diffusion)
+          assign(paste("network_2_output", kernel_sampling[t], sep = "_"), network_2_output[, t])
         }
 
       }
@@ -228,8 +256,39 @@ align <- function(network_1_input, network_2_input, input = "matrix", base = 2, 
   alignment_score_padding <- mean(alignment_padding[, 3]) # Taking the mean standardizes the alignment score across alignments between networks of varying sizes
   alignment_score <- mean(alignment[, 3]) # Ignore the padding nodes, which act as a penalty for aligning networks of different sizes
 
-  output <- list("score" = alignment_score, "alignment" = alignment, "score_with_padding" = alignment_score_padding, "alignment_with_padding" = alignment_padding)
-
+  if (unit_test == TRUE) {
+    output <- list("score" = alignment_score, 
+                   "alignment" = alignment, 
+                   "score_with_padding" = alignment_score_padding, 
+                   "alignment_with_padding" = alignment_padding,
+                   "network_1" = network_1,
+                   "network_2" = network_2,
+                   "matrix_1_padded" = matrix_1_padded,
+                   "matrix_2_padded" = matrix_2_padded,
+                   "kernel_sampling" = kernel_sampling,
+                   "network_1_diffusion_1" = network_1_diffusion_1,
+                   "network_1_diffusion_2" = network_1_diffusion_2,
+                   "network_1_diffusion_4" = network_1_diffusion_4,
+                   "network_1_diffusion_8" = network_1_diffusion_8,
+                   "network_2_diffusion_1" = network_2_diffusion_1,
+                   "network_2_diffusion_2" = network_2_diffusion_2,
+                   "network_2_diffusion_4" = network_2_diffusion_4,
+                   "network_2_diffusion_8" = network_2_diffusion_8,
+                   "network_1_output_1" = network_1_output_1,
+                   "network_1_output_2" = network_1_output_2,
+                   "network_1_output_4" = network_1_output_4,
+                   "network_1_output_8" = network_1_output_8,
+                   "network_2_output_1" = network_2_output_1,
+                   "network_2_output_2" = network_2_output_2,
+                   "network_2_output_4" = network_2_output_4,
+                   "network_2_output_8" = network_2_output_8,
+                   "cost_matrix" = cost_matrix)    
+  } else {
+    output <- list("score" = alignment_score, 
+                   "alignment" = alignment, 
+                   "score_with_padding" = alignment_score_padding, 
+                   "alignment_with_padding" = alignment_padding)    
+  }
 
   return(output)
 }
