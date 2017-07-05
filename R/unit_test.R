@@ -188,18 +188,22 @@ unit_test <- function()
   
   
   
-  # Results of the unit test
+  # Results of the unit tests
+  # Rounding to 5 digits prevents disagreements because of different numbers of reported digits
   unit_test_results <- list()
-  # Rounding to 6 digits prevents disagreements because of different numbers of reported digits
+  
+  # Normal output
   unit_test_results[[1]] <- round(Score, 5) == round(Test$score, 5)
   unit_test_results[[2]] <- round(Score_with_Padding, 5) == round(Test$score_with_padding, 5)
   unit_test_results[[3]] <- sum(round(Alignment_with_Padding, 5) == round(Test$alignment_with_padding, 5)) == 30 # All 30 elements of the alignment must be the same
 
-  unit_test_results[[4]] <- sum(sum(rowSums(Test$network_1) == 1) == 10, 
-                              sum(rowSums(Test$network_2) == 1) == 10) == 2 
+  # Conversion to Markov chains where every row sums to 1
+  unit_test_results[[4]] <- sum(sum(rowSums(Test$network_1) == 1) == 10, sum(rowSums(Test$network_2) == 1) == 10) == 2 
 
+  # Time steps at which to sample the diffusion kernel (base = 2)
   unit_test_results[[5]] <- sum(Test$kernel_sampling == c(1,2,4,8)) == 4
   
+  # Diffusion kernel for each network at each of the time steps in kernel_sampling
   unit_test_results[[6]] <- sum(round(Test$network_1_diffusion_1, 5) == round(network_1_diffusion_1, 5)) == 100
   unit_test_results[[7]] <- sum(round(Test$network_1_diffusion_2, 5) == round(network_1_diffusion_2, 5)) == 100
   unit_test_results[[8]] <- sum(round(Test$network_1_diffusion_4, 5) == round(network_1_diffusion_4, 5)) == 100
@@ -209,6 +213,7 @@ unit_test <- function()
   unit_test_results[[12]] <- sum(round(Test$network_2_diffusion_4, 5) == round(network_2_diffusion_4, 5)) == 100
   unit_test_results[[13]] <- sum(round(Test$network_2_diffusion_8, 5) == round(network_2_diffusion_8, 5)) == 100
   
+  # Entropy-over-time curves for each network at each of the time steps in kernel sampling (characterization = "entropy")
   unit_test_results[[14]] <- sum(round(Test$network_1_output_1, 5) == round(network_1_output_1, 5)) == 10
   unit_test_results[[15]] <- sum(round(Test$network_1_output_2, 5) == round(network_1_output_2, 5)) == 10
   unit_test_results[[16]] <- sum(round(Test$network_1_output_4, 5) == round(network_1_output_4, 5)) == 10
@@ -218,8 +223,10 @@ unit_test <- function()
   unit_test_results[[20]] <- sum(round(Test$network_2_output_4, 5) == round(network_2_output_4, 5)) == 10
   unit_test_results[[21]] <- sum(round(Test$network_2_output_8, 5) == round(network_2_output_8, 5)) == 10
   
+  # Cost matrix fed into the Hungarian algorithm
   unit_test_results[[22]] <- sum(round(Test$cost_matrix, 5) == round(cost_matrix, 5)) == 100
   
+  # Test results
   if (sum(unit_test_results == TRUE) == 22) {
     print("Unit test results: PASS")
   } else {
