@@ -1,7 +1,7 @@
 #' @title Dynamic Network Alignment
 #'
 #' @description Network alignment by comparing the entropies of diffusion kernels simulated on two networks.
-#' Takes two networks, either matrices or linked lists, and returns a node-level alignment between them.
+#' \code{align} takes two networks, either matrices or linked lists, and returns a node-level alignment between them.
 #'
 #' @param network_1_input The first network being aligned, either as a matrix or linked list. If the two
 #'     networks are of different sizes, it will be easier to interpret the output if this is the smaller one.
@@ -43,16 +43,17 @@
 #' @return 
 #' \item{score}{Mean of all alignment scores between nodes in both original networks network_1_input and network_2_input.}
 #' \item{alignment}{Data frame of the nodes in both networks, sorted numerically by the first network (why it helps to make the smaller network the first one), and the corresponding alignment score.}
-#' \item{score_with_padding}{Same as score but includes the padding nodes in the smaller network, which can be thought of as a size gap penalty for aligning differently sized networks.}
-#' \item{alignment_with_padding}{Same as alignment but includes the padding nodes in the smaller network.}
+#' \item{score_with_padding}{Same as score but includes the padding nodes in the smaller network, which can be thought of as a size gap penalty for aligning differently sized networks. Only included if the input networks are different sizes.}
+#' \item{alignment_with_padding}{Same as alignment but includes the padding nodes in the smaller network. Only included if the input networks are different sizes.}
 #'
 #' @examples
 #' net_one <- matrix(runif(25,0,1), nrow=5, ncol=5)
 #' net_two <- matrix(runif(25,0,1), nrow=5, ncol=5)
 #' align(net_one, net_two)
 #' align(net_one, net_two, base = 1, characterization = "gini", normalization = TRUE)
-
+#' 
 #' @export
+
 align <- function(network_1_input, network_2_input, input = "matrix", base = 2, max_duration, characterization = "entropy", normalization = FALSE, unit_test = FALSE)
 {
   # Check if inputs are square matrices. If not, they are linked lists which need to be converted to 
@@ -169,7 +170,7 @@ align <- function(network_1_input, network_2_input, input = "matrix", base = 2, 
         network_1_output[, 1] <- c(vegan::diversity(network_1_diffusion[1:matrix_sizes[1], 1:matrix_sizes[1]]) / vegan::diversity(rep(1, matrix_sizes[1])), rep(0, max(matrix_sizes) - matrix_sizes[1]))
       }
       if (characterization == "gini") {
-        network_1_output[, 1] <- c(gini(network_1_diffusion[1:matrix_sizes[1], 1:matrix_sizes[1]]), rep(0, max(matrix_sizes) - matrix_sizes[1]))
+        network_1_output[, 1] <- c(gini(network_1_diffusion[1:matrix_sizes[1], 1:matrix_sizes[1]], byrow = TRUE), rep(0, max(matrix_sizes) - matrix_sizes[1]))
       }
       
       # unit_test.R functionality
@@ -189,7 +190,7 @@ align <- function(network_1_input, network_2_input, input = "matrix", base = 2, 
           network_1_output[, t] <- c(vegan::diversity(network_1_diffusion[1:matrix_sizes[1], 1:matrix_sizes[1]]) / vegan::diversity(rep(1, matrix_sizes[1])), rep(0, max(matrix_sizes) - matrix_sizes[1]))
         }
         if (characterization == "gini") {
-          network_1_output[, t] <- c(gini(network_1_diffusion[1:matrix_sizes[1], 1:matrix_sizes[1]]), rep(0, max(matrix_sizes) - matrix_sizes[1]))
+          network_1_output[, t] <- c(gini(network_1_diffusion[1:matrix_sizes[1], 1:matrix_sizes[1]], byrow = TRUE), rep(0, max(matrix_sizes) - matrix_sizes[1]))
         }
         
         # unit_test.R functionality
@@ -208,8 +209,8 @@ align <- function(network_1_input, network_2_input, input = "matrix", base = 2, 
       if (characterization == "entropy") {
         network_2_output[, 1] <- c(vegan::diversity(network_2_diffusion[1:matrix_sizes[2], 1:matrix_sizes[2]]) / vegan::diversity(rep(1, matrix_sizes[2])), rep(0, max(matrix_sizes) - matrix_sizes[2]))
       }
-      if (characterization == "Gini") {
-        network_2_output[, 1] <- c(gini(network_2_diffusion[1:matrix_sizes[2], 1:matrix_sizes[2]]), rep(0, max(matrix_sizes) - matrix_sizes[2]))
+      if (characterization == "gini") {
+        network_2_output[, 1] <- c(gini(network_2_diffusion[1:matrix_sizes[2], 1:matrix_sizes[2]], byrow = TRUE), rep(0, max(matrix_sizes) - matrix_sizes[2]))
       }
       
       # unit_test.R functionality
@@ -224,8 +225,8 @@ align <- function(network_1_input, network_2_input, input = "matrix", base = 2, 
         if (characterization == "entropy") {
           network_2_output[, t] <- c(vegan::diversity(network_2_diffusion[1:matrix_sizes[2], 1:matrix_sizes[2]]) / vegan::diversity(rep(1, matrix_sizes[2])), rep(0, max(matrix_sizes) - matrix_sizes[2]))
         }
-        if (characterization == "Gini") {
-          network_2_output[, t] <- c(gini(network_2_diffusion[1:matrix_sizes[2], 1:matrix_sizes[2]]), rep(0, max(matrix_sizes) - matrix_sizes[2]))
+        if (characterization == "gini") {
+          network_2_output[, t] <- c(gini(network_2_diffusion[1:matrix_sizes[2], 1:matrix_sizes[2]], byrow = TRUE), rep(0, max(matrix_sizes) - matrix_sizes[2]))
         }
         
         # unit_test.R functionality
@@ -283,6 +284,9 @@ align <- function(network_1_input, network_2_input, input = "matrix", base = 2, 
                    "network_2_output_4" = network_2_output_4,
                    "network_2_output_8" = network_2_output_8,
                    "cost_matrix" = cost_matrix)    
+  } else if (sum(dim(matrix_1) == dim(matrix_2)) == 2) { # Don't include the padded version if the networks are the same size
+    output <- list("score" = alignment_score, 
+                   "alignment" = alignment)
   } else {
     output <- list("score" = alignment_score, 
                    "alignment" = alignment, 

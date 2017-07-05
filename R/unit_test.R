@@ -1,13 +1,16 @@
-#' @title Test of the align.R function
+#' @title Test of the \code{align}
 #'
-#' @description Compared the output of align.R to a hand curated output.
+#' @description Compared the output of \code{align} to 22 hand curated outputs and intermediate steps.
 #'
 #' @return Either "Unit test results: PASS" or "Unit test results: FAIL"
 #'
 #' @examples
 #' unit_test()
-
+#'
 #' @export
+#' 
+#' @keywords internal
+
 unit_test <- function()
 {
   # Unweighted and directed test matrices
