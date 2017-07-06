@@ -2,10 +2,10 @@
 #'
 #' @description Calculates the Induced Conserved Structure proposed by Patro and Kingsford (2012) of an alignment between two networks.
 #'
-#' @param matrix_1_input The first network being aligned, which must be a matrix. If the two
+#' @param network_1_input The first network being aligned, which must be in matrix form. If the two
 #' networks are of different sizes, it will be easier to interpret the output if this is the smaller one.
 #'
-#' @param matrix_2_input The second network, which also must be a matrix.
+#' @param network_2_input The second network, which also must be a matrix.
 #'
 #' @param alignment A matrix, such as is output by the function NetCom, where the first two columns contain
 #' corresponding node IDs for the two networks that were aligned.
@@ -32,7 +32,7 @@
 ics <- function(network_1_input, network_2_input, alignment, flip = FALSE)
 {
   # Check to make sure the networks are unweighted. ICS is not defined on weighted networks.
-  if ((sum(matrix_1_input %in% c(0,1)) != nrow(matrix_1_input) * ncol(matrix_1_input)) | (sum(matrix_2_input %in% c(0,1)) != nrow(matrix_2_input) * ncol(matrix_2_input))) {
+  if ((sum(network_1_input %in% c(0,1)) != nrow(network_1_input) * ncol(network_1_input)) | (sum(network_2_input %in% c(0,1)) != nrow(network_2_input) * ncol(network_2_input))) {
     return("ICS is only defined on unweighted networks.") 
   } else {
     

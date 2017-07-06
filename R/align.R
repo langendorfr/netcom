@@ -3,7 +3,7 @@
 #' @description Network alignment by comparing the entropies of diffusion kernels simulated on two networks.
 #' \code{align} takes two networks stored as matrices and returns a node-level alignment between them.
 #'
-#' @param network_1_input The first network being aligned, which must be a matrix. If the two
+#' @param network_1_input The first network being aligned, which must be in matrix form. If the two
 #'     networks are of different sizes, it will be easier to interpret the output if this is the smaller one.
 #'
 #' @param network_2_input The second network, which also must be a matrix. 
@@ -68,7 +68,7 @@
 #' 
 #' @export
 
-align <- function(network_1_input, network_2_input, input = "matrix", base = 2, max_duration, characterization = "entropy", normalization = FALSE, unit_test = FALSE)
+align <- function(network_1_input, network_2_input, base = 2, max_duration, characterization = "entropy", normalization = FALSE, unit_test = FALSE)
 {
   # Prevents the NOTE "no visible binding for global variable" which arises because these variables are set in a loop with their names deriving from the loop index 
   network_1_diffusion_2 = network_1_diffusion_4 = network_1_diffusion_8 = NULL

@@ -4,17 +4,14 @@
 \alias{align}
 \title{Dynamic Network Alignment}
 \usage{
-align(network_1_input, network_2_input, input = "matrix", base = 2,
-  max_duration, characterization = "entropy", normalization = FALSE,
-  unit_test = FALSE)
+align(network_1_input, network_2_input, base = 2, max_duration,
+  characterization = "entropy", normalization = FALSE, unit_test = FALSE)
 }
 \arguments{
-\item{network_1_input}{The first network being aligned, either as a matrix or linked list. If the two
+\item{network_1_input}{The first network being aligned, which must be in matrix form. If the two
 networks are of different sizes, it will be easier to interpret the output if this is the smaller one.}
 
-\item{network_2_input}{The second network. Should be the same type (matrix or linked list) as network_1_input.}
-
-\item{input}{Defaults to "matrix". Can be set to "list" if the two networks are stored as linked lists.}
+\item{network_2_input}{The second network, which also must be a matrix.}
 
 \item{base}{Defaults to 1. The base in the series of time steps to sample the diffusion kernels at. If base = 1 every time step
 is sampled. If base = 2, only time steps that are powers of 2 are sampled, etc. Larger values place more emphasis on 
@@ -43,7 +40,7 @@ ij element is the difference between the characterization-over-time curves for n
 }
 \description{
 Network alignment by comparing the entropies of diffusion kernels simulated on two networks.
-\code{align} takes two networks, either matrices or linked lists, and returns a node-level alignment between them.
+\code{align} takes two networks stored as matrices and returns a node-level alignment between them.
 }
 \details{
 Network alignment pairs nodes between two networks so as to maximize similarities in their edge structures. 

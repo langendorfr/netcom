@@ -4,19 +4,16 @@
 \alias{ics}
 \title{Induced Conserved Structure (ICS)}
 \usage{
-ics(matrix_1_input, matrix_2_input, alignment, input = "matrix",
-  flip = FALSE)
+ics(network_1_input, network_2_input, alignment, flip = FALSE)
 }
 \arguments{
-\item{matrix_1_input}{The first network being aligned, either as a matrix or linked list. If the two
+\item{network_1_input}{The first network being aligned, which must be in matrix form. If the two
 networks are of different sizes, it will be easier to interpret the output if this is the smaller one.}
 
-\item{matrix_2_input}{The second network. Should be the same type (matrix or linked list) as matrix_1_input.}
+\item{network_2_input}{The second network, which also must be a matrix.}
 
 \item{alignment}{A matrix, such as is output by the function NetCom, where the first two columns contain
 corresponding node IDs for the two networks that were aligned.}
-
-\item{input}{Defaults to "matrix". Can be set to "list" if the two networks are stored as linked lists.}
 
 \item{flip}{Defaults to FALSE. Set to TRUE if the first network is larger than the second. This is necessary 
 because ICS is not a symmetric measure of alignment quality.}
