@@ -4,10 +4,12 @@
 \alias{gini}
 \title{Gini coefficient}
 \usage{
-gini(input)
+gini(input, byrow = FALSE)
 }
 \arguments{
 \item{input}{A row-stochastic matrix, meaning each row is a multinomial distribution.}
+
+\item{byrow}{Defaults to FALSE. Set to TRUE to calculate the Gini coefficient of each row.}
 }
 \value{
 A vector of the Gini coefficient of each row.
@@ -17,4 +19,5 @@ Takes a matrix and returns the Gini coefficient of each row.
 }
 \examples{
 gini(matrix(runif(25, 0, 1), nrow = 5, ncol = 5))
+
 }

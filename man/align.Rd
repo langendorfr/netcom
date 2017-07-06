@@ -5,7 +5,8 @@
 \title{Dynamic Network Alignment}
 \usage{
 align(network_1_input, network_2_input, input = "matrix", base = 2,
-  max_duration, characterization = "entropy", normalization = FALSE)
+  max_duration, characterization = "entropy", normalization = FALSE,
+  unit_test = FALSE)
 }
 \arguments{
 \item{network_1_input}{The first network being aligned, either as a matrix or linked list. If the two
@@ -28,16 +29,21 @@ kernel to spread for, which is the smallest power of base that is at least as la
 \item{normalization}{Defaults to FALSE. Determines if self-loops should be augmented such that edge weights are
 proportional to those in network_1_input and network_2_input. FALSE by default because this is innapropriate for
 unweighted binary/logical networks where edges indicate only the presense of an interaction.}
+
+\item{unit_test}{Defaults to FALSE. Saves the following intermediate steps to help with general troubleshooting: post-processing matrix
+representations of both networks, time steps at which the diffusion kernels were sampled, the diffusion kernels at those time steps,
+the characterizations of the diffusion kernels at those time steps, and the cost matrix fed into the Hungarian algorithm where the 
+ij element is the difference between the characterization-over-time curves for node i in the first network and node j in the second network.}
 }
 \value{
 \item{score}{Mean of all alignment scores between nodes in both original networks network_1_input and network_2_input.}
 \item{alignment}{Data frame of the nodes in both networks, sorted numerically by the first network (why it helps to make the smaller network the first one), and the corresponding alignment score.}
-\item{score_with_padding}{Same as score but includes the padding nodes in the smaller network, which can be thought of as a size gap penalty for aligning differently sized networks.}
-\item{alignment_with_padding}{Same as alignment but includes the padding nodes in the smaller network.}
+\item{score_with_padding}{Same as score but includes the padding nodes in the smaller network, which can be thought of as a size gap penalty for aligning differently sized networks. Only included if the input networks are different sizes.}
+\item{alignment_with_padding}{Same as alignment but includes the padding nodes in the smaller network. Only included if the input networks are different sizes.}
 }
 \description{
 Network alignment by comparing the entropies of diffusion kernels simulated on two networks.
-Takes two networks, either matrices or linked lists, and returns a node-level alignment between them.
+\code{align} takes two networks, either matrices or linked lists, and returns a node-level alignment between them.
 }
 \details{
 Network alignment pairs nodes between two networks so as to maximize similarities in their edge structures. 
@@ -48,7 +54,7 @@ Network alignment pairs nodes between two networks so as to maximize similaritie
     as trying to compare two hypothetical cities of houses connected by roads. The approach implemented here is to pairwise 
     compare each house with those in the other city by creating a house-specific signature. This is accomplished by quantifying 
     the predictability of the location of a person at various times after they left their house, assuming they were moving randomly. 
-    This predictability across all houses captures much of the way each city is organized and functions. The function align 
+    This predictability across all houses captures much of the way each city is organized and functions. \code{align} 
     uses this conceptual rationale to align two networks, with nodes as houses, edges as roads, and random diffusion representing people leaving 
     their houses and walking around the city to other houses. The mechanics of this, which are conceptually akin to flow 
     algorithms and Laplacian dynamics, can be analytically expressed as a Markov chain raised to successive powers which are 
@@ -59,4 +65,5 @@ net_one <- matrix(runif(25,0,1), nrow=5, ncol=5)
 net_two <- matrix(runif(25,0,1), nrow=5, ncol=5)
 align(net_one, net_two)
 align(net_one, net_two, base = 1, characterization = "gini", normalization = TRUE)
+
 }

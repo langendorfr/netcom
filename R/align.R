@@ -24,7 +24,10 @@
 #'     proportional to those in network_1_input and network_2_input. FALSE by default because this is innapropriate for
 #'     unweighted binary/logical networks where edges indicate only the presense of an interaction.
 #'     
-#' @param unit_test Defaults to FALSE. Saves intermediate steps for the unit_test.R function, and to help with general troubleshooting.
+#' @param unit_test Defaults to FALSE. Saves the following intermediate steps to help with general troubleshooting: post-processing matrix
+#'     representations of both networks, time steps at which the diffusion kernels were sampled, the diffusion kernels at those time steps,
+#'     the characterizations of the diffusion kernels at those time steps, and the cost matrix fed into the Hungarian algorithm where the 
+#'     ij element is the difference between the characterization-over-time curves for node i in the first network and node j in the second network.
 #'
 #' @details Network alignment pairs nodes between two networks so as to maximize similarities in their edge structures. 
 #'     This allows information from well-studied systems to be used in poorly studied ones, such as to identify
@@ -34,7 +37,7 @@
 #'     as trying to compare two hypothetical cities of houses connected by roads. The approach implemented here is to pairwise 
 #'     compare each house with those in the other city by creating a house-specific signature. This is accomplished by quantifying 
 #'     the predictability of the location of a person at various times after they left their house, assuming they were moving randomly. 
-#'     This predictability across all houses captures much of the way each city is organized and functions. The function align 
+#'     This predictability across all houses captures much of the way each city is organized and functions. \code{align} 
 #'     uses this conceptual rationale to align two networks, with nodes as houses, edges as roads, and random diffusion representing people leaving 
 #'     their houses and walking around the city to other houses. The mechanics of this, which are conceptually akin to flow 
 #'     algorithms and Laplacian dynamics, can be analytically expressed as a Markov chain raised to successive powers which are 
@@ -45,7 +48,7 @@
 #' \item{alignment}{Data frame of the nodes in both networks, sorted numerically by the first network (why it helps to make the smaller network the first one), and the corresponding alignment score.}
 #' \item{score_with_padding}{Same as score but includes the padding nodes in the smaller network, which can be thought of as a size gap penalty for aligning differently sized networks. Only included if the input networks are different sizes.}
 #' \item{alignment_with_padding}{Same as alignment but includes the padding nodes in the smaller network. Only included if the input networks are different sizes.}
-#'
+#' 
 #' @examples
 #' net_one <- matrix(runif(25,0,1), nrow=5, ncol=5)
 #' net_two <- matrix(runif(25,0,1), nrow=5, ncol=5)
@@ -56,6 +59,12 @@
 
 align <- function(network_1_input, network_2_input, input = "matrix", base = 2, max_duration, characterization = "entropy", normalization = FALSE, unit_test = FALSE)
 {
+  # Prevents the NOTE "no visible binding for global variable" which arises because these variables are set in a loop with their names deriving from the loop index 
+  network_1_diffusion_2 = network_1_diffusion_4 = network_1_diffusion_8 = NULL
+  network_2_diffusion_2 = network_2_diffusion_4 = network_2_diffusion_8 = NULL
+  network_1_output_2 = network_1_output_4 = network_1_output_8 = NULL
+  network_2_output_2 = network_2_output_4 = network_2_output_8 = NULL
+  
   # Check if inputs are square matrices. If not, they are linked lists which need to be converted to 
   # their respective matrix representations. (NOTE: this assumes the same data type for the two input networks)
   if (input == "list" | dim(network_1_input)[1] != dim(network_1_input)[2] | dim(network_2_input)[1] != dim(network_2_input)[2]) {
@@ -173,7 +182,7 @@ align <- function(network_1_input, network_2_input, input = "matrix", base = 2, 
         network_1_output[, 1] <- c(gini(network_1_diffusion[1:matrix_sizes[1], 1:matrix_sizes[1]], byrow = TRUE), rep(0, max(matrix_sizes) - matrix_sizes[1]))
       }
       
-      # unit_test.R functionality
+      # unit_test functionality
       if (unit_test == TRUE) {
         network_1_diffusion_1 <- network_1_diffusion
         network_1_output_1 <- network_1_output[, 1]
@@ -193,7 +202,7 @@ align <- function(network_1_input, network_2_input, input = "matrix", base = 2, 
           network_1_output[, t] <- c(gini(network_1_diffusion[1:matrix_sizes[1], 1:matrix_sizes[1]], byrow = TRUE), rep(0, max(matrix_sizes) - matrix_sizes[1]))
         }
         
-        # unit_test.R functionality
+        # unit_test functionality
         if (unit_test == TRUE) {
           assign(paste("network_1_diffusion", kernel_sampling[t], sep = "_"), network_1_diffusion)
           assign(paste("network_1_output", kernel_sampling[t], sep = "_"), network_1_output[, t])          
@@ -213,7 +222,7 @@ align <- function(network_1_input, network_2_input, input = "matrix", base = 2, 
         network_2_output[, 1] <- c(gini(network_2_diffusion[1:matrix_sizes[2], 1:matrix_sizes[2]], byrow = TRUE), rep(0, max(matrix_sizes) - matrix_sizes[2]))
       }
       
-      # unit_test.R functionality
+      # unit_test functionality
       if (unit_test == TRUE) {
         network_2_diffusion_1 <- network_2_diffusion
         network_2_output_1 <- network_2_output[, 1]
@@ -229,7 +238,7 @@ align <- function(network_1_input, network_2_input, input = "matrix", base = 2, 
           network_2_output[, t] <- c(gini(network_2_diffusion[1:matrix_sizes[2], 1:matrix_sizes[2]], byrow = TRUE), rep(0, max(matrix_sizes) - matrix_sizes[2]))
         }
         
-        # unit_test.R functionality
+        # unit_test functionality
         if (unit_test == TRUE) {
           assign(paste("network_2_diffusion", kernel_sampling[t], sep = "_"), network_2_diffusion)
           assign(paste("network_2_output", kernel_sampling[t], sep = "_"), network_2_output[, t])

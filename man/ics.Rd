@@ -29,7 +29,9 @@ isomorphic (identical) under the given alignment.
 Calculates the Induced Conserved Structure (Patro and Kingsford, 2012) of an alignment between two networks.
 }
 \examples{
-NetOne <- matrix(runif(25,0,1), nrow=5, ncol=5)
-NetTwo <- matrix(runif(25,0,1), nrow=5, ncol=5)
-align(NetOne, NetTwo, align(NetOne, NetTwo)$alignment)
+# Note that ICS is only defined on unweighted networks.
+net_one <- round(matrix(runif(25,0,1), nrow=5, ncol=5))
+net_two <- round(matrix(runif(25,0,1), nrow=5, ncol=5))
+ics(net_two, net_two, align(net_one, net_two)$alignment)
+
 }
