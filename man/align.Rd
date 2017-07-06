@@ -37,9 +37,9 @@ ij element is the difference between the characterization-over-time curves for n
 }
 \value{
 \item{score}{Mean of all alignment scores between nodes in both original networks network_1_input and network_2_input.}
-\item{alignment}{Data frame of the nodes in both networks, sorted numerically by the first network (why it helps to make the smaller network the first one), and the corresponding alignment score.}
-\item{score_with_padding}{Same as score but includes the padding nodes in the smaller network, which can be thought of as a size gap penalty for aligning differently sized networks. Only included if the input networks are different sizes.}
-\item{alignment_with_padding}{Same as alignment but includes the padding nodes in the smaller network. Only included if the input networks are different sizes.}
+ \item{alignment}{Data frame of the nodes in both networks, sorted numerically by the first network (why it helps to make the smaller network the first one), and the corresponding alignment score.}
+ \item{score_with_padding}{Same as score but includes the padding nodes in the smaller network, which can be thought of as a size gap penalty for aligning differently sized networks. Only included if the input networks are different sizes.}
+ \item{alignment_with_padding}{Same as alignment but includes the padding nodes in the smaller network. Only included if the input networks are different sizes.}
 }
 \description{
 Network alignment by comparing the entropies of diffusion kernels simulated on two networks.
@@ -59,13 +59,24 @@ Network alignment pairs nodes between two networks so as to maximize similaritie
     their houses and walking around the city to other houses. The mechanics of this, which are conceptually akin to flow 
     algorithms and Laplacian dynamics, can be analytically expressed as a Markov chain raised to successive powers which are 
     the durations of diffusion.
+    
+    Note that the novel part of \code{align} lies in creating a matrix where the ij entry is a measure of similarity between node i in the first
+    network and node j in the second. The final alignment is found using \link[clue]{solve_LSAP} in the package \code{clue}, which uses the 
+    Hungarian algorithm to solve the assignment problem.
 }
 \examples{
+# The two networks to be aligned
 net_one <- matrix(runif(25,0,1), nrow=5, ncol=5)
 net_two <- matrix(runif(25,0,1), nrow=5, ncol=5)
+
 align(net_one, net_two)
 align(net_one, net_two, base = 1, characterization = "gini", normalization = TRUE)
 
+}
+\references{
+Kuhn, H. W. (1955). The Hungarian method for the assignment problem. Naval Research Logistics (NRL), 2(1-2), 83-97.
+
+C. Papadimitriou and K. Steiglitz (1982), Combinatorial Optimization: Algorithms and Complexity. Englewood Cliffs: Prentice Hall.
 }
 \author{
 Ryan E. Langendorf \email{ryan.langendorf@colorado.edu}, Debra S. Goldberg

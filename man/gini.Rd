@@ -12,7 +12,7 @@ gini(input, byrow = FALSE)
 \item{byrow}{Defaults to FALSE. Set to TRUE to calculate the Gini coefficient of each row.}
 }
 \value{
-A vector of the Gini coefficient of each column.
+A vector of the Gini coefficients of each column.
 }
 \description{
 Takes a matrix and returns the Gini coefficient of each column.
@@ -22,7 +22,7 @@ gini(matrix(runif(20, 0, 1), nrow = 10, ncol = 2))
 
 }
 \references{
-{Gini, C. (1912). Variabilita e mutabilita. Reprinted in Memorie di metodologica statistica (Ed. Pizetti E, Salvemini, T). Rome: Libreria Eredi Virgilio Veschi.}
+Gini, C. (1912). Variabilita e mutabilita. Reprinted in Memorie di metodologica statistica (Ed. Pizetti E, Salvemini, T). Rome: Libreria Eredi Virgilio Veschi.
 }
 \author{
 Ryan E. Langendorf \email{ryan.langendorf@colorado.edu}, Debra S. Goldberg

@@ -1,14 +1,12 @@
 #' @title Dynamic Network Alignment
 #'
 #' @description Network alignment by comparing the entropies of diffusion kernels simulated on two networks.
-#' \code{align} takes two networks, either matrices or linked lists, and returns a node-level alignment between them.
+#' \code{align} takes two networks stored as matrices and returns a node-level alignment between them.
 #'
-#' @param network_1_input The first network being aligned, either as a matrix or linked list. If the two
+#' @param network_1_input The first network being aligned, which must be a matrix. If the two
 #'     networks are of different sizes, it will be easier to interpret the output if this is the smaller one.
 #'
-#' @param network_2_input The second network. Should be the same type (matrix or linked list) as network_1_input.
-#'
-#' @param input Defaults to "matrix". Can be set to "list" if the two networks are stored as linked lists.
+#' @param network_2_input The second network, which also must be a matrix. 
 #'
 #' @param base Defaults to 1. The base in the series of time steps to sample the diffusion kernels at. If base = 1 every time step
 #'     is sampled. If base = 2, only time steps that are powers of 2 are sampled, etc. Larger values place more emphasis on 
@@ -42,18 +40,29 @@
 #'     their houses and walking around the city to other houses. The mechanics of this, which are conceptually akin to flow 
 #'     algorithms and Laplacian dynamics, can be analytically expressed as a Markov chain raised to successive powers which are 
 #'     the durations of diffusion.
+#'     
+#'     Note that the novel part of \code{align} lies in creating a matrix where the ij entry is a measure of similarity between node i in the first
+#'     network and node j in the second. The final alignment is found using \link[clue]{solve_LSAP} in the package \code{clue}, which uses the 
+#'     Hungarian algorithm to solve the assignment problem.
 #'
 #' @return 
-#' \item{score}{Mean of all alignment scores between nodes in both original networks network_1_input and network_2_input.}
-#' \item{alignment}{Data frame of the nodes in both networks, sorted numerically by the first network (why it helps to make the smaller network the first one), and the corresponding alignment score.}
-#' \item{score_with_padding}{Same as score but includes the padding nodes in the smaller network, which can be thought of as a size gap penalty for aligning differently sized networks. Only included if the input networks are different sizes.}
-#' \item{alignment_with_padding}{Same as alignment but includes the padding nodes in the smaller network. Only included if the input networks are different sizes.}
+#'  \item{score}{Mean of all alignment scores between nodes in both original networks network_1_input and network_2_input.}
+#'  \item{alignment}{Data frame of the nodes in both networks, sorted numerically by the first network (why it helps to make the smaller network the first one), and the corresponding alignment score.}
+#'  \item{score_with_padding}{Same as score but includes the padding nodes in the smaller network, which can be thought of as a size gap penalty for aligning differently sized networks. Only included if the input networks are different sizes.}
+#'  \item{alignment_with_padding}{Same as alignment but includes the padding nodes in the smaller network. Only included if the input networks are different sizes.}
 #' 
 #' @author Ryan E. Langendorf \email{ryan.langendorf@@colorado.edu}, Debra S. Goldberg 
 #' 
+#' @references 
+#' Kuhn, H. W. (1955). The Hungarian method for the assignment problem. Naval Research Logistics (NRL), 2(1-2), 83-97.
+#' 
+#' C. Papadimitriou and K. Steiglitz (1982), Combinatorial Optimization: Algorithms and Complexity. Englewood Cliffs: Prentice Hall.
+#' 
 #' @examples
+#' # The two networks to be aligned
 #' net_one <- matrix(runif(25,0,1), nrow=5, ncol=5)
 #' net_two <- matrix(runif(25,0,1), nrow=5, ncol=5)
+#' 
 #' align(net_one, net_two)
 #' align(net_one, net_two, base = 1, characterization = "gini", normalization = TRUE)
 #' 
@@ -67,29 +76,9 @@ align <- function(network_1_input, network_2_input, input = "matrix", base = 2, 
   network_1_output_2 = network_1_output_4 = network_1_output_8 = NULL
   network_2_output_2 = network_2_output_4 = network_2_output_8 = NULL
   
-  # Check if inputs are square matrices. If not, they are linked lists which need to be converted to 
-  # their respective matrix representations. (NOTE: this assumes the same data type for the two input networks)
-  if (input == "list" | dim(network_1_input)[1] != dim(network_1_input)[2] | dim(network_2_input)[1] != dim(network_2_input)[2]) {
-
-    # R starts counting at one, not zero
-    if (min(network_1_input) == 0) {
-      matrix_1_input <- igraph::as_adjacency_matrix(igraph::graph_from_edgelist(as.matrix(network_1_input + 1), directed = TRUE), sparse = FALSE)
-    } else {
-      matrix_1_input <- igraph::as_adjacency_matrix(igraph::graph_from_edgelist(as.matrix(network_1_input), directed = TRUE), sparse = FALSE)
-    }
-
-    if (min(network_2_input) == 0) {
-      matrix_2_input <- igraph::as_adjacency_matrix(igraph::graph_from_edgelist(as.matrix(network_2_input + 1), directed = TRUE), sparse = FALSE)
-    } else {
-      matrix_2_input <- igraph::as_adjacency_matrix(igraph::graph_from_edgelist(as.matrix(network_2_input), directed = TRUE), sparse = FALSE)
-    }
-
-  } else {
-    
-    # When the input networks are matrices
-    matrix_1_input <- network_1_input
-    matrix_2_input <- network_2_input
-  }
+  # This step serves entirely to pave the way for future development allowing linked lists as inputs
+  matrix_1_input <- network_1_input
+  matrix_2_input <- network_2_input
 
   # Calculate the number of nodes in each network, which are used repeatedly
   matrix_sizes <- c(nrow(matrix_1_input), nrow(matrix_2_input))
