@@ -6,11 +6,11 @@
 #' 
 #' @param byrow Defaults to FALSE. Set to TRUE to calculate the Gini coefficient of each row.
 #'
-#' @return A vector of the Gini coefficient of each column.
+#' @return A vector of the Gini coefficients of each column.
 #' 
 #' @author Ryan E. Langendorf \email{ryan.langendorf@@colorado.edu}, Debra S. Goldberg 
 #' 
-#' @references {Gini, C. (1912). Variabilita e mutabilita. Reprinted in Memorie di metodologica statistica (Ed. Pizetti E, Salvemini, T). Rome: Libreria Eredi Virgilio Veschi.}
+#' @references Gini, C. (1912). Variabilita e mutabilita. Reprinted in Memorie di metodologica statistica (Ed. Pizetti E, Salvemini, T). Rome: Libreria Eredi Virgilio Veschi.
 #'
 #' @examples
 #' gini(matrix(runif(20, 0, 1), nrow = 10, ncol = 2))

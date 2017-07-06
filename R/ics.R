@@ -20,7 +20,7 @@
 #' 
 #' @author Ryan E. Langendorf \email{ryan.langendorf@@colorado.edu}, Debra S. Goldberg 
 #' 
-#' @references {Patro, R., & Kingsford, C. (2012). Global network alignment using multiscale spectral signatures. Bioinformatics, 28(23), 3105-3114.}
+#' @references Patro, R., & Kingsford, C. (2012). Global network alignment using multiscale spectral signatures. Bioinformatics, 28(23), 3105-3114.
 #'
 #' @examples
 #' # Note that ICS is only defined on unweighted networks.
