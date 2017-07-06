@@ -3,6 +3,8 @@
 #' @description Compared the output of \code{align} to 22 hand curated outputs and intermediate steps.
 #'
 #' @return Either "Unit test results: PASS" or "Unit test results: FAIL"
+#' 
+#' @author Ryan E. Langendorf \email{ryan.langendorf@@colorado.edu}, Debra S. Goldberg 
 #'
 #' @examples
 #' unit_test()

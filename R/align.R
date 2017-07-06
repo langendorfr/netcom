@@ -21,8 +21,8 @@
 #' @param characterization Defaults to "entropy". Determines how the diffusion kernels are characterized. Either "entropy" or "gini".
 #'
 #' @param normalization Defaults to FALSE. Determines if self-loops should be augmented such that edge weights are
-#'     proportional to those in network_1_input and network_2_input. FALSE by default because this is innapropriate for
-#'     unweighted binary/logical networks where edges indicate only the presense of an interaction.
+#'     proportional to those in network_1_input and network_2_input. FALSE by default because this is inappropriate for
+#'     unweighted binary/logical networks where edges indicate only the presence of an interaction.
 #'     
 #' @param unit_test Defaults to FALSE. Saves the following intermediate steps to help with general troubleshooting: post-processing matrix
 #'     representations of both networks, time steps at which the diffusion kernels were sampled, the diffusion kernels at those time steps,
@@ -48,6 +48,8 @@
 #' \item{alignment}{Data frame of the nodes in both networks, sorted numerically by the first network (why it helps to make the smaller network the first one), and the corresponding alignment score.}
 #' \item{score_with_padding}{Same as score but includes the padding nodes in the smaller network, which can be thought of as a size gap penalty for aligning differently sized networks. Only included if the input networks are different sizes.}
 #' \item{alignment_with_padding}{Same as alignment but includes the padding nodes in the smaller network. Only included if the input networks are different sizes.}
+#' 
+#' @author Ryan E. Langendorf \email{ryan.langendorf@@colorado.edu}, Debra S. Goldberg 
 #' 
 #' @examples
 #' net_one <- matrix(runif(25,0,1), nrow=5, ncol=5)

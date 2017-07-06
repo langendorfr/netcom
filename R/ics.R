@@ -1,6 +1,6 @@
 #' @title Induced Conserved Structure (ICS)
 #'
-#' @description Calculates the Induced Conserved Structure (Patro and Kingsford, 2012) of an alignment between two networks.
+#' @description Calculates the Induced Conserved Structure proposed by Patro and Kingsford (2012) of an alignment between two networks.
 #'
 #' @param matrix_1_input The first network being aligned, either as a matrix or linked list. If the two
 #' networks are of different sizes, it will be easier to interpret the output if this is the smaller one.
@@ -17,6 +17,10 @@
 #'
 #' @return A number ranging between 0 and 1. If the Induced Conserved Structure is 1, the two networks are
 #' isomorphic (identical) under the given alignment.
+#' 
+#' @author Ryan E. Langendorf \email{ryan.langendorf@@colorado.edu}, Debra S. Goldberg 
+#' 
+#' @references {Patro, R., & Kingsford, C. (2012). Global network alignment using multiscale spectral signatures. Bioinformatics, 28(23), 3105-3114.}
 #'
 #' @examples
 #' # Note that ICS is only defined on unweighted networks.

@@ -7,17 +7,23 @@
 gini(input, byrow = FALSE)
 }
 \arguments{
-\item{input}{A row-stochastic matrix, meaning each row is a multinomial distribution.}
+\item{input}{A matrix where the Gini coefficient will be calculated on each column.}
 
 \item{byrow}{Defaults to FALSE. Set to TRUE to calculate the Gini coefficient of each row.}
 }
 \value{
-A vector of the Gini coefficient of each row.
+A vector of the Gini coefficient of each column.
 }
 \description{
-Takes a matrix and returns the Gini coefficient of each row.
+Takes a matrix and returns the Gini coefficient of each column.
 }
 \examples{
-gini(matrix(runif(25, 0, 1), nrow = 5, ncol = 5))
+gini(matrix(runif(20, 0, 1), nrow = 10, ncol = 2))
 
+}
+\references{
+{Gini, C. (1912). Variabilita e mutabilita. Reprinted in Memorie di metodologica statistica (Ed. Pizetti E, Salvemini, T). Rome: Libreria Eredi Virgilio Veschi.}
+}
+\author{
+Ryan E. Langendorf \email{ryan.langendorf@colorado.edu}, Debra S. Goldberg
 }

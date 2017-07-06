@@ -27,8 +27,8 @@ kernel to spread for, which is the smallest power of base that is at least as la
 \item{characterization}{Defaults to "entropy". Determines how the diffusion kernels are characterized. Either "entropy" or "gini".}
 
 \item{normalization}{Defaults to FALSE. Determines if self-loops should be augmented such that edge weights are
-proportional to those in network_1_input and network_2_input. FALSE by default because this is innapropriate for
-unweighted binary/logical networks where edges indicate only the presense of an interaction.}
+proportional to those in network_1_input and network_2_input. FALSE by default because this is inappropriate for
+unweighted binary/logical networks where edges indicate only the presence of an interaction.}
 
 \item{unit_test}{Defaults to FALSE. Saves the following intermediate steps to help with general troubleshooting: post-processing matrix
 representations of both networks, time steps at which the diffusion kernels were sampled, the diffusion kernels at those time steps,
@@ -66,4 +66,7 @@ net_two <- matrix(runif(25,0,1), nrow=5, ncol=5)
 align(net_one, net_two)
 align(net_one, net_two, base = 1, characterization = "gini", normalization = TRUE)
 
+}
+\author{
+Ryan E. Langendorf \email{ryan.langendorf@colorado.edu}, Debra S. Goldberg
 }

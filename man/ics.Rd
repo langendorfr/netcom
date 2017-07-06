@@ -26,7 +26,7 @@ A number ranging between 0 and 1. If the Induced Conserved Structure is 1, the t
 isomorphic (identical) under the given alignment.
 }
 \description{
-Calculates the Induced Conserved Structure (Patro and Kingsford, 2012) of an alignment between two networks.
+Calculates the Induced Conserved Structure proposed by Patro and Kingsford (2012) of an alignment between two networks.
 }
 \examples{
 # Note that ICS is only defined on unweighted networks.
@@ -34,4 +34,10 @@ net_one <- round(matrix(runif(25,0,1), nrow=5, ncol=5))
 net_two <- round(matrix(runif(25,0,1), nrow=5, ncol=5))
 ics(net_two, net_two, align(net_one, net_two)$alignment)
 
+}
+\references{
+{Patro, R., & Kingsford, C. (2012). Global network alignment using multiscale spectral signatures. Bioinformatics, 28(23), 3105-3114.}
+}
+\author{
+Ryan E. Langendorf \email{ryan.langendorf@colorado.edu}, Debra S. Goldberg
 }
