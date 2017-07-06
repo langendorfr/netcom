@@ -21,7 +21,9 @@ runs faster.}
 \item{max_duration}{Defaults to twice the diameter of the larger network. Sets the number of time steps to allow the diffusion
 kernel to spread for, which is the smallest power of base that is at least as large as max_duration.}
 
-\item{characterization}{Defaults to "entropy". Determines how the diffusion kernels are characterized. Either "entropy" or "gini".}
+\item{characterization}{Defaults to "entropy". Determines how the diffusion kernels are characterized. Either "entropy" or "gini". "entropy" 
+is a size-normalized version of Shannon's entropy with base e (Euler's number). This is also known as interaction or species evenness
+in ecology. "gini" is the Gini coefficient.}
 
 \item{normalization}{Defaults to FALSE. Determines if self-loops should be augmented such that edge weights are
 proportional to those in network_1_input and network_2_input. FALSE by default because this is inappropriate for
