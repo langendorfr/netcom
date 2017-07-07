@@ -70,7 +70,7 @@
 
 align <- function(network_1_input, network_2_input, base = 2, max_duration, characterization = "entropy", normalization = FALSE, unit_test = FALSE)
 {
-  # Prevents the NOTE "no visible binding for global variable" which arises because these variables are set in a loop with their names deriving from the loop index 
+  # Prevents the NOTE "no visible binding for global variable" which arises because these variables, which are used in the unit test, are set in a loop with their names deriving from the loop index 
   network_1_diffusion_2 = network_1_diffusion_4 = network_1_diffusion_8 = NULL
   network_2_diffusion_2 = network_2_diffusion_4 = network_2_diffusion_8 = NULL
   network_1_output_2 = network_1_output_4 = network_1_output_8 = NULL
