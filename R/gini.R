@@ -22,8 +22,8 @@ gini <- function(input, byrow = FALSE)
     input <- t(input)
   }
   
-  # Number of elements in each Gini coefficient
-  size <- nrow(input)
+  rows <- nrow(input)
+  cols <- ncol(input)
   
   # Convert the input to a column-stochastic matrix (won't affect inputs already in that format)
   matrix <- sweep(input, 2, Matrix::colSums(input), FUN = "/")
@@ -31,16 +31,22 @@ gini <- function(input, byrow = FALSE)
   # Sort each column into ascending order (a CDF)
   sorted <- apply(matrix, 2, sort)
 
-  cdf <- matrix(NA, nrow = size, ncol = ncol(input))
+  cdf <- matrix(NA, nrow = rows, ncol = cols)
   cdf[1, ] <- sorted[1, ]
-  for (i in 2:size) {
+  for (i in 2:rows) {
     cdf[i, ] = cdf[i - 1, ] + sorted[i, ]
   }
+  cdf <- rbind(rep(0, cols), cdf)
 
   # The Gini coefficient is relative to a perfectly equitable distribution
-  equality <- seq(from = 1/size, to = 1, by = 1/size)
-  output <- colSums(abs(sweep(cdf, 1, equality))) / (size - 1) # Divide by size - 1 because the last value in both equality and output will always be the same (1)
+  equality <- seq(from = 0, to = 1, by = 1/rows)
 
+  output <- rep(NA, cols)
+  for (i in 1:cols) {
+    output[i] <- 2*(0.5 - pracma::trapz(equality, cdf[, i]))
+  }
+  
+  
   # The output is a vector of Gini coefficients for each column (row if byrow = TRUE) of the input matrix
   return(output)
 }
