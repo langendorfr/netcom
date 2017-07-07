@@ -7,7 +7,7 @@
 gini(input, byrow = FALSE)
 }
 \arguments{
-\item{input}{A matrix where the Gini coefficient will be calculated on each column.}
+\item{input}{A matrix where the Gini coefficient will be calculated on each column. Note that vector data must be converted to a single-column matrix.}
 
 \item{byrow}{Defaults to FALSE. Set to TRUE to calculate the Gini coefficient of each row.}
 }
@@ -18,7 +18,12 @@ A vector of the Gini coefficients of each column.
 Takes a matrix and returns the Gini coefficient of each column.
 }
 \examples{
-gini(matrix(runif(20, 0, 1), nrow = 10, ncol = 2))
+# Vectors are not supported. First convert to a single-column matrix.
+sample_data <- runif(20, 0, 1)
+gini(matrix(sample_data, ncol = 1))
+
+# Multiple Gini coefficients can be calculated simultaneously
+gini(matrix(sample_data, ncol = 2)) 
 
 }
 \references{
