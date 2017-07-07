@@ -77,6 +77,3 @@ Kuhn, H. W. (1955). The Hungarian method for the assignment problem. Naval Resea
 
 C. Papadimitriou and K. Steiglitz (1982), Combinatorial Optimization: Algorithms and Complexity. Englewood Cliffs: Prentice Hall.
 }
-\author{
-Ryan E. Langendorf \email{ryan.langendorf@colorado.edu}, Debra S. Goldberg
-}

@@ -24,6 +24,3 @@ gini(matrix(runif(20, 0, 1), nrow = 10, ncol = 2))
 \references{
 Gini, C. (1912). Variabilita e mutabilita. Reprinted in Memorie di metodologica statistica (Ed. Pizetti E, Salvemini, T). Rome: Libreria Eredi Virgilio Veschi.
 }
-\author{
-Ryan E. Langendorf \email{ryan.langendorf@colorado.edu}, Debra S. Goldberg
-}

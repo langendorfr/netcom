@@ -8,8 +8,6 @@
 #'
 #' @return A vector of the Gini coefficients of each column.
 #' 
-#' @author Ryan E. Langendorf \email{ryan.langendorf@@colorado.edu}, Debra S. Goldberg 
-#' 
 #' @references Gini, C. (1912). Variabilita e mutabilita. Reprinted in Memorie di metodologica statistica (Ed. Pizetti E, Salvemini, T). Rome: Libreria Eredi Virgilio Veschi.
 #'
 #' @examples
@@ -41,7 +39,7 @@ gini <- function(input, byrow = FALSE)
 
   # The Gini coefficient is relative to a perfectly equitable distribution
   equality <- seq(from = 1/size, to = 1, by = 1/size)
-  output <- colSums(abs(sweep(cdf, 1, equality))) / size
+  output <- colSums(abs(sweep(cdf, 1, equality))) / (size - 1) # Divide by size - 1 because the last value in both equality and output will always be the same (1)
 
   # The output is a vector of Gini coefficients for each column (row if byrow = TRUE) of the input matrix
   return(output)

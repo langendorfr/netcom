@@ -4,8 +4,6 @@
 #'
 #' @return Either "Unit test results: PASS" or "Unit test results: FAIL"
 #' 
-#' @author Ryan E. Langendorf \email{ryan.langendorf@@colorado.edu}, Debra S. Goldberg 
-#'
 #' @examples
 #' unit_test()
 #'
