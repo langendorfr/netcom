@@ -1,6 +1,7 @@
 # netcom
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](http://www.gnu.org/licenses/gpl-3.0)
 [![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/netcom)](http://cran.r-project.org/package=netcom)
+[![Build Status](https://travis-ci.org/langendorfr/netcom.svg?branch=master)](https://travis-ci.org/langendorfr/netcom)
 
 `netcom` is an R package to align two networks using the dynamics of diffusion originating from their respective nodes.
 
