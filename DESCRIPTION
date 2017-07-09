@@ -1,16 +1,17 @@
 Package: netcom
 Type: Package
 Title: Dynamic Network Alignment
-Version: 1.0.2
-Date: 2017-06-06
+Version: 1.0.3
+Date: 2017-06-09
+License: GPL-3
+Encoding: UTF-8
+Description: Functions to take two networks stored as matrices and return a node-level injection between them (bijection if the input networks are of the same size). The alignment is made by giving the Hungarian algorithm a symmetric cost matrix where entries are the numerical difference in the distributions over time of diffusion within each network originating from each node.
+URL: https://github.com/langendorfr/netcom
+Repository: CRAN
 Authors@R: c(
     person("Ryan", "Langendorf", role = c("aut", "cre"), email = "ryan.langendorf@colorado.edu"),
     person("Debra", "Goldberg", role = "ctb", email = "debra@colorado.edu")
     )
-Description: Functions to take two networks stored as matrices and return 
-    a node-level injection between them (bijection if the input networks are of the same size). The alignment
-    is made by giving the Hungarian algorithm a symmetric cost matrix where entries are the numerical difference in 
-    the distributions over time of diffusion within each network originating from each node.
 Depends: R (>= 3.1.0)
 Imports:
     clue,
@@ -20,7 +21,5 @@ Imports:
     pdist,
     pracma,
     vegan
-License: GPL-3
-Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.0.1

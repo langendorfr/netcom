@@ -44,8 +44,8 @@
 #'     the durations of diffusion.
 #'     
 #'     Note that the novel part of \code{align} lies in creating a matrix where the ij entry is a measure of similarity between node i in the first
-#'     network and node j in the second. The final alignment is found using \link[clue]{solve_LSAP} in the package \code{clue}, which uses the 
-#'     Hungarian algorithm to solve the assignment problem.
+#'     network and node j in the second. The final alignment is found using \code{solve_LSAP} in the package \code{clue}, which uses the 
+#'     Hungarian algorithm to solve the assignment problem optimally.
 #'
 #' @return 
 #'  \item{score}{Mean of all alignment scores between nodes in both original networks network_1_input and network_2_input.}
