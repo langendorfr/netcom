@@ -1,4 +1,4 @@
-#' @title Dynamic Network Alignment
+#' @title Network Alignment
 #'
 #' @description Network alignment by comparing the entropies of diffusion kernels simulated on two networks.
 #' \code{align} takes two networks stored as matrices and returns a node-level alignment between them.
