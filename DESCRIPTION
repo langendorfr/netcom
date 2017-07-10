@@ -1,7 +1,7 @@
 Package: netcom
 Type: Package
 Title: Dynamic Network Alignment
-Version: 1.0.3
+Version: 1.0.4
 Date: 2017-07-10
 Description: Functions to take two networks stored as matrices and return a node-level injection between them (bijection if the input networks are of the same size). The alignment is made by comparing diffusion kernels originating from each node in one network to those originating from each node in the other network. This creates a cost matrix where rows are nodes from one network and columns are nodes from the other network. Optimal node pairings are then found using the Hungarian algorithm.
 Authors@R: c(
