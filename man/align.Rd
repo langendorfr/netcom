@@ -2,7 +2,7 @@
 % Please edit documentation in R/align.R
 \name{align}
 \alias{align}
-\title{Dynamic Network Alignment}
+\title{Network Alignment}
 \usage{
 align(network_1_input, network_2_input, base = 2, max_duration,
   characterization = "entropy", normalization = FALSE, unit_test = FALSE)

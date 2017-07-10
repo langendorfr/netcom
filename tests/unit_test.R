@@ -183,7 +183,7 @@ unit_test <- function()
     
   
   # Run the alignment algorithm
-  Test <- align(matrix_1_input, matrix_2_input, input = "matrix", base = 2, characterization = "entropy", normalization = FALSE, unit_test = TRUE)
+  Test <- align(matrix_1_input, matrix_2_input, base = 2, characterization = "entropy", normalization = FALSE, unit_test = TRUE)
 
   
   
