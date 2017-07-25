@@ -13,7 +13,7 @@ The mechanics of this, which are conceptually akin to flow algorithms and Laplac
 ## Installation
 1. Install the release version of `netcom` from CRAN. 
 	```R
-	install.packages("devtools").
+	install.packages("netcom").
 	```
 
 2. Install the development version of `netcom` from GitHub using `devtools`.
