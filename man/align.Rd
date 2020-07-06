@@ -4,8 +4,15 @@
 \alias{align}
 \title{Network Alignment}
 \usage{
-align(network_1_input, network_2_input, base = 2, max_duration,
-  characterization = "entropy", normalization = FALSE, unit_test = FALSE)
+align(
+  network_1_input,
+  network_2_input,
+  base = 2,
+  max_duration,
+  characterization = "entropy",
+  normalization = FALSE,
+  unit_test = FALSE
+)
 }
 \arguments{
 \item{network_1_input}{The first network being aligned, which must be in matrix form. If the two

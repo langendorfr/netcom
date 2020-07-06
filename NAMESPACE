@@ -3,3 +3,4 @@
 export(align)
 export(gini)
 export(ics)
+export(make_NM)
