@@ -1,0 +1,163 @@
+#' @title Mechanistic Network Classification
+#'
+#' @description Tests a network against hypothetical generating processes using a comparative network inference.
+#'
+#' @param network The network to be classified.
+#' 
+#' @param method Defaults to "DD". This determines the method used to compare networks at the heart of the classification. Currently "DD" (Degree Distribution) and "align" (the align function which compares networks by the entropy of diffusion on them) are supported. Future versions will allow user-defined methods.
+#'
+#' @param resolution Defaults to 100. The first step is to find the version of each process most similar to the target network. This parameter sets the number of parameter values to search across. Decrease to improve performance, but at the cost of accuracy.
+#' 
+#' @param resolution_min Defaults to 0.01. The minimum parameter value to consider. Zero is not used because in many processes it results in degenerate systems (e.g. entirely unconnected networks). Currently process agnostic. Future versions will accept a vector of values, one for each process.
+#' 
+#' @param resolution_max Defaults to 0.99. The maximum parameter value to consider. One is not used because in many processes it results in degenerate systems (e.g. entirely connected networks). Currently process agnostic. Future versions will accept a vector of values, one for each process.
+#' 
+#' @param reps Defaults to 3. The number of networks to simulate for each parameter. More replicates increases accuracy by making the estimation of the parameter that produces networks most similar to the target network less idiosyncratic.
+#' 
+#' @param processes Defaults to c("ER", "PA", "DD", "SW", "NM"). Vector of process abbreviations. Currently only the default five are supported. Future versions will accept user-defined network-generating functions and associated parameters. ER = Erdos-Renyi random. PA = Preferential Attachment. DD = Duplication and Divergence. SW = Small World. NM = Niche Model.
+#' 
+#' @param power_max Defaults to 5. The maximum power of attachment in the Preferential Attachment process (PA).
+#' 
+#' @param null_reps Defaults to 50. The number of best fit networks to simulate that will be used to create a null distribution of distances between networks within the given process, which will then be used to test if the target network appears unusually distant from them and therefore likely not governed by that process.
+#' 
+#' @param best_fit_sd Defaults to 0.01. Standard Deviation used to simulate networks with a similar but not identical best fit parameter. This is important because simulating networks with the identical parameter artificially inflates the false negative rate by assuming the best fit parameter is the true parameter. For large resolution and reps values this will become true, but also computationally intractable for realistically large systems.
+#' 
+#' @param ks_dither Defaults to 0. The KS test cannot compute exact p-values when every pairwise network distance is not unique. Adding small amounts of noise makes each distance unique. We are not aware of a study on the impacts this has on accuracy so it is set to zero by default.
+#' 
+#' @param ks_alternative Defaults to "two.sided". Governs the KS test. Assuming best_fit_sd is not too large, this can be set to "greater" because the target network cannot be more alike identically simulated networks than they are to each other. In practice we have found "greater" and "less" produce numerical errors. Only "two.sided", "less", and "greater" are supported through stats::ks.test().
+#' 
+#' @param cores Defaults to 1. The number of cores to run the classification on. When set to 1 parallelization will be ignored.
+#' 
+#' @param directed Defaults to TRUE. Whether the target network is directed.
+#' 
+#' @param verbose Defaults to TRUE. Whether to print all messages.
+#' 
+#' @details Note: Currently each process is assumed to have a single governing parameter.
+#'
+#' @return A dataframe with 3 columns and as many rows as processes being tested (5 by default). The first column lists the processes. The second lists the p-value on the null hypothesis that the target network did come from that row's process. The third column gives the estimated parameter for that particular process.
+#' 
+#' @references 
+#' 
+#' @examples
+#' 
+#' @export
+
+classify <- function(network, method = "DD", net_kind = "list", resolution = 100, resolution_min = 0.01, resolution_max = 0.99, reps = 3, processes = c("ER", "PA", "DD", "SW", "NM"), power_max = 5, null_reps = 50, best_fit_sd = 1e-2, ks_dither = 0, ks_alternative = "two.sided", cores = 1, directed = TRUE, verbose = TRUE) {
+
+    ## Matrix input checks
+    if (net_kind == "matrix") {
+        ## Check that the network is square
+        if (nrow(network) != ncol(network)) {
+            stop("Input network must be a square matrix.")
+        }
+
+        ## If there are row and column names, check that they are ordered identically
+        ## If there are none, assume they are
+        if((!is.null(rownames(network))) & (!is.null(colnames(network)))) {
+            if (!identical(rownames(network), colnames(network))) {
+                stop("Row & Column names must have the same order.")
+            }
+        }
+    }
+
+    ## Network size
+    if (net_kind == "matrix") {
+        net_size <- nrow(network)
+    } else if (net_kind == "list") {
+        net_size <- c(network[,1], network[,2]) %>% unique() %>% length()
+    } else {
+        stop("Unknown network kind. Must be `list` or `matrix`.")
+    }
+
+    ## Create object with list of networks and table of corresponding parameters
+    state_space <- make_Systematic(net_size = net_size,
+                                   net_kind = net_kind,
+                                   resolution = resolution,
+                                   resolution_min = resolution_min,
+                                   resolution_max = resolution_max,
+                                   reps = reps,
+                                   processes = processes,
+                                   power_max = power_max,
+                                   cores = cores,
+                                   directed = directed,
+                                   verbose = verbose)
+
+    networks <- state_space$networks
+    parameters <- state_space$parameters
+
+    D_target <- compare_Target(target = network, 
+                               networks = networks, 
+                               net_size = net_size,
+                               net_kind = net_kind,
+                               method = method, 
+                               cause_orientation = "row", 
+                               DD_kind = "out", 
+                               max_norm = FALSE, 
+                               cores = 1, 
+                               verbose = FALSE)
+
+    parameters_scored <- dplyr::mutate(parameters, Distance = D_target)
+
+    ## Check each process one at a time
+    pvalues <- rep(NA, length(processes))
+    p_estimates <- rep(NA, length(processes))
+    for (p in seq_along(processes)) {
+        if (verbose == TRUE) {
+            print(paste0("Checking if the network is ", processes[p], "."))
+        }
+
+        parameters_scored_process <- dplyr::filter(parameters_scored, Process == processes[p])
+
+        ## Use the min of the average
+        ## Even for a given process and parameter there are many possible networks
+        parameters_scored_process = parameters_scored_process %>% group_by(Process, Parameter_Value) %>% summarize(Distance = mean(Distance), .groups = "drop")
+        best_fit <- dplyr::filter(parameters_scored_process, Distance == min(parameters_scored_process$Distance))
+
+        ## Assuming there are multiple best fits, pick one randomly
+        best_fit = best_fit[sample(1:nrow(best_fit), size = 1), ]
+
+        null_dist <- make_Null(input_network = network,
+                               net_kind = net_kind,
+                               process = best_fit$Process, 
+                               parameter = best_fit$Parameter_Value,
+                               net_size = net_size, 
+                               iters = null_reps, ## Note: length(null_dist) = ((iters^2)-iters)/2
+                               method = method,
+                               best_fit_sd = best_fit_sd,
+                               cores = cores,
+                               verbose = verbose)
+
+        ## Distance matrix is symmetric so only use the lower triangular values
+        null_dist_network <- null_dist$D_null[1,-1]
+        null_dist_process <- null_dist$D_null[-1,-1]
+        null_dist_process = null_dist_process[lower.tri(null_dist_process, diag = FALSE)]
+        # null_dist_network %>% summary()
+        # null_dist_process %>% summary()
+
+        ks_test <- stats::ks.test(x = null_dist_network + rnorm(n = length(null_dist_network), mean = 0, sd = ks_dither), 
+                                  y = null_dist_process + rnorm(n = length(null_dist_process), mean = 0, sd = ks_dither), 
+                                  alternative = ks_alternative) ## should be "greater" because "less" than expected just means best_fit_sd is too big, but I was getting weird p-values of 1 so left the default as "two.sided"
+
+        # p_value <- 1 - sum(best_fit$Distance > null_dist) / length(null_dist)
+        p_value <- ks_test$p.value
+
+        pvalues[p] = p_value
+        # p_estimates[p] = stats::weighted.mean(x = null_dist$parameters, w = 1/(null_dist$D_null[1,-1]))
+        p_estimates[p] = stats::weighted.mean(x = null_dist$parameters, w = exp(-null_dist$D_null[1,-1]) )
+    }
+
+    return_tbl <- tibble(process = processes, 
+                         p_value = pvalues, #round(pvalues, 5),
+                         par_estimate = p_estimates) #round(p_estimates, 5))
+    
+
+    # ## Warn about strangely close best_fit distances
+    # for (row in 1:nrow(return_tbl)) {
+    #     if (return_tbl$p_value[row] > 0.95) {
+    #         warning(paste0("Network appears strangely similar to process ", return_tbl$Process[row]))
+    #     }
+    # }
+
+
+    return(return_tbl)
+}
