@@ -55,18 +55,19 @@ make_Null <- function(input_network, net_kind, process, parameter, net_size, ite
                                             directed = directed, 
                                             loops = FALSE)
 
+                    mat <- igraph::as_adj(net, 
+                                        type = "both", 
+                                        edges = TRUE, 
+                                        names = TRUE,
+                                        sparse = FALSE)
+                    ## igraph puts the edge id in the matrix element
+                    mat[which(mat != 0)] = 1
+
                     if (net_kind == "matrix") {
-                        mat <- igraph::as_adj(net, 
-                                            type = "both", 
-                                            edges = TRUE, 
-                                            names = TRUE,
-                                            sparse = FALSE)
-                        ## igraph puts the edge id in the matrix element
-                        mat[which(mat != 0)] = 1
                         networks[[counter]] <- mat
 
                     } else if (net_kind == "list") {
-                        edgelist <- igraph::as_edgelist(net, names = TRUE)
+                        edgelist <- mat %>% as.matrix() %>% reshape2::melt() %>% dplyr::filter(value != 0)
                         networks[[counter]] = edgelist
 
                     } else {
@@ -90,18 +91,19 @@ make_Null <- function(input_network, net_kind, process, parameter, net_size, ite
                                             algorithm = "psumtree",
                                             start.graph = NULL)
 
+                    mat <- igraph::as_adj(net, 
+                                        type = "both", 
+                                        edges = TRUE, 
+                                        names = TRUE,
+                                        sparse = FALSE)
+                    ## igraph puts the edge id in the matrix element
+                    mat[which(mat != 0)] = 1
+
                     if (net_kind == "matrix") {
-                        mat <- igraph::as_adj(net, 
-                                            type = "both", 
-                                            edges = TRUE, 
-                                            names = TRUE,
-                                            sparse = FALSE)
-                        ## igraph puts the edge id in the matrix element
-                        mat[which(mat != 0)] = 1
                         networks[[counter]] <- mat
 
                     } else if (net_kind == "list") {
-                        edgelist <- igraph::as_edgelist(net, names = TRUE)
+                        edgelist <- mat %>% as.matrix() %>% reshape2::melt() %>% dplyr::filter(value != 0)
                         networks[[counter]] = edgelist
 
                     } else {
@@ -144,19 +146,19 @@ make_Null <- function(input_network, net_kind, process, parameter, net_size, ite
                                                     loops = FALSE, 
                                                     multiple = FALSE)
 
+                    mat <- igraph::as_adj(net, 
+                                        type = "both", 
+                                        edges = TRUE, 
+                                        names = TRUE,
+                                        sparse = FALSE)
+                    ## igraph puts the edge id in the matrix element
+                    mat[which(mat != 0)] = 1
 
                     if (net_kind == "matrix") {
-                        mat <- igraph::as_adj(net, 
-                                            type = "both", 
-                                            edges = TRUE, 
-                                            names = TRUE,
-                                            sparse = FALSE)
-                        ## igraph puts the edge id in the matrix element
-                        mat[which(mat != 0)] = 1
                         networks[[counter]] <- mat
 
                     } else if (net_kind == "list") {
-                        edgelist <- igraph::as_edgelist(net, names = TRUE)
+                        edgelist <- mat %>% as.matrix() %>% reshape2::melt() %>% dplyr::filter(value != 0)
                         networks[[counter]] = edgelist
 
                     } else {
@@ -195,6 +197,7 @@ make_Null <- function(input_network, net_kind, process, parameter, net_size, ite
 
     D_null <- compare(networks = networks, 
                       method = method, 
+                      net_size = net_size,
                       cause_orientation = "row", 
                       DD_kind = "out", 
                       DD_resize = "smaller", 

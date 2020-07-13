@@ -14,7 +14,7 @@
 #' 
 #' @export
 
-compare <- function(networks, method, cause_orientation = "row", DD_kind = "out", DD_resize = "smaller", max_norm = FALSE, cores = 1, verbose = FALSE) {
+compare <- function(networks, method, net_size, cause_orientation = "row", DD_kind = "out", DD_resize = "smaller", max_norm = FALSE, cores = 1, verbose = FALSE) {
     ## Network alignment
     if (method == "align") {
         ## Pairwise compare input network with each network in state_space
