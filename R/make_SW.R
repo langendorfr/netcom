@@ -14,7 +14,7 @@
 #' 
 #' @export
 
-make_SW <- function(size, net_kind, rewire, neighborhood, directed = TRUE, self_loops = FALSE) {
+make_SW <- function(size, net_kind, rewire, neighborhood, directed = TRUE) {
     ## Default neighborhood is one-tenth the network's size
     if (missing(neighborhood)) {
         neighborhood = max(1, round(size/10))
@@ -43,9 +43,7 @@ make_SW <- function(size, net_kind, rewire, neighborhood, directed = TRUE, self_
         }
 
         ## Remove self-loops
-        if (self_loops == FALSE) {
-            diag(matrix) = 0
-        }
+        diag(matrix) = 0
 
         ## Rewiring, which is where `directed` comes into play
         edge_ids <- which(matrix != 0, arr.ind = TRUE)
@@ -54,13 +52,17 @@ make_SW <- function(size, net_kind, rewire, neighborhood, directed = TRUE, self_
             for (edge in 1:nrow(edge_ids)) {
                 if (runif(1) <= rewire) {
                     ## Prevent rewiring to self or current target
-                    possible_ids <- 1:size
+                    possible_ids <- which(matrix[edge_ids[edge, 1], ] == 0)
                     impossible_ids <- edge_ids[edge,]
                     possible_ids = possible_ids[-which(possible_ids %in% impossible_ids)]
-                    new_target <- sample(x = possible_ids, size = 1)
 
-                    matrix[edge_ids[edge, 1], edge_ids[edge, 2]] = 0
-                    matrix[edge_ids[edge, 1], new_target] = 1
+                    ## If all edges already exist no rewiring is possible
+                    if (length(possible_ids) > 0) {
+                        new_target <- sample(x = possible_ids, size = 1)
+
+                        matrix[edge_ids[edge, 1], edge_ids[edge, 2]] = 0
+                        matrix[edge_ids[edge, 1], new_target] = 1
+                    }
                 }
             }
 
@@ -72,16 +74,20 @@ make_SW <- function(size, net_kind, rewire, neighborhood, directed = TRUE, self_
                 if (edge_ids[edge, 2] < edge_ids[edge, 1]) {
                     if (runif(1) <= rewire) {
                         ## Prevent rewiring to self or current target
-                        possible_ids <- 1:size
+                        possible_ids <- which(matrix[edge_ids[edge, 1], ] == 0)
                         impossible_ids <- edge_ids[edge,]
                         possible_ids = possible_ids[-which(possible_ids %in% impossible_ids)]
-                        new_target <- sample(x = possible_ids, size = 1)
+                        
+                        ## If all edges already exist no rewiring is possible
+                        if (length(possible_ids) > 0) {
+                            new_target <- sample(x = possible_ids, size = 1)
 
-                        matrix[edge_ids[edge, 1], edge_ids[edge, 2]] = 0
-                        matrix[edge_ids[edge, 2], edge_ids[edge, 1]] = 0
+                            matrix[edge_ids[edge, 1], edge_ids[edge, 2]] = 0
+                            matrix[edge_ids[edge, 2], edge_ids[edge, 1]] = 0
 
-                        matrix[edge_ids[edge, 1], new_target] = 1
-                        matrix[new_target, edge_ids[edge, 1]] = 1
+                            matrix[edge_ids[edge, 1], new_target] = 1
+                            matrix[new_target, edge_ids[edge, 1]] = 1
+                        }
                     }
                 }
             }
