@@ -44,19 +44,18 @@ make_Systematic <- function(net_size, net_kind = "list", resolution = 100, resol
                                             directed = directed, 
                                             loops = FALSE)
 
-                    mat <- igraph::as_adj(net, 
-                                        type = "both", 
-                                        edges = TRUE, 
-                                        names = TRUE,
-                                        sparse = FALSE)
-                    ## igraph puts the edge id in the matrix element
-                    mat[which(mat != 0)] = 1
-
                     if (net_kind == "matrix") {
+                        mat <- igraph::as_adj(net, 
+                                            type = "both", 
+                                            edges = TRUE, 
+                                            names = TRUE,
+                                            sparse = FALSE)
+                        ## igraph puts the edge id in the matrix element
+                        mat[which(mat != 0)] = 1
                         networks[[counter]] <- mat
 
                     } else if (net_kind == "list") {
-                        edgelist <- mat %>% as.matrix() %>% reshape2::melt() %>% dplyr::filter(value != 0)
+                        edgelist <- net %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
                         networks[[counter]] = edgelist
 
                     } else {
@@ -69,29 +68,28 @@ make_Systematic <- function(net_size, net_kind = "list", resolution = 100, resol
                 } else if (processes[p] == "PA") {
                     power_PA <- power_max * master_par_systematic[i]
                     net <- igraph::sample_pa(n = net_size, 
-                                            power = power_PA, 
+                                            power = power_PA,
+                                            directed = directed,
                                             m = 1, #NULL, 
                                             out.dist = NULL, 
                                             out.seq = NULL, 
                                             out.pref = FALSE, 
-                                            zero.appeal = 1, 
-                                            directed = directed, 
+                                            zero.appeal = 1,
                                             algorithm = "psumtree",
                                             start.graph = NULL)
 
-                    mat <- igraph::as_adj(net, 
-                                        type = "both", 
-                                        edges = TRUE, 
-                                        names = TRUE,
-                                        sparse = FALSE)
-                    ## igraph puts the edge id in the matrix element
-                    mat[which(mat != 0)] = 1
-
                     if (net_kind == "matrix") {
+                        mat <- igraph::as_adj(net, 
+                                            type = "both", 
+                                            edges = TRUE, 
+                                            names = TRUE,
+                                            sparse = FALSE)
+                        ## igraph puts the edge id in the matrix element
+                        mat[which(mat != 0)] = 1
                         networks[[counter]] <- mat
 
                     } else if (net_kind == "list") {
-                        edgelist <- mat %>% as.matrix() %>% reshape2::melt() %>% dplyr::filter(value != 0)
+                        edgelist <- net %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
                         networks[[counter]] = edgelist
 
                     } else {
@@ -114,6 +112,10 @@ make_Systematic <- function(net_size, net_kind = "list", resolution = 100, resol
 
                     } else if (net_kind == "list") {
                         edgelist <- nx$to_pandas_edgelist(G=net)
+                        source <- edgelist[,1]
+                        target <- edgelist[,2]
+                        edgelist = cbind(c(source, target),
+                                         c(target, source))
                         networks[[counter]] = edgelist
 
                     } else {
@@ -132,19 +134,18 @@ make_Systematic <- function(net_size, net_kind = "list", resolution = 100, resol
                                                     loops = FALSE, 
                                                     multiple = FALSE)
 
-                    mat <- igraph::as_adj(net, 
-                                        type = "both", 
-                                        edges = TRUE, 
-                                        names = TRUE,
-                                        sparse = FALSE)
-                    ## igraph puts the edge id in the matrix element
-                    mat[which(mat != 0)] = 1
-
                     if (net_kind == "matrix") {
+                        mat <- igraph::as_adj(net, 
+                                            type = "both", 
+                                            edges = TRUE, 
+                                            names = TRUE,
+                                            sparse = FALSE)
+                        ## igraph puts the edge id in the matrix element
+                        mat[which(mat != 0)] = 1
                         networks[[counter]] <- mat
 
                     } else if (net_kind == "list") {
-                        edgelist <- mat %>% as.matrix() %>% reshape2::melt() %>% dplyr::filter(value != 0)
+                        edgelist <- net %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
                         networks[[counter]] = edgelist
 
                     } else {

@@ -38,7 +38,7 @@ make_NM <- function(size, net_kind, niches, connectance = 0.5, directed = TRUE) 
         edgelist <- matrix(nrow = 0,
                            ncol = 2)
     } else {
-        stop("Unknown network kind. Must be `list` or `matrix`.")
+        stop("Unknown net_kind. Must be `list` or `matrix`.")
     }
 
     beta <- (1/connectance) - 1
@@ -77,7 +77,7 @@ make_NM <- function(size, net_kind, niches, connectance = 0.5, directed = TRUE) 
             }
 
         } else {
-            stop("Unknown network kind. Must be `list` or `matrix`.")
+            stop("Unknown net_kind. Must be `list` or `matrix`.")
         }
 
     } ## for (x in 1:size)

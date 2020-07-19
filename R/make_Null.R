@@ -51,23 +51,24 @@ make_Null <- function(input_network, net_kind, process, parameter, net_size, ite
                     parameters = c(parameters, p_ER)
                     
                     net <- igraph::sample_gnp(n = net_size, 
-                                            p = p_ER, 
-                                            directed = directed, 
-                                            loops = FALSE)
-
-                    mat <- igraph::as_adj(net, 
-                                        type = "both", 
-                                        edges = TRUE, 
-                                        names = TRUE,
-                                        sparse = FALSE)
-                    ## igraph puts the edge id in the matrix element
-                    mat[which(mat != 0)] = 1
+                                              p = p_ER, 
+                                              directed = directed, 
+                                              loops = FALSE)
 
                     if (net_kind == "matrix") {
+                        mat <- igraph::as_adj(net, 
+                                              type = "both", 
+                                              edges = TRUE, 
+                                              names = TRUE,
+                                              sparse = FALSE)
+                        ## igraph puts the edge id in the matrix element
+                        mat[which(mat != 0)] = 1
                         networks[[counter]] <- mat
 
                     } else if (net_kind == "list") {
-                        edgelist <- mat %>% as.matrix() %>% reshape2::melt() %>% dplyr::filter(value != 0)
+                        # edgelist <- igraph::as_edgelist(net)
+                        # edgelist <- mat %>% as.matrix() %>% reshape2::melt() %>% dplyr::filter(value != 0)
+                        edgelist <- net %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
                         networks[[counter]] = edgelist
 
                     } else {
@@ -81,29 +82,28 @@ make_Null <- function(input_network, net_kind, process, parameter, net_size, ite
                     parameters = c(parameters, power_PA)
 
                     net <- igraph::sample_pa(n = net_size, 
-                                            power = power_PA, 
-                                            m = 1, #NULL, 
-                                            out.dist = NULL, 
-                                            out.seq = NULL, 
-                                            out.pref = FALSE, 
-                                            zero.appeal = 1, 
-                                            directed = directed, 
-                                            algorithm = "psumtree",
-                                            start.graph = NULL)
-
-                    mat <- igraph::as_adj(net, 
-                                        type = "both", 
-                                        edges = TRUE, 
-                                        names = TRUE,
-                                        sparse = FALSE)
-                    ## igraph puts the edge id in the matrix element
-                    mat[which(mat != 0)] = 1
+                                             power = power_PA,
+                                             directed = directed,
+                                             m = 1, #NULL, 
+                                             out.dist = NULL, 
+                                             out.seq = NULL, 
+                                             out.pref = FALSE, 
+                                             zero.appeal = 1,
+                                             algorithm = "psumtree",
+                                             start.graph = NULL)
 
                     if (net_kind == "matrix") {
+                        mat <- igraph::as_adj(net, 
+                                            type = "both", 
+                                            edges = TRUE, 
+                                            names = TRUE,
+                                            sparse = FALSE)
+                        ## igraph puts the edge id in the matrix element
+                        mat[which(mat != 0)] = 1
                         networks[[counter]] <- mat
 
                     } else if (net_kind == "list") {
-                        edgelist <- mat %>% as.matrix() %>% reshape2::melt() %>% dplyr::filter(value != 0)
+                        edgelist <- net %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
                         networks[[counter]] = edgelist
 
                     } else {
@@ -117,7 +117,7 @@ make_Null <- function(input_network, net_kind, process, parameter, net_size, ite
                     parameters = c(parameters, divergence_DD)                    
                     
                     net <- nx$duplication_divergence_graph(n=net_size, 
-                                                        p=divergence_DD)
+                                                           p=divergence_DD)
                     
                     if (net_kind == "matrix") {
                         mat <- nx$to_numpy_matrix(G=net, 
@@ -127,6 +127,10 @@ make_Null <- function(input_network, net_kind, process, parameter, net_size, ite
 
                     } else if (net_kind == "list") {
                         edgelist <- nx$to_pandas_edgelist(G=net)
+                        source <- edgelist[,1]
+                        target <- edgelist[,2]
+                        edgelist = cbind(c(source, target),
+                                         c(target, source))
                         networks[[counter]] = edgelist
 
                     } else {
@@ -146,19 +150,18 @@ make_Null <- function(input_network, net_kind, process, parameter, net_size, ite
                                                     loops = FALSE, 
                                                     multiple = FALSE)
 
-                    mat <- igraph::as_adj(net, 
-                                        type = "both", 
-                                        edges = TRUE, 
-                                        names = TRUE,
-                                        sparse = FALSE)
-                    ## igraph puts the edge id in the matrix element
-                    mat[which(mat != 0)] = 1
-
                     if (net_kind == "matrix") {
+                        mat <- igraph::as_adj(net, 
+                                            type = "both", 
+                                            edges = TRUE, 
+                                            names = TRUE,
+                                            sparse = FALSE)
+                        ## igraph puts the edge id in the matrix element
+                        mat[which(mat != 0)] = 1
                         networks[[counter]] <- mat
 
                     } else if (net_kind == "list") {
-                        edgelist <- mat %>% as.matrix() %>% reshape2::melt() %>% dplyr::filter(value != 0)
+                        edgelist <- net %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
                         networks[[counter]] = edgelist
 
                     } else {
