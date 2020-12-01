@@ -28,7 +28,7 @@
 #' 
 #' @export
 
-make_NM <- function(size, net_kind, niches, connectance = 0.5, directed = TRUE) {
+make_NM <- function(size, net_kind, niches, connectance = 0.1, directed = TRUE, grow = FALSE) {
     
     if (net_kind == "matrix") {
         matrix <- matrix(0, 
@@ -41,22 +41,35 @@ make_NM <- function(size, net_kind, niches, connectance = 0.5, directed = TRUE) 
         stop("Unknown net_kind. Must be `list` or `matrix`.")
     }
 
-    beta <- (1/connectance) - 1
+    # beta <- (1/connectance) - 1
+    beta <- (1/(2*connectance)) - 1
 
     for (x in 1:size) {
         n_i <- niches[x]
+        
         r_i <- 1-((1-runif(1))^(1/beta))
 
-        if (r_i/2 > n_i) {
-            r_i = 2 * n_i
-        }
+        ## NEW
+        r_i = r_i * n_i
 
-        c_i <- runif(n = 1, min = r_i/2, max = n_i)
+
+
+        # if (r_i/2 > n_i) {
+        #     r_i = 2 * n_i
+        # }
+
+        c_i <- runif(n = 1, 
+                     min = min(n_i, r_i/2), ## Do not allow c_i to be greater than n_i
+                     max = n_i)
 
         range_min <- c_i - (r_i/2)
         range_max <- c_i + (r_i/2)
 
         interactions <- which( (niches >= range_min) & (niches <= range_max) )
+
+        if (grow) {
+            interactions = interactions[which(interactions <= x)]
+        }
 
 
         if (net_kind == "matrix") {

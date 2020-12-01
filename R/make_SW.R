@@ -14,7 +14,7 @@
 #' 
 #' @export
 
-make_SW <- function(size, net_kind, rewire, neighborhood, directed = TRUE) {
+make_SW <- function(size, net_kind, rewire, neighborhood, directed = FALSE) {
     ## Default neighborhood is one-tenth the network's size
     if (missing(neighborhood)) {
         neighborhood = max(1, round(size/10))

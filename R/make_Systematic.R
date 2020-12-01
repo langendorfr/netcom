@@ -14,10 +14,18 @@
 #' 
 #' @export
 
-make_Systematic <- function(net_size, net_kind = "list", resolution = 100, resolution_min = 0.01, resolution_max = 0.99, reps = 3, processes = c("ER", "PA", "DD", "SW", "NM"), power_max = 5, cores = 6, directed = TRUE, verbose = TRUE) {
+make_Systematic <- function(net_size, neighborhood, directed, net_kind = "matrix", resolution = 100, resolution_min = 0.01, resolution_max = 0.99, reps = 3, processes = c("ER", "PA", "DM", "SW", "NM"), power_max = 5, connectance_max = 0.5, divergence_max = 0.5, mutation_max = 0.5, cores = 1, verbose = TRUE) {
     ## Libraries
 
     ### Main Body ---
+    if (!(net_kind %in% c("matrix", "list"))) {
+        stop("Unknown net_kind. Must be `list` or `matrix`.")
+    }
+
+    # if (!(net_kind == "matrix")) {
+    #     stop("Unknown net_kind. Must be `matrix`. `list` will be supported in future versions.")
+    # }
+
     networks <- list()
     parameters <- tibble(Process = character(),
                         Parameter_Name = character(),
@@ -38,6 +46,8 @@ make_Systematic <- function(net_size, net_kind = "list", resolution = 100, resol
                 }
 
                 if (processes[p] == "ER") {
+                    directed = TRUE
+
                     p_ER <- master_par_systematic[i]
                     net <- igraph::sample_gnp(n = net_size, 
                                             p = p_ER, 
@@ -66,6 +76,8 @@ make_Systematic <- function(net_size, net_kind = "list", resolution = 100, resol
                     parameters = dplyr::bind_rows(parameters, parameters_addition)
 
                 } else if (processes[p] == "PA") {
+                    directed = TRUE
+
                     power_PA <- power_max * master_par_systematic[i]
                     net <- igraph::sample_pa(n = net_size, 
                                             power = power_PA,
@@ -100,69 +112,70 @@ make_Systematic <- function(net_size, net_kind = "list", resolution = 100, resol
                     parameters = dplyr::bind_rows(parameters, parameters_addition)
 
                 } else if (processes[p] == "DD") {
-                    divergence_DD <- master_par_systematic[i]
-                    net <- nx$duplication_divergence_graph(n=net_size, 
-                                                        p=divergence_DD)
-                    
-                    if (net_kind == "matrix") {
-                        mat <- nx$to_numpy_matrix(G=net, 
-                                                weight='weight', 
-                                                nonedge=0.0)
-                        networks[[counter]] <- mat
+                    directed = FALSE
 
-                    } else if (net_kind == "list") {
-                        edgelist <- nx$to_pandas_edgelist(G=net)
-                        source <- edgelist[,1]
-                        target <- edgelist[,2]
-                        edgelist = cbind(c(source, target),
-                                         c(target, source))
-                        networks[[counter]] = edgelist
+                    divergence_DD <- divergence_max * master_par_systematic[i]
 
-                    } else {
-                        stop("Unknown network kind. Must be `list` or `matrix`.")
-                    }
+                    net <- make_DD(size = net_size, 
+                                   net_kind = net_kind, 
+                                   divergence = divergence_DD, 
+                                   directed = directed) #FALSE)
+ 
+                    networks[[counter]] = net
 
                     parameters_addition <- tibble(Process = processes[p], Parameter_Name = "divergence_DD", Parameter_Value = divergence_DD)
                     parameters = dplyr::bind_rows(parameters, parameters_addition)
 
+                } else if (processes[p] == "DM") {
+                    directed = FALSE
+
+                    divergence_DM <- divergence_max * master_par_systematic[i]
+                    mutation_DM <- mutation_max * master_par_systematic[i]
+
+                    net <- make_DM(size = net_size, 
+                                    net_kind = net_kind, 
+                                    divergence = divergence_DM,
+                                    mutation = 0, #mutation_DM, #0, #0.01,
+                                    directed = directed) #FALSE)
+
+                    networks[[counter]] = net
+
+                    ## Note for this divergence_DM = mutation_DM
+                    parameters_addition <- tibble(Process = processes[p], Parameter_Name = "mutation_DM", Parameter_Value = mutation_DM)
+                    parameters = dplyr::bind_rows(parameters, parameters_addition)
+
                 } else if (processes[p] == "SW") {
+                    directed = FALSE
+
                     rewire_SW <- master_par_systematic[i]
-                    net <- igraph::sample_smallworld(dim = 1, 
-                                                    size = net_size, 
-                                                    nei = max(2, round(0.1 * net_size)), 
-                                                    p = rewire_SW, 
-                                                    loops = FALSE, 
-                                                    multiple = FALSE)
 
-                    if (net_kind == "matrix") {
-                        mat <- igraph::as_adj(net, 
-                                            type = "both", 
-                                            edges = TRUE, 
-                                            names = TRUE,
-                                            sparse = FALSE)
-                        ## igraph puts the edge id in the matrix element
-                        mat[which(mat != 0)] = 1
-                        networks[[counter]] <- mat
-
-                    } else if (net_kind == "list") {
-                        edgelist <- net %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
-                        networks[[counter]] = edgelist
-
-                    } else {
-                        stop("Unknown network kind. Must be `list` or `matrix`.")
+                    ## SW neighborhood parameter based on net_size if missing
+                    if (missing(neighborhood)) {
+                        neighborhood = max(1, round(0.1 * net_size))
                     }
+
+                    net <- make_SW(size = net_size, 
+                                   net_kind = net_kind, 
+                                   rewire = rewire_SW, 
+                                   neighborhood = neighborhood, 
+                                   directed = directed) #FALSE)
+
+                    networks[[counter]] <- net
 
                     parameters_addition <- tibble(Process = processes[p], Parameter_Name = "rewire_SW", Parameter_Value = rewire_SW)
                     parameters = dplyr::bind_rows(parameters, parameters_addition)
 
                 } else if (processes[p] == "NM") {
-                    connectance_NM <- master_par_systematic[i]
+                    directed = TRUE
+
+                    connectance_NM <- connectance_max * master_par_systematic[i]
                     niches <- runif(net_size) # %>% sort()
                     net <- make_NM(size = net_size,
                                    net_kind = net_kind,
                                    niches = niches, 
                                    connectance = connectance_NM, 
-                                   directed = directed)
+                                   directed = directed, #TRUE
+                                   grow = TRUE)
                     networks[[counter]] <- net
 
                     parameters_addition <- tibble(Process = processes[p], Parameter_Name = "connectance_NM", Parameter_Value = connectance_NM)

@@ -14,12 +14,7 @@
 #' 
 #' @export
 
-compare <- function(networks, method, net_kind, cause_orientation = "row", DD_kind = "all", DD_weight = 1, DD_resize = "smaller", max_norm = FALSE, size_different = FALSE, cores = 1, diffusion_sampling = 2, diffusion_limit = 10, verbose = FALSE) {
-
-    if ((length(DD_weight) == 1) & (length(DD_kind) > 1)) {
-        DD_weight = rep(DD_weight, length(DD_kind)) / length(DD_kind)
-    }
-
+compare <- function(networks, method, net_size, cause_orientation = "row", DD_kind = "all", DD_resize = "smaller", max_norm = FALSE, cores = 1, diffusion_sampling = 2, diffusion_limit = 10, verbose = FALSE) {
     ## Network alignment
     if (method == "align") {
         ## Pairwise compare input network with each network in state_space
@@ -88,168 +83,114 @@ compare <- function(networks, method, net_kind, cause_orientation = "row", DD_ki
                         nrow = length(networks),
                         ncol = length(networks))
 
-            # ## Assume all networks are the same size
-            # net_size <- nrow(networks[[1]])
-
-            net_DD_list <- list()
-            for (net in seq_along(networks)) {
-                if (verbose == TRUE) { print(net) }
-
-                ## Assume all networks are the same size
-                net_size <- nrow(networks[[net]])
-                
-                DD_combined <- list()
-            
-                igraph_graph <- igraph::graph_from_adjacency_matrix(networks[[net]], mode = "directed", weighted = TRUE, diag = TRUE, add.colnames = NULL, add.rownames = NA)
-                
-                equilibrium_net <- networks[[net]]
-                zero_rows <- which(rowSums(equilibrium_net) == 0)
-                diag(equilibrium_net)[zero_rows] = 1
-                equilibrium_net = sweep(equilibrium_net, 1, Matrix::rowSums(equilibrium_net, na.rm = TRUE), FUN = "/")
-                equilibrium_net = equilibrium_net %^% 5
-
-                eq_igraph_graph <- igraph::graph_from_adjacency_matrix(equilibrium_net, mode = "directed", weighted = TRUE, diag = TRUE, add.colnames = NULL, add.rownames = NA)
-
-                if ("communities" %in% DD_kind) {
-                    community_sizes <- igraph::graph_from_adjacency_matrix(networks[[net]], mode = "undirected", weighted = TRUE, diag = TRUE, add.colnames = NULL, add.rownames = NA) %>% igraph::cluster_fast_greedy(weights = NULL) %>% sizes() %>% sort(decreasing = TRUE)
-                }
-
-                if ("eq_communities" %in% DD_kind) {
-                    eq_community_sizes <- igraph::graph_from_adjacency_matrix(equilibrium_net, mode = "undirected", weighted = TRUE, diag = TRUE, add.colnames = NULL, add.rownames = NA) %>% igraph::cluster_fast_greedy(weights = NULL) %>% sizes() %>% sort(decreasing = TRUE)
-                }
-
-                for (DD_kind_name in seq_along(DD_kind)) {
-                    DD_net <- switch(
-                        DD_kind[DD_kind_name],
-                        "out" = networks[[net]] %>% rowSums() %>% as.numeric(),
-                        "eq_out" = equilibrium_net %>% rowSums() %>% as.numeric(),
-                        
-                        "in" = networks[[net]] %>% colSums() %>% as.numeric(),
-                        "eq_in" = equilibrium_net %>% colSums() %>% as.numeric(),
-                        
-                        "undirected" = as.numeric(rowSums(networks[[net]])) + as.numeric(colSums(networks[[net]])),
-                        "eq_undirected" = as.numeric(rowSums(equilibrium_net)) + as.numeric(colSums(equilibrium_net)),
-                        
-                        "all" = 0.5 * (rbind( rowSums(networks[[net]]) + colSums(networks[[net]]) )),
-                        "eq_all" = 0.5 * (rbind( rowSums(equilibrium_net) + colSums(equilibrium_net) )),
-                        
-                        "entropy_out" = networks[[net]] %>% t() %>% vegan::diversity() %>% as.numeric(),
-                        "eq_entropy_out" = equilibrium_net %>% t() %>% vegan::diversity() %>% as.numeric(),
-                        
-                        "entropy_in" = networks[[net]] %>% vegan::diversity() %>% as.numeric(),
-                        "eq_entropy_in" = equilibrium_net %>% vegan::diversity() %>% as.numeric(),
-                        
-                        "entropy_all" = c(networks[[net]] %>% t() %>% vegan::diversity() %>% as.numeric(), networks[[net]] %>% vegan::diversity() %>% as.numeric()),
-                        "eq_entropy_all" = c(equilibrium_net %>% t() %>% vegan::diversity() %>% as.numeric(), equilibrium_net %>% vegan::diversity() %>% as.numeric()),
-                        
-                        "clustering_coefficient" = igraph::transitivity(igraph_graph, type = "weighted"),
-                        "eq_clustering_coefficient" = igraph::transitivity(eq_igraph_graph, type = "weighted"),
-
-                        "cohesion" = igraph::vertex_connectivity(igraph_graph),
-                        "eq_cohesion" = igraph::vertex_connectivity(eq_igraph_graph),
-
-                        "spectral_decomposition" = igraph::embed_adjacency_matrix(igraph_graph, no = nrow(networks[[net]])-1)$X %>% rowSums(),
-                        "eq_spectral_decomposition" = igraph::embed_adjacency_matrix(eq_igraph_graph, no = nrow(equilibrium_net)-1)$X %>% rowSums(),
-
-                        "alpha" = igraph::alpha_centrality(igraph_graph, nodes = V(igraph_graph), alpha = 10, loops = TRUE, exo = 1, weights = NULL, tol = 1e-07, sparse = FALSE),
-                        "eq_alpha" = igraph::alpha_centrality(eq_igraph_graph, nodes = V(eq_igraph_graph), alpha = 10, loops = TRUE, exo = 1, weights = NULL, tol = 1e-07, sparse = FALSE),
-
-                        "page_rank" = igraph::page_rank(igraph_graph, algo = c("prpack", "arpack", "power"), vids = V(igraph_graph), directed = TRUE, damping = 0.85, personalized = NULL, weights = NULL, options = NULL)$vector,
-                        "eq_page_rank" = igraph::page_rank(eq_igraph_graph, algo = c("prpack", "arpack", "power"), vids = V(eq_igraph_graph), directed = TRUE, damping = 0.85, personalized = NULL, weights = NULL, options = NULL)$vector,
-
-                        "communities" = rep(seq_along(community_sizes), community_sizes),
-                        "eq_communities" = rep(seq_along(eq_community_sizes), eq_community_sizes),
-
-                        "motifs_3" = igraph::motifs(igraph_graph, size = 3)[-c(1,2,4)],
-                        "eq_motifs_3" = igraph::motifs(eq_igraph_graph, size = 3)[-c(1,2,4)],
-
-                        "motifs_4" = igraph::motifs(igraph_graph, size = 4)[-c(1, 2, 3, 5, 6, 7, 10, 11, 12, 16, 23, 24, 28, 29, 34, 35, 40, 63, 121)],
-                        "eq_motifs_4" = igraph::motifs(eq_igraph_graph, size = 4)[-c(1, 2, 3, 5, 6, 7, 10, 11, 12, 16, 23, 24, 28, 29, 34, 35, 40, 63, 121)],
-
-                        stop("Kind of Degree Distribution not supported. Check the DD_kind parameter.")
-                    )
-
-                    ## Some network properties return NA or NaN or Inf on disconnected networks
-                    if (any(is.na(DD_net)) | any(is.infinite(DD_net))) {
-                        DD_net[which(is.na(DD_net))] = 0
-                        DD_net[which(is.infinite(DD_net))] = 0
-                    }
-
-                    DD_net = DD_net %>% sort()
-                    if (max_norm == TRUE) {
-                        DD_net = DD_net / max(DD_net, na.rm = TRUE)
-                    }
-
-                    ## Some network properties return NA or NaN or Inf on disconnected networks
-                    if (any(is.na(DD_net)) | any(is.infinite(DD_net))) {
-                        DD_net[which(is.na(DD_net))] = 0
-                        DD_net[which(is.infinite(DD_net))] = 0
-                    }
-
-                    # DD_combined = c(DD_combined, DD_net)
-                    DD_combined[[DD_kind_name]] = DD_net
-
-                }
-                
-                net_DD_list[[net]] = DD_combined
-            }
-
-
-
             for (net_1 in seq_along(networks)) {
                 for (net_2 in seq_along(networks)) {
                     if(net_2 > net_1) {
                         if (verbose == TRUE) { print(c(net_1, net_2)) }
 
-                        # DD_difference_each <- {}
-                        DD_difference_each <- rep(NA, length(DD_kind))
-                        for (DD_kind_name in seq_along(DD_kind)) {
-                            DD_1 <- net_DD_list[[net_1]][[DD_kind_name]]
-                            DD_2 <- net_DD_list[[net_2]][[DD_kind_name]]
 
-
-
-
-                            if (length(DD_1) != length(DD_2)) {
-                                larger <- which(c(length(DD_1), length(DD_2)) == max(c(length(DD_1), length(DD_2))))
-
-                                if (larger == 1) {
-                                    DD_larger <- DD_1
-                                    DD_smaller <- DD_2
-                                } else if (larger == 2) {
-                                    DD_larger <- DD_2
-                                    DD_smaller <- DD_1
-                                } else {
-                                    stop("Error in compare(). DD_* should be either 1 or 2.")
-                                }
-
-
-                                # Position_c <- seq(from = 0, to = 1, length = length(DD_smaller))
-                                # Points_c <- tibble(Position = Position_c, DD = DD_1)
-
-                                Position_c <- seq(from = min(DD_larger), to = max(DD_larger), length = length(DD_smaller))
-                                DD_larger = stats::spline(DD_larger, xout = Position_c)$y   # %>% as_tibble()
-                            } else {
-
-                                ## Equal size networks so does not matter which is the smaller/larger one
-                                DD_smaller <- DD_1
-                                DD_larger <- DD_2
-                            }
-
-
-
-                            DD_1_vs_2 <- ((DD_smaller - DD_larger)^2) #%>% sum() %>% sqrt()
-
-                            if (max(DD_1_vs_2, na.rm = TRUE) != 0) {
-                                DD_1_vs_2 = (sum(DD_1_vs_2) / max(DD_1_vs_2, na.rm = TRUE)) * DD_weight[DD_kind_name]
-                            } else {
-                                DD_1_vs_2 = 0
-                            }
-
-                            DD_difference_each[DD_kind_name] = DD_1_vs_2
+                        if (DD_resize == "smaller") {
+                            net_size <- min(nrow(networks[[net_1]]), nrow(networks[[net_2]]))
+                        } else if (DD_resize == "larger") {
+                            net_size <- max(nrow(networks[[net_1]]), nrow(networks[[net_2]]))
+                        } else {
+                            stop("DD_resize parameter unknown.")
                         }
 
-                        DD_difference <- sum(DD_difference_each, na.rm = TRUE) %>% sqrt()
+
+
+                        DD_1_combined <- {}
+                        DD_2_combined <- {}
+
+                        for (DD_kind_name in DD_kind) {
+
+                            ## First network's Degree Distribution
+                            DD_1 <- switch(
+                                DD_kind_name,
+                                "out" = networks[[net_1]] %>% rowSums() %>% as.numeric(),
+                                "in" = networks[[net_1]] %>% colSums() %>% as.numeric(),
+                                "undirected" = as.numeric(rowSums(networks[[net_1]])) + as.numeric(colSums(networks[[net_1]])),
+                                "all" = 0.5 * (rbind( rowSums(networks[[net_1]]) + colSums(networks[[net_1]]) )),
+                                "entropy_out" = networks[[net_1]] %>% t() %>% vegan::diversity() %>% as.numeric(),
+                                "entropy_in" = networks[[net_1]] %>% vegan::diversity() %>% as.numeric(),
+                                "entropy_all" = c(networks[[net_1]] %>% t() %>% vegan::diversity() %>% as.numeric(), networks[[net_1]] %>% vegan::diversity() %>% as.numeric()),
+                                "clustering_coefficient" = igraph::transitivity(igraph::graph_from_adjacency_matrix(networks[[net_1]], mode = "directed", weighted = TRUE, diag = TRUE, add.colnames = NULL, add.rownames = NA), type = "weighted"),
+                                "cohesion" = igraph::vertex_connectivity(igraph::graph_from_adjacency_matrix(networks[[net_1]], mode = "directed", weighted = TRUE, diag = TRUE, add.colnames = NULL, add.rownames = NA)),
+                                "spectral_decomposition" = igraph::embed_adjacency_matrix(igraph::graph_from_adjacency_matrix(networks[[net_1]], mode = "directed", weighted = TRUE, diag = TRUE, add.colnames = NULL, add.rownames = NA), no = nrow(networks[[net_1]])-1)$X %>% rowSums(),
+                                stop("Kind of Degree Distribution not supported. Check the DD_kind parameter.")
+                            )
+
+                            ## Some network properties return NA or NaN or Inf on disconnected networks
+                            if (any(is.na(DD_1)) | any(is.infinite(DD_1))) {
+                                DD_1[which(is.na(DD_1))] = 0
+                                DD_1[which(is.infinite(DD_1))] = 0
+                            }
+
+                            DD_1 = DD_1 %>% sort()
+                            if (max_norm == TRUE) {
+                                DD_1 = DD_1 / max(DD_1, na.rm = TRUE)
+                            }
+
+                            ## Some network properties return NA or NaN or Inf on disconnected networks
+                            if (any(is.na(DD_1)) | any(is.infinite(DD_1))) {
+                                DD_1[which(is.na(DD_1))] = 0
+                                DD_1[which(is.infinite(DD_1))] = 0
+                            }
+
+                            Position_1 <- seq(from = 0, to = 1, length = length(DD_1))
+                            Points_1 <- tibble(Position = Position_1, DD = DD_1)
+
+                            Position_c_1 <- seq(from = 0, to = 1, length = net_size)
+                            Points_c_1 <- apply(Points_1, 2, function(u) spline(Position_1, u, xout = Position_c_1)$y) %>% as_tibble()
+
+                        ## Second network's Degree Distribution
+                            DD_2 <- switch(
+                                DD_kind_name,
+                                "out" = networks[[net_2]] %>% rowSums() %>% as.numeric(),
+                                "in" = networks[[net_2]] %>% colSums() %>% as.numeric(),
+                                "undirected" = as.numeric(rowSums(networks[[net_2]])) + as.numeric(colSums(networks[[net_2]])),
+                                "all" = 0.5 * (rbind( rowSums(networks[[net_2]]) + colSums(networks[[net_2]]) )),
+                                "entropy_out" = networks[[net_2]] %>% t() %>% vegan::diversity() %>% as.numeric(),
+                                "entropy_in" = networks[[net_2]] %>% vegan::diversity() %>% as.numeric(),
+                                "entropy_all" = c(networks[[net_2]] %>% t() %>% vegan::diversity() %>% as.numeric(), networks[[net_2]] %>% vegan::diversity() %>% as.numeric()),
+                                "clustering_coefficient" = igraph::transitivity(igraph::graph_from_adjacency_matrix(networks[[net_2]], mode = "directed", weighted = TRUE, diag = TRUE, add.colnames = NULL, add.rownames = NA), type = "weighted"),
+                                "cohesion" = igraph::vertex_connectivity(igraph::graph_from_adjacency_matrix(networks[[net_2]], mode = "directed", weighted = TRUE, diag = TRUE, add.colnames = NULL, add.rownames = NA)),
+                                "spectral_decomposition" = igraph::embed_adjacency_matrix(igraph::graph_from_adjacency_matrix(networks[[net_2]], mode = "directed", weighted = TRUE, diag = TRUE, add.colnames = NULL, add.rownames = NA), no = nrow(networks[[net_2]])-1)$X %>% rowSums(),
+                                stop("Kind of Degree Distribution not supported. Check the DD_kind parameter.")
+                            )
+
+                            ## Some network properties return NA or NaN or Inf on disconnected networks
+                            if (any(is.na(DD_2)) | any(is.infinite(DD_2))) {
+                                DD_2[which(is.na(DD_2))] = 0
+                                DD_2[which(is.infinite(DD_2))] = 0
+                            }
+                            
+                            DD_2 = DD_2 %>% sort()
+                            if (max_norm == TRUE) {
+                                DD_2 = DD_2 / max(DD_2, na.rm = TRUE)
+                            }
+
+                            ## Some network properties return NA or NaN or Inf on disconnected networks
+                            if (any(is.na(DD_2)) | any(is.infinite(DD_2))) {
+                                DD_2[which(is.na(DD_2))] = 0
+                                DD_2[which(is.infinite(DD_2))] = 0
+                            }
+
+                            Position_2 <- seq(from = 0, to = 1, length = length(DD_2))
+                            Points_2 <- tibble(Position = Position_2, DD = DD_2)
+
+                            Position_c_2 <- seq(from = 0, to = 1, length = net_size)
+                            Points_c_2 <- apply(Points_2, 2, function(u) spline(Position_2, u, xout = Position_c_2)$y) %>% as_tibble()
+
+                            ## Comapre the Degree Distributions of the two networks
+                            DD_1 = Points_c_1$DD
+                            DD_2 = Points_c_2$DD
+
+                            DD_1_combined = c(DD_1_combined, DD_1)
+                            DD_2_combined = c(DD_2_combined, DD_2)
+                        }
+
+                        DD_difference <- ((DD_1 - DD_2)^2) %>% sum() %>% sqrt()
 
                         ## Add to the growing D_DD matrix
                         D_DD[net_1, net_2] = DD_difference
@@ -354,13 +295,15 @@ compare <- function(networks, method, net_kind, cause_orientation = "row", DD_ki
                             }
                         }
 
-                        if (size_different) {
-                            Position_1 <- seq(from = 0, to = 1, length = length(DD_1))
-                            Points_1 <- tibble(Position = Position_1, DD = DD_1)
 
-                            Position_c_1 <- seq(from = 0, to = 1, length = net_size)
-                            Points_c_1 <- apply(Points_1, 2, function(u) spline(Position_1, u, xout = Position_c_1)$y) %>% as_tibble()
-                        }
+                        Position_1 <- seq(from = 0, to = 1, length = length(DD_1))
+                        Points_1 <- tibble(Position = Position_1, DD = DD_1)
+
+                        Position_c_1 <- seq(from = 0, to = 1, length = net_size)
+                        Points_c_1 <- apply(Points_1, 2, function(u) spline(Position_1, u, xout = Position_c_1)$y) %>% as_tibble()
+
+
+
 
 
 
@@ -432,20 +375,18 @@ compare <- function(networks, method, net_kind, cause_orientation = "row", DD_ki
                             }
                         }
 
-                        if (size_different) {
-                            Position_2 <- seq(from = 0, to = 1, length = length(DD_2))
-                            Points_2 <- tibble(Position = Position_2, DD = DD_2)
 
-                            Position_c_2 <- seq(from = 0, to = 1, length = net_size)
-                            Points_c_2 <- apply(Points_2, 2, function(u) spline(Position_2, u, xout = Position_c_2)$y) %>% as_tibble()
+                        Position_2 <- seq(from = 0, to = 1, length = length(DD_2))
+                        Points_2 <- tibble(Position = Position_2, DD = DD_2)
 
-
-                            ## Comapre the Degree Distributions of the two networks
-                            DD_1 <- Points_c_1$DD
-                            DD_2 <- Points_c_2$DD
-                        }
+                        Position_c_2 <- seq(from = 0, to = 1, length = net_size)
+                        Points_c_2 <- apply(Points_2, 2, function(u) spline(Position_2, u, xout = Position_c_2)$y) %>% as_tibble()
 
 
+
+                        ## Comapre the Degree Distributions of the two networks
+                        DD_1 <- Points_c_1$DD
+                        DD_2 <- Points_c_2$DD
                         DD_difference <- ((DD_1 - DD_2)^2) %>% sum() %>% sqrt()
 
                         ## Add to the growing D_DD matrix

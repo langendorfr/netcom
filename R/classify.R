@@ -42,7 +42,7 @@
 #' 
 #' @export
 
-classify <- function(network, method = "DD", net_kind = "list", resolution = 100, resolution_min = 0.01, resolution_max = 0.99, reps = 3, processes = c("ER", "PA", "DD", "SW", "NM"), power_max = 5, null_reps = 50, best_fit_sd = 1e-2, ks_dither = 0, ks_alternative = "two.sided", cores = 1, directed = TRUE, verbose = TRUE) {
+classify <- function(network, directed = FALSE, method = "DD", net_kind = "matrix", DD_kind = "all", DD_weight = 1, cause_orientation = "row", max_norm = FALSE, resolution = 100, resolution_min = 0.01, resolution_max = 0.99, reps = 3, processes = c("ER", "PA", "DM", "SW", "NM"), power_max = 5, connectance_max = 0.5, divergence_max = 0.5, mutation_max = 0.5, null_reps = 50, best_fit_kind = "avg", best_fit_sd = 1e-2, ks_dither = 0, ks_alternative = "two.sided", cores = 1, size_different = FALSE, DD_resize = "smaller", null_dist_trim = 0.1, verbose = TRUE) {
 
     ## Matrix input checks
     if (net_kind == "matrix") {
@@ -78,6 +78,9 @@ classify <- function(network, method = "DD", net_kind = "list", resolution = 100
                                    reps = reps,
                                    processes = processes,
                                    power_max = power_max,
+                                   connectance_max = connectance_max,
+                                   divergence_max = divergence_max,
+                                   mutation_max = mutation_max,
                                    cores = cores,
                                    directed = directed,
                                    verbose = verbose)
@@ -87,14 +90,19 @@ classify <- function(network, method = "DD", net_kind = "list", resolution = 100
 
     D_target <- compare_Target(target = network, 
                                networks = networks, 
-                               net_size = net_size,
+                            #    net_size = net_size,
                                net_kind = net_kind,
                                method = method, 
-                               cause_orientation = "row", 
-                               DD_kind = "out", 
-                               max_norm = FALSE, 
-                               cores = 1, 
-                               verbose = FALSE)
+                               cause_orientation = cause_orientation, 
+                               DD_kind = DD_kind, 
+                               DD_weight = DD_weight,
+                               max_norm = max_norm, 
+                            #    size_different = size_different,
+                               cores = cores, 
+                               verbose = verbose)
+    
+    # print("D_target")
+    # print(D_target)
 
     parameters_scored <- dplyr::mutate(parameters, Distance = D_target)
 
@@ -108,23 +116,49 @@ classify <- function(network, method = "DD", net_kind = "list", resolution = 100
 
         parameters_scored_process <- dplyr::filter(parameters_scored, Process == processes[p])
 
+        # print("parameters_scored_process")
+        # print(parameters_scored_process)
+
         ## Use the min of the average
         ## Even for a given process and parameter there are many possible networks
-        parameters_scored_process = parameters_scored_process %>% group_by(Process, Parameter_Value) %>% summarize(Distance = mean(Distance), .groups = "drop")
+        
+        if (best_fit_kind == "avg") {
+            parameters_scored_process = parameters_scored_process %>% group_by(Process, Parameter_Value) %>% summarize(Distance = mean(Distance), .groups = "drop")
+        } else if (best_fit_kind == "min") {
+            parameters_scored_process = parameters_scored_process %>% group_by(Process, Parameter_Value) %>% summarize(Distance = min(Distance), .groups = "drop")
+        } else if (best_fit_kind == "max") {
+            parameters_scored_process = parameters_scored_process %>% group_by(Process, Parameter_Value) %>% summarize(Distance = max(Distance), .groups = "drop")
+        } else {
+            stop("best_fit_kind must be `avg`, `min`, or `max`.")
+        }
+
         best_fit <- dplyr::filter(parameters_scored_process, Distance == min(parameters_scored_process$Distance))
 
         ## Assuming there are multiple best fits, pick one randomly
         best_fit = best_fit[sample(1:nrow(best_fit), size = 1), ]
 
+        # print("best_fit")
+        # print(best_fit)
+
         null_dist <- make_Null(input_network = network,
                                net_kind = net_kind,
+                               DD_kind = DD_kind,
                                process = best_fit$Process, 
                                parameter = best_fit$Parameter_Value,
+                               power_max = power_max,
+                               connectance_max = connectance_max,
+                               divergence_max = divergence_max,
                                net_size = net_size, 
                                iters = null_reps, ## Note: length(null_dist) = ((iters^2)-iters)/2
                                method = method,
+                               neighborhood = max(1, round(0.1 * net_size)),
                                best_fit_sd = best_fit_sd,
                                cores = cores,
+                               directed = directed,
+                               size_different = size_different,
+                               DD_resize = DD_resize,
+                               cause_orientation = cause_orientation,
+                               max_norm = max_norm,
                                verbose = verbose)
 
         ## Distance matrix is symmetric so only use the lower triangular values
@@ -133,6 +167,11 @@ classify <- function(network, method = "DD", net_kind = "list", resolution = 100
         null_dist_process = null_dist_process[lower.tri(null_dist_process, diag = FALSE)]
         # null_dist_network %>% summary()
         # null_dist_process %>% summary()
+
+        if ((null_dist_trim > 0) & (null_dist_trim < 1)) {
+            null_dist_network = null_dist_network[1:round(length(null_dist_network)*null_dist_trim)]
+            null_dist_process = null_dist_process[1:round(length(null_dist_process)*null_dist_trim)]
+        }
 
         ks_test <- stats::ks.test(x = null_dist_network + rnorm(n = length(null_dist_network), mean = 0, sd = ks_dither), 
                                   y = null_dist_process + rnorm(n = length(null_dist_process), mean = 0, sd = ks_dither), 
