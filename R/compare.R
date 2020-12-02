@@ -1,20 +1,52 @@
-#' @title 
+#' @title Compare Networks Many-to-Many
 #'
-#' @description 
+#' @description Compares one network to a list of many networks.
 #'
-#' @param 
-#'
-#' @details 
-#'
-#' @return 
+#' @param target The network be compared.
 #' 
-#' @references 
+#' @param networks The networks being compared to the target network
+#' 
+#' @param net_size Size
+#' 
+#' @param net_kind If the network is an adjacency matrix ("matrix") or an edge list ("list"). Defaults to "matrix".
+#' 
+#' @param method This determines the method used to compare networks at the heart of the classification. Currently "DD" (Degree Distribution) and "align" (the align function which compares networks by the entropy of diffusion on them) are supported. Future versions will allow user-defined methods. Defaults to "DD".
+#' 
+#' @param cause_orientation = The orientation of directed adjacency matrices. Defaults to "row".
+#' 
+#' @param DD_kind = A vector of network properties to be used to compare networks. Defaults to "all", which is the average of the in- and out-degrees.
+#' 
+#' @param DD_weight = Weights of each network property in DD_kind. Defaults to 1, which is equal weighting for each property.
+#' 
+#' @param max_norm Binary variable indicating if each network property should be normalized so its max value (if a node-level property) is one. Defaults to FALSE.
+#'
+#' @param cores Defaults to 1. The number of cores to run the classification on. When set to 1 parallelization will be ignored.
+#' 
+#' @param diffusion_sampling Base of the power to use to nonlinearly sample the diffusion kernels if method = "align". Defaults to 2.
+#' 
+#' @param diffusion_limit Number of markov steps in the diffusion kernels if method = "align". Defaults to 10.
+#' 
+#' @param verbose Defaults to TRUE. Whether to print all messages.
+#' 
+#' @details Note: Currently each process is assumed to have a single governing parameter.
+#'
+#' @return A dataframe with 3 columns and as many rows as processes being tested (5 by default). The first column lists the processes. The second lists the p-value on the null hypothesis that the target network did come from that row's process. The third column gives the estimated parameter for that particular process.
+#' 
+#' @references Langendorf, R. E. & Burgess, M. G. Empirically classifying network mechanisms. In Preparation for PNAS.
 #' 
 #' @examples
+#' # Adjacency matrix
+#' size <- 10
+#' comparisons <- 50
+#' networks <- list()
+#' for (net in 1:comparisons) {
+#'      networks[[net]] = matrix(sample(c(0,1), size = size^2, replace = TRUE), nrow = size, ncol = size)
+#' }
+#' compare(networks = networks)
 #' 
 #' @export
 
-compare <- function(networks, method, net_kind, cause_orientation = "row", DD_kind = "all", DD_weight = 1, DD_resize = "smaller", max_norm = FALSE, size_different = FALSE, cores = 1, diffusion_sampling = 2, diffusion_limit = 10, verbose = FALSE) {
+compare <- function(networks, net_kind = "matrix", method = "DD", cause_orientation = "row", DD_kind = "all", DD_weight = 1, DD_resize = "smaller", max_norm = FALSE, size_different = FALSE, cores = 1, diffusion_sampling = 2, diffusion_limit = 10, verbose = FALSE) {
 
     if ((length(DD_weight) == 1) & (length(DD_kind) > 1)) {
         DD_weight = rep(DD_weight, length(DD_kind)) / length(DD_kind)

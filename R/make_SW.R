@@ -1,16 +1,29 @@
-#' @title 
+#' @title Makes a Small-World Network
 #'
-#' @description 
+#' @description Make an already existing network according to the Small-World mechanism.
 #'
-#' @param 
-#'
-#' @details Different from Duplication & Mutation models in that edges can only be lost
-#'
-#' @return 
+#' @param size The number of nodes in the network. Must be a positive integer.
 #' 
-#' @references 
+#' @param net_kind The format of the network. Currently must be either `matrix` or `list`.x
+#' 
+#' @param rewire Small-World parameter specifying the probability each edge is randomly rewired, allowing for the possiblity of bridges between connected communities.
+#' 
+#' @param neighborhood The range of nodes that form connected communities. Note: This implementation results in overlap of communities.
+#' 
+#' @param directed Binary variable determining if the network is directed, resulting in off-diagonal asymmetry in the adjacency matrix. Defaults to TRUE.
+#' 
+#' @details Rewires a node in a network according to the Small-World mechanism.
+#'
+#' @return An adjacency matrix.
+#' 
+#' @references Watts, D. J., & Strogatz, S. H. (1998). Collective dynamics of ‘small-world’networks. nature, 393(6684), 440-442.
 #' 
 #' @examples
+#' size <- 10
+#' existing_network <- matrix(sample(c(0,1), size = size^2, replace = TRUE), nrow = size, ncol = size)
+#' new_network_prep <- matrix(0, nrow = size + 1, ncol = size + 1)
+#' new_network_prep[1:size, 1:size] = existing_network
+#' new_network <- make_SW(matrix = new_network_prep, x = size + 1, rewire = 0.213)
 #' 
 #' @export
 

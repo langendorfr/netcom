@@ -4,13 +4,31 @@
 #'
 #' @param network The network to be classified.
 #' 
-#' @param method Defaults to "DD". This determines the method used to compare networks at the heart of the classification. Currently "DD" (Degree Distribution) and "align" (the align function which compares networks by the entropy of diffusion on them) are supported. Future versions will allow user-defined methods.
+#' @param directed Defaults to TRUE. Whether the target network is directed.
+#' 
+#' @param method This determines the method used to compare networks at the heart of the classification. Currently "DD" (Degree Distribution) and "align" (the align function which compares networks by the entropy of diffusion on them) are supported. Future versions will allow user-defined methods. Defaults to "DD".
+#' 
+#' @param net_kind If the network is an adjacency matrix ("matrix") or an edge list ("list"). Defaults to "matrix".
+#' 
+#' @param DD_kind = A vector of network properties to be used to compare networks. Defaults to "all", which is the average of the in- and out-degrees.
+#' 
+#' @param DD_weight = Weights of each network property in DD_kind. Defaults to 1, which is equal weighting for each property.
+#' 
+#' @param cause_orientation = The orientation of directed adjacency matrices. Defaults to "row".
+#' 
+#' @param max_norm Binary variable indicating if each network property should be normalized so its max value (if a node-level property) is one. Defaults to FALSE.
 #'
 #' @param resolution Defaults to 100. The first step is to find the version of each process most similar to the target network. This parameter sets the number of parameter values to search across. Decrease to improve performance, but at the cost of accuracy.
 #' 
 #' @param resolution_min Defaults to 0.01. The minimum parameter value to consider. Zero is not used because in many processes it results in degenerate systems (e.g. entirely unconnected networks). Currently process agnostic. Future versions will accept a vector of values, one for each process.
 #' 
 #' @param resolution_max Defaults to 0.99. The maximum parameter value to consider. One is not used because in many processes it results in degenerate systems (e.g. entirely connected networks). Currently process agnostic. Future versions will accept a vector of values, one for each process.
+#' 
+#' @param connectance_max = Defaults to 0.5. The maximum connectance parameter for the Niche Model.
+#' 
+#' @param divergence_max = Defaults to 0.5. The maximum divergence parameter for the Duplication and Divergence/Mutation mechanisms.
+#' 
+#' @param mutation_max = Defaults to 0.5. The maximum mutation parameter for the Duplication and Mutation mechanism.
 #' 
 #' @param reps Defaults to 3. The number of networks to simulate for each parameter. More replicates increases accuracy by making the estimation of the parameter that produces networks most similar to the target network less idiosyncratic.
 #' 
@@ -28,7 +46,11 @@
 #' 
 #' @param cores Defaults to 1. The number of cores to run the classification on. When set to 1 parallelization will be ignored.
 #' 
-#' @param directed Defaults to TRUE. Whether the target network is directed.
+#' @param size_different = If there is a difference in the size of the networks used in the null distribution. Defaults to FALSE.
+#' 
+#' @param DD_resize = If networks being compared are a different size, this parameter determines if upscaling "larger" or downscaling "smaller" occurs. Unlikely to be relevant here. Defaults to "smaller".
+#' 
+#' @param null_dist_trim = Number between zero and one that determines how much of each network comparison distribution (unknown network compared to simulated networks, simulated networks compared to each other) should be used. Prevents p-value convergence with large sample sizes. Defaults to 1, which means all comparisons are used (no trimming).
 #' 
 #' @param verbose Defaults to TRUE. Whether to print all messages.
 #' 
@@ -36,13 +58,17 @@
 #'
 #' @return A dataframe with 3 columns and as many rows as processes being tested (5 by default). The first column lists the processes. The second lists the p-value on the null hypothesis that the target network did come from that row's process. The third column gives the estimated parameter for that particular process.
 #' 
-#' @references 
+#' @references Langendorf, R. E. & Burgess, M. G. Empirically classifying network mechanisms. In Preparation for PNAS.
 #' 
 #' @examples
+#' # Adjacency matrix
+#' size <- 10
+#' network <- matrix(sample(c(0,1), size = size^2, replace = TRUE), nrow = size, ncol = size)
+#' classify(network)
 #' 
 #' @export
 
-classify <- function(network, directed = FALSE, method = "DD", net_kind = "matrix", DD_kind = "all", DD_weight = 1, cause_orientation = "row", max_norm = FALSE, resolution = 100, resolution_min = 0.01, resolution_max = 0.99, reps = 3, processes = c("ER", "PA", "DM", "SW", "NM"), power_max = 5, connectance_max = 0.5, divergence_max = 0.5, mutation_max = 0.5, null_reps = 50, best_fit_kind = "avg", best_fit_sd = 1e-2, ks_dither = 0, ks_alternative = "two.sided", cores = 1, size_different = FALSE, DD_resize = "smaller", null_dist_trim = 0.1, verbose = TRUE) {
+classify <- function(network, directed = FALSE, method = "DD", net_kind = "matrix", DD_kind = "all", DD_weight = 1, cause_orientation = "row", max_norm = FALSE, resolution = 100, resolution_min = 0.01, resolution_max = 0.99, reps = 3, processes = c("ER", "PA", "DM", "SW", "NM"), power_max = 5, connectance_max = 0.5, divergence_max = 0.5, mutation_max = 0.5, null_reps = 50, best_fit_kind = "avg", best_fit_sd = 1e-2, ks_dither = 0, ks_alternative = "two.sided", cores = 1, size_different = FALSE, DD_resize = "smaller", null_dist_trim = 1, verbose = TRUE) {
 
     ## Matrix input checks
     if (net_kind == "matrix") {
@@ -165,8 +191,6 @@ classify <- function(network, directed = FALSE, method = "DD", net_kind = "matri
         null_dist_network <- null_dist$D_null[1,-1]
         null_dist_process <- null_dist$D_null[-1,-1]
         null_dist_process = null_dist_process[lower.tri(null_dist_process, diag = FALSE)]
-        # null_dist_network %>% summary()
-        # null_dist_process %>% summary()
 
         if ((null_dist_trim > 0) & (null_dist_trim < 1)) {
             null_dist_network = null_dist_network[1:round(length(null_dist_network)*null_dist_trim)]

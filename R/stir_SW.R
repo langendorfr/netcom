@@ -1,3 +1,28 @@
+#' @title Stirs a Small-World Network
+#'
+#' @description Stirs an already existing network by rewiring a node according to the Small-World mechanism.
+#'
+#' @param matrix Existing network to experience growth.
+#' 
+#' @param x The ID of the node to be grown.
+#' 
+#' @param rewire Small-World parameter specifying the probability each edge is randomly rewired, allowing for the possiblity of bridges between connected communities.
+#' 
+#' @details Rewires a node in a network according to the Small-World mechanism.
+#'
+#' @return An adjacency matrix.
+#' 
+#' @references Watts, D. J., & Strogatz, S. H. (1998). Collective dynamics of ‘small-world’networks. nature, 393(6684), 440-442.
+#' 
+#' @examples
+#' size <- 10
+#' existing_network <- matrix(sample(c(0,1), size = size^2, replace = TRUE), nrow = size, ncol = size)
+#' new_network_prep <- matrix(0, nrow = size + 1, ncol = size + 1)
+#' new_network_prep[1:size, 1:size] = existing_network
+#' new_network <- stir_SW(matrix = new_network_prep, x = size + 1, rewire = 0.213)
+#' 
+#' @export
+
 stir_SW <- function(matrix, x, rewire) {
     ids <- (1:ncol(matrix))[-x]
 

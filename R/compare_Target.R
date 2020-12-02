@@ -1,20 +1,49 @@
-#' @title 
+#' @title Compare Networks One-to-Many
 #'
-#' @description 
+#' @description Compares one network to a list of many networks.
 #'
-#' @param 
-#'
-#' @details 
-#'
-#' @return 
+#' @param target The network be compared.
 #' 
-#' @references 
+#' @param networks The networks being compared to the target network
+#' 
+#' @param net_size Size
+#' 
+#' @param net_kind If the network is an adjacency matrix ("matrix") or an edge list ("list"). Defaults to "matrix".
+#' 
+#' @param method This determines the method used to compare networks at the heart of the classification. Currently "DD" (Degree Distribution) and "align" (the align function which compares networks by the entropy of diffusion on them) are supported. Future versions will allow user-defined methods. Defaults to "DD".
+#' 
+#' @param cause_orientation = The orientation of directed adjacency matrices. Defaults to "row".
+#' 
+#' @param DD_kind = A vector of network properties to be used to compare networks. Defaults to "all", which is the average of the in- and out-degrees.
+#' 
+#' @param DD_weight = Weights of each network property in DD_kind. Defaults to 1, which is equal weighting for each property.
+#' 
+#' @param max_norm Binary variable indicating if each network property should be normalized so its max value (if a node-level property) is one. Defaults to FALSE.
+#'
+#' @param cores Defaults to 1. The number of cores to run the classification on. When set to 1 parallelization will be ignored.
+#' 
+#' @param verbose Defaults to TRUE. Whether to print all messages.
+#' 
+#' @details Note: Currently each process is assumed to have a single governing parameter.
+#'
+#' @return A pseudo-distance vector where the i-element is the comparison between the target network and the ith network being compared to.
+#' 
+#' @references Langendorf, R. E. & Burgess, M. G. Empirically classifying network mechanisms. In Preparation for PNAS.
 #' 
 #' @examples
+#' # Adjacency matrix
+#' size <- 10
+#' comparisons <- 50
+#' network_target <- matrix(sample(c(0,1), size = size^2, replace = TRUE), nrow = size, ncol = size)
+#' network_others <- list()
+#' for (net in 1:comparisons) {
+#'      networks_others[[net]] = matrix(sample(c(0,1), size = size^2, replace = TRUE), nrow = size, ncol = size)
+#' }
+#' compare_Target(target = network_target, networks = networks_others, net_size = size, method = "DD")
 #' 
 #' @export
 
-compare_Target <- function(target, networks, net_size, net_kind, method, cause_orientation = "row", DD_kind = "all", DD_weight = 1, max_norm = FALSE, cores = 1, verbose = FALSE) {
+compare_Target <- function(target, networks, net_size, net_kind, method = "DD", cause_orientation = "row", DD_kind = "all", DD_weight = 1, max_norm = FALSE, cores = 1, verbose = FALSE) {
 
     if (length(c(nrow(target), sapply(networks, nrow)) %>% unique()) == 1) {
         size_different = FALSE

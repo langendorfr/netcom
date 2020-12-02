@@ -10,7 +10,9 @@
 #' 
 #' @param connectance Defaults to 0.5. The ratio of actual interactions to possible interactions. Effects the beta distributed width of niche values each member of the system (node) interacts with.
 #'
-#' @param directed Defaults to TRUE. If FALSE all interactions will be made symmetric. Note that the process of creating interactions is unaffected by this choice.
+#' @param directed If FALSE all interactions will be made symmetric. Note that the process of creating interactions is unaffected by this choice. Defaults to TRUE.
+#' 
+#' @param grow Binary argument that determines if the network should be made in a growing fashion, where nodes' edges are added in order of their niches and can only attach to previously considered nodes. Defaults to FALSE.
 #' 
 #' @return An interaction matrix format of a Niche Model network.
 #' 
@@ -29,7 +31,7 @@
 #' @export
 
 make_NM <- function(size, net_kind, niches, connectance = 0.1, directed = TRUE, grow = FALSE) {
-    
+
     if (net_kind == "matrix") {
         matrix <- matrix(0, 
                          nrow = size,

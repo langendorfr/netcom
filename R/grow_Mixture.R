@@ -1,4 +1,47 @@
-grow_Mixture <- function(sequence, disturbance = 0, p_ER = 0.5, power_PA = 2, divergence_DD = 0.8, link_DD = 0.2, divergence_DM = 0.8, mutation_DM = 0.4, link_DM = 0.2, rewire_SW = 0.1, connectance_NM = 1, retcon = FALSE, directed = TRUE, force_connected = FALSE) {
+#' @title Grow a Mixture Mechanism Network
+#'
+#' @description Creates a network by iteratively adding nodes, each capable of attaching to existing nodes according to a user-specified mechanism.
+#'
+#' @param sequence A vector of mechanism names corresponding to the mechanisms each node acts in accordance with. Needs to be the same length as the number of nodes in the network. Note that the first two mechanisms are irrelevant because the first two nodes default to connecting to each other. Currently supported mechanisms: "ER" (Erdos-Renyi random), "PA", (Preferential Attachment), "DD", (Duplication and Divergence), "DM" (Duplication and Mutation), "SW", (Small-World), and "NM" (Niche Model).
+#' 
+#' @param niches Used by the Niche Model to determine which nodes interact. Needs to be a vector of the same length as the number of nodes, and range between zero and one.
+#' 
+#' @param p_ER Erdos-Renyi parameter specifying the probability each possible edge actually exists. Defaults to 0.5.
+#' 
+#' @param power_PA Preferential Attachment parameter specifying the power of attachment, which determines how much new nodes prefer to attach to nodes that are already attached to by other nodes. Defaults to 2.
+#' 
+#' @param divergence_DD Duplication and Divergence parameter specifying the probability of new nodes losing edges that exist in the node they duplicated. Defaults to 0.1.
+#' 
+#' @param link_DD Duplication and Divergence parameter specifying the probability of an edge between a new node and the node it duplicated.
+#' 
+#' @param divergence_DM Duplication and Mutation parameter specifying the probability of new nodes losing edges that exist in the node they duplicated. Defaults to 0.
+#' 
+#' @param mutation_DM Duplication and Mutation parameter specifying the probability of new nodes gaining edges that did not exist in the node they duplicated. Defaults to 0.1.
+#' 
+#' @param link_DM Duplication and Mutation parameter specifying the probability of an edge between a new node and the node it duplicated. Defaults to 0.
+#' 
+#' @param rewire_SW Small-World parameter specifying the probability each edge is randomly rewired, allowing for the possiblity of bridges between connected communities. Defaults to 0.1.
+#' 
+#' @param connectance_NM Niche Model parameter specifying the expected connectivity of the network, which determines for a given node the niche space window within which it attaches to every other node. Defaults to 0.2
+#' 
+#' @param retcon Binary variable determining if already existing nodes can attach to new nodes. Defaults to FALSE.
+#' 
+#' @param directed Binary variable determining if the network is directed, resulting in off-diagonal asymmetry in the adjacency matrix. Defaults to TRUE.
+#' 
+#' @details This function grows, one node at a time, a mixture mechanism network. As each node is added to the growing network it can attach to existing nodes by its own node-specific mechanism. A sequence of mechanism names must be provided. Note: Currently each mechanism is assumed to have a single governing parameter.
+#'
+#' @return An unweighted mixture mechanism adjacency matrix.
+#' 
+#' @references Langendorf, R. E. & Burgess, M. G. Empirically classifying network mechanisms. In Preparation for PNAS.
+#' 
+#' @examples
+#' # Mechanisms
+#' sequence <- c("ER", "SW", "SW", "ER", "PA")
+#' network <- grow_Mixture(sequence)
+#' 
+#' @export
+
+grow_Mixture <- function(sequence, niches, p_ER = 0.5, power_PA = 2, divergence_DD = 0.1, link_DD = 0, divergence_DM = 0.1, mutation_DM = 0.1, link_DM = 0, rewire_SW = 0.1, connectance_NM = 0.2, retcon = FALSE, directed = TRUE) {
     size <- length(sequence)
     matrix <- matrix(0, size, size)
 
@@ -7,16 +50,14 @@ grow_Mixture <- function(sequence, disturbance = 0, p_ER = 0.5, power_PA = 2, di
     matrix[2,1] = 1
 
     ## Assign niches for NM (the Niche Model) so they will be constant across calls to grow_CM
-    niches <- runif(size) %>% sort()
-
-    ## Assign clusters for SW (the Small World model) so they will be constant across calls to grow_SW
-    # k <- 3
-    # num_clusters <- ceiling(size/k)
-    # clusters <- rep(1:num_clusters, each = k)
-    # clusters = clusters[1:size]
+    if (missing(niches)) {
+        niches <- runif(size) %>% sort()
+    } else {
+        # Sort to be safe with use-supplied niches
+        niches = niches %>% sort()
+    }
 
     for (x in 3:size) {
-        # print(x)
         if (sequence[x] == "ER") {
             matrix = grow_ER(matrix, x, p = p_ER, retcon = retcon, directed = TRUE) #directed)
         } else if (sequence[x] == "PA") {
@@ -31,23 +72,6 @@ grow_Mixture <- function(sequence, disturbance = 0, p_ER = 0.5, power_PA = 2, di
             matrix = grow_NM(matrix, x, connectance = connectance_NM, niches = niches, retcon = retcon, directed = TRUE) #directed) 
         } else {
             print("ERROR: Model not specified.")
-        }
-
-        if (disturbance > 0) {
-            for (d in 1:disturbance) {
-                stir_Mixture(matrix = matrix, 
-                            sequence = rep(process, x), 
-                            stirs = disturbance, 
-                            p_ER = p_ER, 
-                            power_PA = power_PA, 
-                            divergence_DM = divergence_DM,
-                            mutation_DM = mutation_DM,
-                            link_DM = link_DM, 
-                            connectance_NM = connectance_NM, 
-                            rewire_SW = rewire_SW, 
-                            force_connected = force_connected, 
-                            directed = directed)
-            }
         }
     }
 
