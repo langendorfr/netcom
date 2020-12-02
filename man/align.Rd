@@ -82,5 +82,7 @@ align(net_one, net_two, base = 1, characterization = "gini", normalization = TRU
 \references{
 Kuhn, H. W. (1955). The Hungarian method for the assignment problem. Naval Research Logistics (NRL), 2(1-2), 83-97.
 
+Langendorf, R. E., & Goldberg, D. S. (2019). Aligning statistical dynamics captures biological network functioning. arXiv preprint arXiv:1912.12551.
+
 C. Papadimitriou and K. Steiglitz (1982), Combinatorial Optimization: Algorithms and Complexity. Englewood Cliffs: Prentice Hall.
 }

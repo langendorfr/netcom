@@ -1,9 +1,9 @@
 Package: netcom
 Type: Package
-Title: Dynamic Network Alignment
-Version: 2.0.1
-Date: 2020-07-06
-Description: Functions to take two networks stored as matrices and return a node-level injection between them (bijection if the input networks are of the same size). The alignment is made by comparing diffusion kernels originating from each node in one network to those originating from each node in the other network. This creates a cost matrix where rows are nodes from one network and columns are nodes from the other network. Optimal node pairings are then found using the Hungarian algorithm.
+Title: NETwork COMparison inference
+Version: 2.1.1
+Date: 2020-12-01
+Description: Functions to infer network functioning by empirically comparing them.
 Authors@R: c(
     person("Ryan", "Langendorf", role = c("aut", "cre"), email = "ryan.langendorf@colorado.edu"),
     person("Debra", "Goldberg", role = "ctb", email = "debra@colorado.edu"),
@@ -24,3 +24,5 @@ Imports:
     vegan
 LazyData: true
 RoxygenNote: 7.0.2
+Suggests: 
+    testthat

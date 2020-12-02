@@ -4,16 +4,27 @@
 \alias{make_NM}
 \title{Make a Niche Model network}
 \usage{
-make_NM(size, niches, connectance = 0.5, directed = TRUE)
+make_NM(
+  size,
+  net_kind,
+  niches,
+  connectance = 0.1,
+  directed = TRUE,
+  grow = FALSE
+)
 }
 \arguments{
 \item{size}{The number of nodes in the network. Must be a positive integer.}
+
+\item{net_kind}{The format of the network. Currently must be either `matrix` or `list`.}
 
 \item{niches}{A vector of numbers specifying the niche of each member of the system (node). Each niche value must be element of [0,1].}
 
 \item{connectance}{Defaults to 0.5. The ratio of actual interactions to possible interactions. Effects the beta distributed width of niche values each member of the system (node) interacts with.}
 
-\item{directed}{Defaults to TRUE. If FALSE all interactions will be made symmetric. Note that the process of creating interactions is unaffected by this choice.}
+\item{directed}{If FALSE all interactions will be made symmetric. Note that the process of creating interactions is unaffected by this choice. Defaults to TRUE.}
+
+\item{grow}{Binary argument that determines if the network should be made in a growing fashion, where nodes' edges are added in order of their niches and can only attach to previously considered nodes. Defaults to FALSE.}
 }
 \value{
 An interaction matrix format of a Niche Model network.

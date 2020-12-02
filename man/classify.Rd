@@ -6,27 +6,50 @@
 \usage{
 classify(
   network,
+  directed = FALSE,
   method = "DD",
+  net_kind = "matrix",
+  DD_kind = "all",
+  DD_weight = 1,
+  cause_orientation = "row",
+  max_norm = FALSE,
   resolution = 100,
   resolution_min = 0.01,
   resolution_max = 0.99,
   reps = 3,
-  processes = c("ER", "PA", "DD", "SW", "NM"),
+  processes = c("ER", "PA", "DM", "SW", "NM"),
   power_max = 5,
-  beta_max = 1,
+  connectance_max = 0.5,
+  divergence_max = 0.5,
+  mutation_max = 0.5,
   null_reps = 50,
+  best_fit_kind = "avg",
   best_fit_sd = 0.01,
   ks_dither = 0,
   ks_alternative = "two.sided",
   cores = 1,
-  directed = TRUE,
+  size_different = FALSE,
+  DD_resize = "smaller",
+  null_dist_trim = 1,
   verbose = TRUE
 )
 }
 \arguments{
 \item{network}{The network to be classified.}
 
-\item{method}{Defaults to "DD". This determines the method used to compare networks at the heart of the classification. Currently "DD" (Degree Distribution) and "align" (the align function which compares networks by the entropy of diffusion on them) are supported. Future versions will allow user-defined methods.}
+\item{directed}{Defaults to TRUE. Whether the target network is directed.}
+
+\item{method}{This determines the method used to compare networks at the heart of the classification. Currently "DD" (Degree Distribution) and "align" (the align function which compares networks by the entropy of diffusion on them) are supported. Future versions will allow user-defined methods. Defaults to "DD".}
+
+\item{net_kind}{If the network is an adjacency matrix ("matrix") or an edge list ("list"). Defaults to "matrix".}
+
+\item{DD_kind}{= A vector of network properties to be used to compare networks. Defaults to "all", which is the average of the in- and out-degrees.}
+
+\item{DD_weight}{= Weights of each network property in DD_kind. Defaults to 1, which is equal weighting for each property.}
+
+\item{cause_orientation}{= The orientation of directed adjacency matrices. Defaults to "row".}
+
+\item{max_norm}{Binary variable indicating if each network property should be normalized so its max value (if a node-level property) is one. Defaults to FALSE.}
 
 \item{resolution}{Defaults to 100. The first step is to find the version of each process most similar to the target network. This parameter sets the number of parameter values to search across. Decrease to improve performance, but at the cost of accuracy.}
 
@@ -40,7 +63,11 @@ classify(
 
 \item{power_max}{Defaults to 5. The maximum power of attachment in the Preferential Attachment process (PA).}
 
-\item{beta_max}{Defaults to 1. The maximum value of beta that governs niche breadth in the Niche Model (NM).}
+\item{connectance_max}{= Defaults to 0.5. The maximum connectance parameter for the Niche Model.}
+
+\item{divergence_max}{= Defaults to 0.5. The maximum divergence parameter for the Duplication and Divergence/Mutation mechanisms.}
+
+\item{mutation_max}{= Defaults to 0.5. The maximum mutation parameter for the Duplication and Mutation mechanism.}
 
 \item{null_reps}{Defaults to 50. The number of best fit networks to simulate that will be used to create a null distribution of distances between networks within the given process, which will then be used to test if the target network appears unusually distant from them and therefore likely not governed by that process.}
 
@@ -52,7 +79,11 @@ classify(
 
 \item{cores}{Defaults to 1. The number of cores to run the classification on. When set to 1 parallelization will be ignored.}
 
-\item{directed}{Defaults to TRUE. Whether the target network is directed.}
+\item{size_different}{= If there is a difference in the size of the networks used in the null distribution. Defaults to FALSE.}
+
+\item{DD_resize}{= If networks being compared are a different size, this parameter determines if upscaling "larger" or downscaling "smaller" occurs. Unlikely to be relevant here. Defaults to "smaller".}
+
+\item{null_dist_trim}{= Number between zero and one that determines how much of each network comparison distribution (unknown network compared to simulated networks, simulated networks compared to each other) should be used. Prevents p-value convergence with large sample sizes. Defaults to 1, which means all comparisons are used (no trimming).}
 
 \item{verbose}{Defaults to TRUE. Whether to print all messages.}
 }
@@ -66,8 +97,12 @@ Tests a network against hypothetical generating processes using a comparative ne
 Note: Currently each process is assumed to have a single governing parameter.
 }
 \examples{
+# Adjacency matrix
+size <- 10
+network <- matrix(sample(c(0,1), size = size^2, replace = TRUE), nrow = size, ncol = size)
+classify(network)
 
 }
 \references{
-
+Langendorf, R. E. & Burgess, M. G. Empirically classifying network mechanisms. In Preparation for PNAS.
 }
