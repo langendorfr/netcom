@@ -8,7 +8,7 @@
 
 Langendorf, R. E., & Goldberg, D. S. (2019). Aligning statistical dynamics captures biological network functioning. arXiv preprint arXiv:1912.12551.
 
-Langendorf, R. E. & Burgess, M. G. Empirically classifying network mechanisms. In Preparation for PNAS.
+Langendorf, R. E. & Burgess, M. G. Empirically classifying network mechanisms. arXiv preprint arXiv:2012.15863.
 
 ## Installation
 
