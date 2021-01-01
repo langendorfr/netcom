@@ -6,9 +6,9 @@
 
 `netcom` is an R package to infer network functioning by emprically comparing networks to each other.
 
-Langendorf, R. E., & Goldberg, D. S. (2019). Aligning statistical dynamics captures biological network functioning. arXiv preprint arXiv:1912.12551.
+Langendorf, R. E. & Burgess, M. G. (2020) Empirically classifying network mechanisms. arXiv preprint arXiv:2012.15863.
 
-Langendorf, R. E. & Burgess, M. G. Empirically classifying network mechanisms. arXiv preprint arXiv:2012.15863.
+Langendorf, R. E. & Goldberg, D. S. (2019) Aligning statistical dynamics captures biological network functioning. arXiv preprint arXiv:1912.12551.
 
 ## Installation
 
