@@ -54,14 +54,14 @@
 #'
 #' @return A list. The first element contains the networks. The second contains their corresponding parameters.
 #' 
-#' @references 
+#' @references Langendorf, R. E., & Burgess, M. G. (2020). Empirically Classifying Network Mechanisms. arXiv preprint arXiv:2012.15863.
 #' 
 #' @examples
 #' make_Systematic(net_size = 10)
 #' 
 #' @export
 
-make_Null <- function(input_network, net_kind, process, parameter, net_size, iters, method, neighborhood, directed = TRUE, DD_kind, power_max = 5, connectance_max = 0.5, divergence_max = 0.5, best_fit_sd = 0, cores = 1, size_different = FALSE, cause_orientation = "row", max_norm = FALSE, DD_resize = "smaller", verbose = FALSE) {
+make_Null <- function(input_network, net_kind, process, parameter, net_size, iters, method, neighborhood, resolution_min = 0.01, resolution_max = 0.99, directed = TRUE, DD_kind, power_max = 5, connectance_max = 0.5, divergence_max = 0.5, best_fit_sd = 0, cores = 1, size_different = FALSE, cause_orientation = "row", max_norm = FALSE, DD_resize = "smaller", verbose = FALSE) {
     ## Primary Directory
     # pd <- "/Users/ryan/Windows/Documents/Post UCB/Research/Relativism"
     # setwd(pd)

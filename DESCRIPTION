@@ -3,7 +3,7 @@ Type: Package
 Title: NETwork COMparison inference
 Version: 2.1.1
 Date: 2020-12-01
-Description: Functions to infer network functioning by empirically comparing them.
+Description: Infer system functioning with empirical NETwork COMparisons.
 Authors@R: c(
     person("Ryan", "Langendorf", role = c("aut", "cre"), email = "ryan.langendorf@colorado.edu"),
     person("Debra", "Goldberg", role = "ctb", email = "debra@colorado.edu"),
@@ -15,6 +15,8 @@ License: GPL-3
 Encoding: UTF-8
 Depends: R (>= 3.1.0)
 Imports:
+    dplyr,
+    stats,
     clue,
     expm,
     igraph,
@@ -23,6 +25,9 @@ Imports:
     pracma,
     vegan
 LazyData: true
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.1
 Suggests: 
+    rmarkdown,
+    knitr,
     testthat
+VignetteBuilder: knitr

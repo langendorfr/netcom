@@ -32,7 +32,7 @@
 #'
 #' @return An unweighted mixture mechanism adjacency matrix.
 #' 
-#' @references Langendorf, R. E. & Burgess, M. G. Empirically classifying network mechanisms. In Preparation for PNAS.
+#' @references Langendorf, R. E., & Burgess, M. G. (2020). Empirically Classifying Network Mechanisms. arXiv preprint arXiv:2012.15863.
 #' 
 #' @examples
 #' # Mechanisms
@@ -77,5 +77,3 @@ grow_Mixture <- function(sequence, niches, p_ER = 0.5, power_PA = 2, divergence_
 
     return(matrix)
 }
-
-

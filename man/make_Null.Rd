@@ -13,6 +13,8 @@ make_Null(
   iters,
   method,
   neighborhood,
+  resolution_min = 0.01,
+  resolution_max = 0.99,
   directed = TRUE,
   DD_kind,
   power_max = 5,
@@ -42,6 +44,10 @@ make_Null(
 
 \item{neighborhood}{The range of nodes that form connected communities. Note: This implementation results in overlap of communities.}
 
+\item{resolution_min}{= The minimum parameter value to consider. Zero is not used because in many processes it results in degenerate systems (e.g. entirely unconnected networks). Currently process agnostic. Future versions will accept a vector of values, one for each process. Defaults to 0.01.}
+
+\item{resolution_max}{The maximum parameter value to consider. One is not used because in many processes it results in degenerate systems (e.g. entirely connected networks). Currently process agnostic. Future versions will accept a vector of values, one for each process. Defaults to 0.99.}
+
 \item{directed}{Whether the target network is directed. Defaults to TRUE.}
 
 \item{DD_kind}{= A vector of network properties to be used to compare networks. Defaults to "all", which is the average of the in- and out-degrees.}
@@ -67,10 +73,6 @@ make_Null(
 \item{verbose}{= Defaults to FALSE. Whether to print all messages.}
 
 \item{resolution}{The first step is to find the version of each process most similar to the target network. This parameter sets the number of parameter values to search across. Decrease to improve performance, but at the cost of accuracy. Defaults to 100.}
-
-\item{resolution_min}{= The minimum parameter value to consider. Zero is not used because in many processes it results in degenerate systems (e.g. entirely unconnected networks). Currently process agnostic. Future versions will accept a vector of values, one for each process. Defaults to 0.01.}
-
-\item{resolution_max}{The maximum parameter value to consider. One is not used because in many processes it results in degenerate systems (e.g. entirely connected networks). Currently process agnostic. Future versions will accept a vector of values, one for each process. Defaults to 0.99.}
 
 \item{reps}{Defaults to 3. The number of networks to simulate for each parameter. More replicates increases accuracy by making the estimation of the parameter that produces networks most similar to the target network less idiosyncratic.}
 

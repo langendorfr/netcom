@@ -58,7 +58,7 @@
 #'
 #' @return A dataframe with 3 columns and as many rows as processes being tested (5 by default). The first column lists the processes. The second lists the p-value on the null hypothesis that the target network did come from that row's process. The third column gives the estimated parameter for that particular process.
 #' 
-#' @references Langendorf, R. E. & Burgess, M. G. Empirically classifying network mechanisms. In Preparation for PNAS.
+#' @references Langendorf, R. E., & Burgess, M. G. (2020). Empirically Classifying Network Mechanisms. arXiv preprint arXiv:2012.15863.
 #' 
 #' @examples
 #' # Adjacency matrix
@@ -136,9 +136,7 @@ classify <- function(network, directed = FALSE, method = "DD", net_kind = "matri
     pvalues <- rep(NA, length(processes))
     p_estimates <- rep(NA, length(processes))
     for (p in seq_along(processes)) {
-        if (verbose == TRUE) {
-            print(paste0("Checking if the network is ", processes[p], "."))
-        }
+        if (verbose) {print(paste0("Checking if the network is ", processes[p], "."))}
 
         parameters_scored_process <- dplyr::filter(parameters_scored, Process == processes[p])
 
@@ -154,6 +152,8 @@ classify <- function(network, directed = FALSE, method = "DD", net_kind = "matri
             parameters_scored_process = parameters_scored_process %>% group_by(Process, Parameter_Value) %>% summarize(Distance = min(Distance), .groups = "drop")
         } else if (best_fit_kind == "max") {
             parameters_scored_process = parameters_scored_process %>% group_by(Process, Parameter_Value) %>% summarize(Distance = max(Distance), .groups = "drop")
+        } else if (best_fit_kind == "median") {
+            parameters_scored_process = parameters_scored_process %>% group_by(Process, Parameter_Value) %>% summarize(Distance = median(Distance), .groups = "drop")
         } else {
             stop("best_fit_kind must be `avg`, `min`, or `max`.")
         }
@@ -197,9 +197,10 @@ classify <- function(network, directed = FALSE, method = "DD", net_kind = "matri
             null_dist_process = null_dist_process[1:round(length(null_dist_process)*null_dist_trim)]
         }
 
+        ## alternative should be "greater" because "less" than expected just means best_fit_sd is too big, but I was getting weird p-values of 1 so left the default as "two.sided"
         ks_test <- stats::ks.test(x = null_dist_network + rnorm(n = length(null_dist_network), mean = 0, sd = ks_dither), 
                                   y = null_dist_process + rnorm(n = length(null_dist_process), mean = 0, sd = ks_dither), 
-                                  alternative = ks_alternative) ## should be "greater" because "less" than expected just means best_fit_sd is too big, but I was getting weird p-values of 1 so left the default as "two.sided"
+                                  alternative = ks_alternative) %>% suppressWarnings() 
 
         # p_value <- 1 - sum(best_fit$Distance > null_dist) / length(null_dist)
         p_value <- ks_test$p.value

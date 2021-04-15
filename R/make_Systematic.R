@@ -36,7 +36,7 @@
 #'
 #' @return A list. The first element contains the networks. The second contains their corresponding parameters.
 #' 
-#' @references 
+#' @references Langendorf, R. E., & Burgess, M. G. (2020). Empirically Classifying Network Mechanisms. arXiv preprint arXiv:2012.15863.
 #' 
 #' @examples
 #' make_Systematic(net_size = 10)

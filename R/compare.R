@@ -62,7 +62,7 @@ compare <- function(networks, net_kind = "matrix", method = "DD", cause_orientat
             for (net_1 in seq_along(networks)) {
                 for (net_2 in seq_along(networks)) {
                     if(net_2 > net_1) {
-                        if (verbose == TRUE) { print(c(net_1, net_2)) }
+                        # if (verbose == TRUE) { print(c(net_1, net_2)) }
 
                         alignment <- netcom::align(networks[[net_1]], 
                                                     networks[[net_2]], 
@@ -86,7 +86,7 @@ compare <- function(networks, net_kind = "matrix", method = "DD", cause_orientat
             D_netcom <- foreach (net_1 = 1:length(networks), .combine = rbind, .packages = c("tibble", "dplyr", "netcom")) %dopar% {        
                 j_output <- rep(NA, length(networks))
                 for (net_2 in 1:length(networks)) {
-                     if (verbose == TRUE) { print(c(net_1, net_2)) }
+                    #  if (verbose == TRUE) { print(c(net_1, net_2)) }
                 
                     j_output[net_2] <- netcom::align(networks[[net_1]], 
                                                 networks[[net_2]], 
@@ -125,7 +125,7 @@ compare <- function(networks, net_kind = "matrix", method = "DD", cause_orientat
 
             net_DD_list <- list()
             for (net in seq_along(networks)) {
-                if (verbose == TRUE) { print(net) }
+                # if (verbose == TRUE) { print(net) }
 
                 ## Assume all networks are the same size
                 net_size <- nrow(networks[[net]])
@@ -231,7 +231,7 @@ compare <- function(networks, net_kind = "matrix", method = "DD", cause_orientat
             for (net_1 in seq_along(networks)) {
                 for (net_2 in seq_along(networks)) {
                     if(net_2 > net_1) {
-                        if (verbose == TRUE) { print(c(net_1, net_2)) }
+                        # if (verbose == TRUE) { print(c(net_1, net_2)) }
 
                         # DD_difference_each <- {}
                         DD_difference_each <- rep(NA, length(DD_kind))
@@ -293,12 +293,7 @@ compare <- function(networks, net_kind = "matrix", method = "DD", cause_orientat
 
             return_matrix <- D_DD
 
-
         } else if (net_kind == "list") {
-        
-        
-        
-        
 
             D_DD <- matrix(NA, 
                         nrow = length(networks),
@@ -307,7 +302,7 @@ compare <- function(networks, net_kind = "matrix", method = "DD", cause_orientat
             for (net_1 in seq_along(networks)) {
                 for (net_2 in seq_along(networks)) {
                     if(net_2 > net_1) {
-                        if (verbose == TRUE) { print(c(net_1, net_2)) }
+                        # if (verbose == TRUE) { print(c(net_1, net_2)) }
 
                         ## Skip because edge lists do not inherently contain the number of nodes (zero degree nodes are missing)
                         ## Assume all networks have size net_size

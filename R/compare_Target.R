@@ -28,7 +28,7 @@
 #'
 #' @return A pseudo-distance vector where the i-element is the comparison between the target network and the ith network being compared to.
 #' 
-#' @references Langendorf, R. E. & Burgess, M. G. Empirically classifying network mechanisms. In Preparation for PNAS.
+#' @references Langendorf, R. E., & Burgess, M. G. (2020). Empirically Classifying Network Mechanisms. arXiv preprint arXiv:2012.15863.
 #' 
 #' @examples
 #' # Adjacency matrix
@@ -59,15 +59,11 @@ compare_Target <- function(target, networks, net_size, net_kind, method = "DD", 
     if (method == "align") {
         ## Pairwise compare input network with each network in state_space
         if (cores == 1) {
-            if (verbose == TRUE) {
-                print("Aligning networks on a single core.")
-            }
+            if (verbose) {print("Aligning networks on a single core.")}
 
             D_netcom <- rep(NA, times = length(networks))
             for (net in seq_along(networks)) {
-                if (verbose == TRUE) {
-                    print(paste0("Aligning ", net, " of ", length(networks), " networks."))
-                }
+                if (verbose) {print(paste0("Aligning ", net, " of ", length(networks), " networks."))}
 
                 alignment <- netcom::align(target,
                                             networks[[net]],
@@ -79,9 +75,7 @@ compare_Target <- function(target, networks, net_size, net_kind, method = "DD", 
 
         ## cores > 1
         } else {
-            if (verbose == TRUE) {
-                print(paste0("Aligning networks on ", cores, " cores."))
-            }
+            if (verbose) {print(paste0("Aligning networks on ", cores, " cores."))}
 
             ## Backend
             ## outfile = "" prints to screen instead of a file
@@ -90,9 +84,7 @@ compare_Target <- function(target, networks, net_size, net_kind, method = "DD", 
 
             ## Parallelized network alignment
             D_netcom <- foreach (net = 1:length(networks), .combine = c, .packages = c("tibble", "dplyr", "netcom")) %dopar% {        
-                if (verbose == TRUE) {
-                    print(paste0("Aligning ", net, " of ", length(networks), " networks."))
-                }
+                if (verbose) {print(paste0("Aligning ", net, " of ", length(networks), " networks."))}
 
                 output <- netcom::align(target,
                                         networks[[net]],
@@ -216,13 +208,11 @@ compare_Target <- function(target, networks, net_size, net_kind, method = "DD", 
             ## Just use the last DD_target, because this is the nubmer of points to use in the spline to make length(DD) = length(DD_target)
             Length <- length(DD_target)
 
-            if (verbose == TRUE) {
-                print(paste0("Comparing the degree distributions of ", length(networks), " networks."))
-            }
+            if (verbose) {print(paste0("Comparing the degree distributions of ", length(networks), " networks."))}
 
             D_DD <- rep(NA, times = length(networks))
             for (net in seq_along(networks)) {
-                if (verbose) { print(net) }
+                # if (verbose) { print(net) }
                 
                 DD_combined <- list()
                 
@@ -424,11 +414,7 @@ compare_Target <- function(target, networks, net_size, net_kind, method = "DD", 
 
             Length <- length(DD_target)
 
-
-            if (verbose == TRUE) {
-                print(paste0("Comparing the degree distributions of ", length(networks), " networks."))
-            }
-
+            if (verbose) {print(paste0("Comparing the degree distributions of ", length(networks), " networks."))}
 
             D_DD <- rep(NA, times = length(networks))
             for (net in seq_along(networks)) {

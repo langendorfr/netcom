@@ -1,12 +1,10 @@
-#' @title Grow a Mixture Mechanism Network
+#' @title Make a Mixture Mechanism Network
 #'
-#' @description Creates a network by iteratively adding nodes, each capable of attaching to existing nodes according to a user-specified mechanism.
+#' @description Creates a network by iteratively adding or rewiring nodes, each capable of attaching to existing nodes according to a user-specified mechanism.
 #'
-#' @param matrix Existing network to experience growth.
-#' 
 #' @param sequence A vector of mechanism names corresponding to the mechanisms each node acts in accordance with. Needs to be the same length as the number of nodes in the network. Note that the first two mechanisms are irrelevant because the first two nodes default to connecting to each other. Currently supported mechanisms: "ER" (Erdos-Renyi random), "PA", (Preferential Attachment), "DD", (Duplication and Divergence), "DM" (Duplication and Mutation), "SW", (Small-World), and "NM" (Niche Model).
 #' 
-#' @param stirs Number of times to stir every node in the network. This should be more than one because the order matters. Stirring many times makes the order matter less.
+#' @param niches Used by the Niche Model to determine which nodes interact. Needs to be a vector of the same length as the number of nodes, and range between zero and one.
 #' 
 #' @param p_ER Erdos-Renyi parameter specifying the probability each possible edge actually exists. Defaults to 0.5.
 #' 
@@ -26,7 +24,7 @@
 #' 
 #' @param connectance_NM Niche Model parameter specifying the expected connectivity of the network, which determines for a given node the niche space window within which it attaches to every other node. Defaults to 0.2
 #' 
-#' @param force_connected Binary argument determining if the newly grown node has to be connected to the existing network. Defaults to FALSE, to prevent rare computational slow-downs when it is unlikely to create a connected network. Defaults to FALSE.
+#' @param retcon Binary variable determining if already existing nodes can attach to new nodes. Defaults to FALSE.
 #' 
 #' @param directed Binary variable determining if the network is directed, resulting in off-diagonal asymmetry in the adjacency matrix. Defaults to TRUE.
 #' 
@@ -39,54 +37,39 @@
 #' @examples
 #' # Mechanisms
 #' sequence <- c("ER", "SW", "SW", "ER", "PA")
-#' network <- stir_Mixture(sequence)
+#' network <- grow_Mixture(sequence)
 #' 
 #' @export
 
-stir_Mixture <- function(matrix, sequence, stirs = 100, p_ER = 0.5, power_PA = 2, divergence_DM = 0.8, mutation_DM = 0.1, link_DM = 0.2, connectance_NM = 0.2, rewire_SW = 0.1, force_connected = FALSE, directed = TRUE) {
-    # ## Primary Directory
-    # pd <- "/Users/ryan/Windows/Documents/Post UCB/Research/Relativism"
-    # setwd(pd)
-
-    # ## Libraries
-    # library("tidyverse")
-    # library("vegan")
-    # library("igraph")
-
-    # ## Custom Functions
-    # source("stir_ER.R")
-    # source("stir_PA.R")
-    # source("stir_DD.R")
-    # source("stir_SW.R")
-    # # source("grow_CC.R")
-
+make_Mixture <- function(sequence, niches, p_ER = 0.5, power_PA = 2, divergence_DD = 0.1, link_DD = 0, divergence_DM = 0.1, mutation_DM = 0.1, link_DM = 0, rewire_SW = 0.1, connectance_NM = 0.2, retcon = FALSE, directed = TRUE) {
     size <- length(sequence)
+    matrix <- matrix(0, size, size)
 
-    sequence_id = seq_along(sequence)
+    ## Start with the first two nodes connected
+    matrix[1,2] = 1
+    matrix[2,1] = 1
 
-    niches <- runif(size) %>% sort()
-
-    sequence_stir = {}
-    for (i in 1:stirs) {
-        sequence_stir = c(sequence_stir, sample(x = sequence_id, size = length(sequence_id), replace = FALSE))
+    ## Assign niches for NM (the Niche Model) so they will be constant across calls to grow_CM
+    if (missing(niches)) {
+        niches <- runif(size) %>% sort()
+    } else {
+        # Sort to be safe with use-supplied niches
+        niches = niches %>% sort()
     }
 
-    for (s in seq_along(sequence_stir)) {
-        x = sequence_stir[s]
-
-        # print(matrix)
-        # print(sequence[x])
-
+    for (x in 3:size) {
         if (sequence[x] == "ER") {
-            matrix = stir_ER(matrix = matrix, x = x, p = p_ER)
+            matrix = grow_ER(matrix, x, p = p_ER, retcon = retcon, directed = TRUE) #directed)
         } else if (sequence[x] == "PA") {
-            matrix = stir_PA(matrix = matrix, x = x, power = power_PA)
+            matrix = grow_PA(matrix, x, power = power_PA, retcon = retcon, directed = TRUE) #directed)
+        } else if (sequence[x] == "DD") {
+            matrix = grow_DD(matrix, x, divergence = divergence_DD, link = link_DD, directed = FALSE) #directed)
         } else if (sequence[x] == "DM") {
-            matrix = stir_DM(matrix = matrix, x = x, divergence = divergence_DM, mutation = mutation_DM, link = link_DM, force_connected = force_connected)
-        } else if (sequence[x] == "NM") {
-            matrix = stir_NM(matrix = matrix, x = x, niches = niches, connectance = connectance_NM, directed = directed)
+            matrix = grow_DM(matrix, x, divergence = divergence_DM, mutation = mutation_DM, link = link_DM, directed = FALSE) #directed)
         } else if (sequence[x] == "SW") {
-            matrix = stir_SW(matrix = matrix, x = x, rewire = rewire_SW)
+            matrix = grow_SW(matrix, x, rewire = rewire_SW, retcon = retcon, directed = FALSE) #directed)
+        } else if (sequence[x] == "NM") {
+            matrix = grow_NM(matrix, x, connectance = connectance_NM, niches = niches, retcon = retcon, directed = TRUE) #directed) 
         } else {
             print("ERROR: Model not specified.")
         }
