@@ -36,13 +36,14 @@
 #' 
 #' @examples
 #' # Mechanisms
-#' sequence <- c("ER", "SW", "SW", "ER", "PA")
-#' network <- grow_Mixture(sequence)
+#' sequence <- c("gER", "gER", "gER", "rPA", "rPA", "gER", "gER")
+#' network <- make_Mixture(sequence)
 #' 
 #' @export
 
 make_Mixture <- function(sequence, niches, p_ER = 0.5, power_PA = 2, divergence_DD = 0.1, link_DD = 0, divergence_DM = 0.1, mutation_DM = 0.1, link_DM = 0, rewire_SW = 0.1, connectance_NM = 0.2, retcon = FALSE, directed = TRUE) {
-    size <- length(sequence)
+
+    size <- sum(substr(sequence, 1, 1) == "g")
     matrix <- matrix(0, size, size)
 
     ## Start with the first two nodes connected
@@ -57,21 +58,43 @@ make_Mixture <- function(sequence, niches, p_ER = 0.5, power_PA = 2, divergence_
         niches = niches %>% sort()
     }
 
-    for (x in 3:size) {
-        if (sequence[x] == "ER") {
-            matrix = grow_ER(matrix, x, p = p_ER, retcon = retcon, directed = TRUE) #directed)
-        } else if (sequence[x] == "PA") {
-            matrix = grow_PA(matrix, x, power = power_PA, retcon = retcon, directed = TRUE) #directed)
-        } else if (sequence[x] == "DD") {
-            matrix = grow_DD(matrix, x, divergence = divergence_DD, link = link_DD, directed = FALSE) #directed)
-        } else if (sequence[x] == "DM") {
-            matrix = grow_DM(matrix, x, divergence = divergence_DM, mutation = mutation_DM, link = link_DM, directed = FALSE) #directed)
-        } else if (sequence[x] == "SW") {
-            matrix = grow_SW(matrix, x, rewire = rewire_SW, retcon = retcon, directed = FALSE) #directed)
-        } else if (sequence[x] == "NM") {
-            matrix = grow_NM(matrix, x, connectance = connectance_NM, niches = niches, retcon = retcon, directed = TRUE) #directed) 
+    ## Keep track of growing size, which is different than `x` because rewiring events do not add nodes
+    s <- 2
+
+    for (x in 3:length(sequence)) {
+        kind <- substr(sequence[x], 1, 1)
+        if (kind == "g") {
+            s = s + 1
+        } else if (kind == "r") {
+            x_rewire <- sample(1:s, 1)
         } else {
-            print("ERROR: Model not specified.")
+            stop("ERROR: Kind of network evolution not specified correctly. `sequence` must begin with either `g` or `r`, for growing and rewiring events respectively.")
+        }
+
+        if (sequence[x] == "gER") {
+            matrix = grow_ER(matrix, s, p = p_ER, retcon = retcon, directed = TRUE) #directed)
+        } else if (sequence[x] == "gPA") {
+            matrix = grow_PA(matrix, s, power = power_PA, retcon = retcon, directed = TRUE) #directed)
+        } else if (sequence[x] == "gDD") {
+            matrix = grow_DD(matrix, s, divergence = divergence_DD, link = link_DD, directed = FALSE) #directed)
+        } else if (sequence[x] == "gDM") {
+            matrix = grow_DM(matrix, s, divergence = divergence_DM, mutation = mutation_DM, link = link_DM, directed = FALSE) #directed)
+        } else if (sequence[x] == "gSW") {
+            matrix = grow_SW(matrix, s, rewire = rewire_SW, retcon = retcon, directed = FALSE) #directed)
+        } else if (sequence[x] == "gNM") {
+            matrix = grow_NM(matrix, s, connectance = connectance_NM, niches = niches, retcon = retcon, directed = TRUE) #directed) 
+        } else if (sequence[x] == "rER") {
+            matrix = stir_ER(matrix = matrix, x = x_rewire, p = p_ER)
+        } else if (sequence[x] == "rPA") {
+            matrix = stir_PA(matrix = matrix, x = x_rewire, power = power_PA)
+        } else if (sequence[x] == "rDM") {
+            matrix = stir_DM(matrix = matrix, x = x_rewire, divergence = divergence_DM, mutation = mutation_DM, link = link_DM, force_connected = force_connected)
+        } else if (sequence[x] == "rNM") {
+            matrix = stir_NM(matrix = matrix, x = x_rewire, niches = niches, connectance = connectance_NM, directed = directed)
+        } else if (sequence[x] == "rSW") {
+            matrix = stir_SW(matrix = matrix, x = x_rewire, rewire = rewire_SW)
+        } else {
+            stop("ERROR: Model not specified.")
         }
     }
 
