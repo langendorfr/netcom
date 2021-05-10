@@ -26,8 +26,8 @@
 stir_SW <- function(matrix, x, rewire) {
     ids <- (1:ncol(matrix))[-x]
 
-    out_degree <- rowSums(matrix[-x, -x])
-    # in_degree <- colSums(matrix[-x, -x])    
+    out_degree <- rowSums(as.matrix(matrix[-x, -x]))
+    # in_degree <- colSums(as.matrix(matrix[-x, -x]))
 
     out_avg <- mean(out_degree) %>% round(digits = 0)
     # in_avg <- mean(in_degree) %>% round(digits = 0)

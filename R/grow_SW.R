@@ -32,8 +32,8 @@
 grow_SW <- function(matrix, x, rewire, connected = FALSE, retcon = FALSE, directed = TRUE) {
     w <- x-1
 
-    out_degree <- rowSums(matrix[1:w, 1:w])
-    in_degree <- colSums(matrix[1:w, 1:w])    
+    out_degree <- rowSums(as.matrix(matrix[1:w, 1:w]))
+    in_degree <- colSums(as.matrix(matrix[1:w, 1:w]))
 
     out_avg <- mean(out_degree) %>% round(digits = 0)
     in_avg <- mean(in_degree) %>% round(digits = 0)

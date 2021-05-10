@@ -61,7 +61,7 @@
 #' 
 #' @export
 
-make_Null <- function(input_network, net_kind, process, parameter, net_size, iters, method, neighborhood, DD_kind, DD_weight, resolution_min = 0.01, resolution_max = 0.99, directed = TRUE, power_max = 5, connectance_max = 0.5, divergence_max = 0.5, best_fit_sd = 0, cores = 1, size_different = FALSE, cause_orientation = "row", max_norm = FALSE, DD_resize = "smaller", verbose = FALSE) {
+make_Null <- function(input_network, net_kind, process, parameter, net_size, iters, method, neighborhood, resolution_min = 0.01, resolution_max = 0.99, directed = TRUE, DD_kind, power_max = 5, connectance_max = 0.5, divergence_max = 0.5, best_fit_sd = 0, cores = 1, size_different = FALSE, cause_orientation = "row", max_norm = FALSE, DD_resize = "smaller", verbose = FALSE) {
     ## Primary Directory
     # pd <- "/Users/ryan/Windows/Documents/Post UCB/Research/Relativism"
     # setwd(pd)
@@ -103,14 +103,24 @@ make_Null <- function(input_network, net_kind, process, parameter, net_size, ite
                     p_ER = max(p_ER, resolution_min)
                     parameters = c(parameters, p_ER)
                     
-                    mat <- make_Mixture(sequence = rep(paste0("g", processes[p]), net_size),
-                                        p_ER = p_ER,
-                                        directed = directed)
+                    net <- igraph::sample_gnp(n = net_size, 
+                                              p = p_ER, 
+                                              directed = directed, 
+                                              loops = FALSE)
 
                     if (net_kind == "matrix") {
+                        mat <- igraph::as_adj(net, 
+                                              type = "both", 
+                                              edges = TRUE, 
+                                              names = TRUE,
+                                              sparse = FALSE)
+                        ## igraph puts the edge id in the matrix element
+                        mat[which(mat != 0)] = 1
                         networks[[counter]] <- mat
 
                     } else if (net_kind == "list") {
+                        # edgelist <- igraph::as_edgelist(net)
+                        # edgelist <- mat %>% as.matrix() %>% reshape2::melt() %>% dplyr::filter(value != 0)
                         edgelist <- net %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
                         networks[[counter]] = edgelist
 
@@ -126,11 +136,25 @@ make_Null <- function(input_network, net_kind, process, parameter, net_size, ite
                     power_PA = max(power_PA, resolution_min * power_max)
                     parameters = c(parameters, power_PA)
 
-                    mat <- make_Mixture(sequence = rep(paste0("g", processes[p]), net_size),
-                                        power_PA = power_PA,
-                                        directed = directed)
+                    net <- igraph::sample_pa(n = net_size, 
+                                             power = power_PA,
+                                             directed = directed,
+                                             m = 1, #NULL, 
+                                             out.dist = NULL, 
+                                             out.seq = NULL, 
+                                             out.pref = FALSE, 
+                                             zero.appeal = 1,
+                                             algorithm = "psumtree",
+                                             start.graph = NULL)
 
                     if (net_kind == "matrix") {
+                        mat <- igraph::as_adj(net, 
+                                            type = "both", 
+                                            edges = TRUE, 
+                                            names = TRUE,
+                                            sparse = FALSE)
+                        ## igraph puts the edge id in the matrix element
+                        mat[which(mat != 0)] = 1
                         networks[[counter]] <- mat
 
                     } else if (net_kind == "list") {
@@ -149,20 +173,12 @@ make_Null <- function(input_network, net_kind, process, parameter, net_size, ite
                     divergence_DD = max(divergence_DD, resolution_min)
                     parameters = c(parameters, divergence_DD)
 
-                    mat <- make_Mixture(sequence = rep(paste0("g", processes[p]), net_size),
-                                        divergence_DD = divergence_DD,
-                                        directed = directed)
+                    net <- make_DD(size = net_size, 
+                                   net_kind = net_kind, 
+                                   divergence = divergence_DD, 
+                                   directed = directed)
 
-                    if (net_kind == "matrix") {
-                        networks[[counter]] <- mat
-
-                    } else if (net_kind == "list") {
-                        edgelist <- net %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
-                        networks[[counter]] = edgelist
-
-                    } else {
-                        stop("Unknown network kind. Must be `list` or `matrix`.")
-                    }
+                    networks[[counter]] = net
 
                 } else if (process == "DM") {
                     directed = FALSE
@@ -174,21 +190,13 @@ make_Null <- function(input_network, net_kind, process, parameter, net_size, ite
 
                     mutation_DM <- divergence_DM
 
-                    mat <- make_Mixture(sequence = rep(paste0("g", processes[p]), net_size),
-                                        divergence_DM = divergence_DD,
-                                        mutation_DM = mutation_DM,
-                                        directed = directed)
+                    net <- make_DM(size = net_size, 
+                                   net_kind = net_kind, 
+                                   divergence = divergence_DM,
+                                   mutation = 0, #mutation_DM, 
+                                   directed = directed)
 
-                    if (net_kind == "matrix") {
-                        networks[[counter]] <- mat
-
-                    } else if (net_kind == "list") {
-                        edgelist <- net %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
-                        networks[[counter]] = edgelist
-
-                    } else {
-                        stop("Unknown network kind. Must be `list` or `matrix`.")
-                    }
+                    networks[[counter]] = net
 
                 } else if (process == "SW") {
                     directed = FALSE
@@ -198,25 +206,18 @@ make_Null <- function(input_network, net_kind, process, parameter, net_size, ite
                     rewire_SW = max(rewire_SW, resolution_min)
                     parameters = c(parameters, rewire_SW)
 
-                    # ## SW neighborhood parameter based on net_size if missing
-                    # if (missing(neighborhood)) {
-                    #     neighborhood = max(1, round(0.1 * net_size))
-                    # }
-
-                    mat <- make_Mixture(sequence = rep(paste0("g", processes[p]), net_size),
-                                        rewire_SW = rewire_SW,
-                                        directed = directed)
-
-                    if (net_kind == "matrix") {
-                        networks[[counter]] <- mat
-
-                    } else if (net_kind == "list") {
-                        edgelist <- net %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
-                        networks[[counter]] = edgelist
-
-                    } else {
-                        stop("Unknown network kind. Must be `list` or `matrix`.")
+                    ## SW neighborhood parameter based on net_size if missing
+                    if (missing(neighborhood)) {
+                        neighborhood = max(1, round(0.1 * net_size))
                     }
+
+                    net <- make_SW(size = net_size, 
+                                   net_kind = net_kind, 
+                                   rewire = rewire_SW, 
+                                   neighborhood = neighborhood, 
+                                   directed = directed)
+
+                    networks[[counter]] <- net
 
                 } else if (process == "NM") {
                     directed = TRUE
@@ -227,22 +228,13 @@ make_Null <- function(input_network, net_kind, process, parameter, net_size, ite
                     parameters = c(parameters, connectance_NM)
 
                     niches <- runif(net_size) # %>% sort()
-
-                    mat <- make_Mixture(sequence = rep(paste0("g", processes[p]), net_size),
-                                        niches = niches,
-                                        connectance_NM = connectance_NM,
-                                        directed = directed)
-
-                    if (net_kind == "matrix") {
-                        networks[[counter]] <- mat
-
-                    } else if (net_kind == "list") {
-                        edgelist <- net %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
-                        networks[[counter]] = edgelist
-
-                    } else {
-                        stop("Unknown network kind. Must be `list` or `matrix`.")
-                    }
+                    net <- make_NM(size = net_size,
+                                   net_kind = net_kind,
+                                   niches = niches, 
+                                   connectance = connectance_NM, 
+                                   directed = directed,
+                                   grow = TRUE)
+                    networks[[counter]] <- net
 
                 } else {
                     stop("An unknown process was included in the simulation.")
@@ -266,7 +258,6 @@ make_Null <- function(input_network, net_kind, process, parameter, net_size, ite
                     #   net_size = net_size,
                       cause_orientation = cause_orientation,
                       DD_kind = DD_kind,
-                      DD_weight = DD_weight,
                       DD_resize = DD_resize,
                       max_norm = max_norm,
                       size_different = size_different,

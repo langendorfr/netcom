@@ -10,7 +10,7 @@ vignette: >
   %\VignetteIndexEntry{netcom: Infer system functioning with empirical NETwork COMparisons}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
-  %\VignetteDepends{ggplot2}
+  %\VignetteDepends{dplyr}
 bibliography: references.bib
 csl: nature.csl
 ---
@@ -24,11 +24,11 @@ options(digits = 2)
 ```
 
 # Abstract
-Network data are ubiquitous, reflecting a burgeoning systematics paradigm across physical, natural, and social sciences. Means of inferring the functioning of the systems these networks describe has lagged behind. The **netcom** package provides generally applicable tools for inferring system functioning from network data. Instead of testing models of system formation and/or functioning with network data, **netcom** compares the networks to each other. Patterns in the resulting state space of inter-network distances capture system functioning, risk, and underlying mechanisms.
+Network data are ubiquitous, reflecting a burgeoning systematics paradigm across physical, natural, and social sciences. The __netcom__ package provides generally applicable tools for inferring system functioning from network data. Instead of testing models of system formation and/or functioning with network data, __netcom__ compares the networks to each other. Patterns in the resulting state space of inter-network distances capture system functioning, risk, and underlying mechanisms.
 
 # Installation
 
-You can install the **netcom** package two main ways. A release version of the package can from CRAN (the Comprehensive R Archive Network): https://cran.r-project.org/package=netcom.
+You can install the __netcom__ package two main ways. A release version of the package can be installed from CRAN (the Comprehensive R Archive Network): https://cran.r-project.org/package=netcom.
 
 ```{r CRAN installation, eval = FALSE}
 install.packages("netcom")
@@ -40,10 +40,16 @@ Alternatively, the most recent version can be installed from GitHub: https://git
 devtools::install_github("langendorfr/netcom")
 ```
 
-Once installed simply load the package and you will have access to all of its functionality.
+Once installed simply load the package and you will have access to all of its functionality. Here we also load data manipulation and visualization packages necessary for the rest of this vignette.
 
-```{r Setup}
+```{r Setup, message = FALSE}
 library(netcom)
+library(dplyr)
+library(tibble)
+library(expm)
+library(ggplot2)
+library(ggraph)
+library(ggfortify)
 ```
 
 # Simulating Networks
@@ -66,7 +72,36 @@ Note that both ways of simulating networks (growing and rewiring) involve assign
 
 As an example, here is a recipe for a realistically complex mixture network:
 
-```{r Simulate mixture network}
+```{r Easily simulate mixture network, fig.height = 4, fig.width = 4, fig.align = "left"}
+## 1. Start by creating a sequence of network evolutions.
+sequence <- c("gER", "gER", "gER", "gER", "gER", "gER", "gER",
+              "rPA", "rPA", "rPA", 
+              "gER", "gER", "gER")
+
+## 2. Simulate a network according to the rules of this system evolution.
+network <- make_Mixture(sequence)
+
+
+## Finally, plot the simulated network. netcom typically stores networks as matrices,
+## so to plot a network you will have to transform it into a linked list.
+network %>% 
+    reshape2::melt() %>% 
+    dplyr::filter(value == 1) %>% 
+    ggraph(layout = "stress") + 
+        theme_void() +
+        geom_node_point(size = 10,
+                        color = "slateblue") +
+        geom_edge_link(arrow = arrow(type = "closed",
+                                     length = unit(3, "mm")),
+                       start_cap = circle(4, "mm"),
+                       end_cap = circle(4, "mm"))
+```
+
+This is a system that grows randomly at first, adding three nodes that attach to other nodes according to the Erdos-Renyi (ER) random model. Node the first three elements of _sequence_ start with the letter _g_ signifying these are growth events. The next two events starts with the letter _r_ signifying rewiring events. These do not change the size of the network (number of nodes). Only the edges between currently existing nodes are affected, as happens for the next two events where two nodes are rewired according to the Preferential Attachment (PA) model. Note that these events include all currently existing nodes. In this way a rewiring event can result in a node interacting with a node that was grown (added to the network) after it.
+
+If you want to simulate a more complicated network you can use the functions called by *make_Mixture()*. These require more care as you must specify the node being acted on by each event. This works by initializing an empty matrix of the final network's size and then iteratively interacting with the row-column ID of each node. Here is an example of the same mixture network as above, but with a changing probability of attachment:
+
+```{r Manually simulate mixture network, fig.height = 4, fig.width = 4, fig.align = "left"}
 ## 1. Start by creating a network of the desired final size with only two variables that
 ## interact with each other.
 network_size <- 10
@@ -97,33 +132,110 @@ for (node in 8:10) {
     network = netcom::grow_ER(network, x = node, p = p_interaction)
 }
 
-print(network)
+## Finally, plot the simulated network. Remember, netcom typically stores networks as matrices,
+## so to plot a network you will have to transform it into a linked list.
+network %>% 
+    reshape2::melt() %>% 
+    dplyr::filter(value == 1) %>% 
+    ggraph(layout = "stress") + 
+        theme_void() +
+        geom_node_point(size = 10,
+                        color = "slateblue") +
+        geom_edge_link(arrow = arrow(type = "closed",
+                                     length = unit(3, "mm")),
+                       start_cap = circle(4, "mm"),
+                       end_cap = circle(4, "mm"))
 ```
 
 This models a community that grows randomly, but with a decreasing chance of new members interacting. Several choose to rethink their interactions, preferring to interact with members that have lots of interactions. Subsequent growth then involves a constant higher level of interactions with new members.
 
-Initializing an empty matrix, and having to specify which subset of the matrix to use in a rewiring event, may seem cumbersome but they allow you to simulate a greater diversity of networks. For example, you can grow nodes anachronistic to their location in the network matrix, and explore rewiring in the context of metacommunities, neither of which would be possible if the input network was itself a fully simulated network.
+Learning to use individual *grow_* and *stir_* functions can help you add your own, extending the mechanisms available for simulation and classification.
 
 # Comparing Networks
 
-Aligning two networks is a common way to compare them to each other. This works by pairing nodes between the two networks, typically as a mathematical injection; 'one-to-one' but not necessarily 'onto'. You can visualize this by imagining stacking one network on top of the other. A common way to do this is to minimize the disagreement in their edges. Looking at the two networks stacked together, this is the number of places where there is only one edge, indicating that one of the networks claims there is an interaction between the two nodes connected by the edge and the other thinks those two nodes describe variables that do not interact.
+Aligning two networks is a common way to compare them to each other. This works by pairing nodes between the two networks, typically as a mathematical injection; 'one-to-one' but not necessarily 'onto'. You can visualize this as stacking one network on top of the other. A common way to do this is to minimize the disagreement in their edges. Looking at the two networks stacked together, this is the number of places where there is only one edge, indicating that one of the networks claims there is an interaction between the two nodes connected by the edge and the other thinks those two nodes describe variables that do not interact.
 
-Network alignment offers useful insights at both the level of the entire network and the level of individual nodes. Paired nodes suggest variables that may serve similar functional roles in their respective systems, and may even respond similarly to disturbances. This kind of information sharing is particularly helpful in systems that are difficult to study but have closely related systems that are more common, for example a species that is endangered in one country but common in another. Zooming out to the level of entire networks, alignments offer a way to map state spaces of systemic properties, structures, and functions. 
+Network alignment offers useful insights at both the level of the entire network and the level of individual nodes. Paired nodes suggest variables that may serve similar functional roles in their respective systems, and may even respond similarly to disturbances. This kind of information sharing is particularly helpful in systems that are difficult to study but have closely related systems that are more common, for example a species that is endangered in one country but common in another. Zooming out to the level of entire networks, network alignment offers a way to map state spaces of systemic properties, structures, and functions. 
 
-```{r Align networks}
+```{r Align networks, fig.height = 4, fig.width = 4, fig.align = "left"}
+## Create two sets of 5 networks each, all with 10 nodes. One of these sets is grown
+## according to the Small-World (SW) random mechanism. The other is also grown in this
+## manner, but with one randomly rewired nodes for every 2 nodes grown, mimicking a 
+## disturbed system.
+num_networks <- 10
+
+## First set of undisturbed networks.
+networks_SW <- list()
+for (net in 1:num_networks) {
+    # networks_SW[[net]] = netcom::make_SW(size = 10, 
+    #                                      net_kind = "matrix", 
+    #                                      rewire = 0.2, 
+    #                                      neighborhood = 2, 
+    #                                      directed = FALSE)
+    networks_SW[[net]] = netcom::make_Mixture(rep("gSW", 20))
+}
+
+## Second set of disturbed networks
+networks_SW_disturbed <- list()
+for (net in 1:num_networks) {
+    networks_SW_disturbed[[net]] = netcom::make_Mixture(rep(c(rep("gSW", 3), rep("rER", 2)), 4))
+}
+
+## Pairwise compare all of the networks to each other 
+networks <- c(networks_SW, networks_SW_disturbed)
+comparisons <- matrix(NA, nrow = length(networks), ncol = length(networks))
+for (row in 1:length(networks)) {
+    for (col in 1:length(networks)) {
+        
+        ## Take advantage of the symmetry of this alignment algorithm
+        if (col > row) {
+            comparisons[row, col] = netcom::align(networks[[row]], networks[[col]])$score
+            comparisons[col, row] = comparisons[row, col]
+        }
+
+    }
+}
+## Self-alignment always returns a zero distance so these can be added manually
+diag(comparisons) = 0
+
+## PCA of comparisons
+stats::prcomp(comparisons) %>%
+    ggplot2::autoplot(data = tibble(Kind = c(rep("Small-World", num_networks),
+                                             rep("Disturbed Small-World", num_networks))), 
+                      colour = "Kind",
+                      size = 5) + 
+    theme_bw() +
+    theme(legend.position = "bottom",
+          legend.title = element_blank())
 ```
 
 Aligning networks is not the only way to compare them. For example, the average degree (number of interactions) in a network can be compared. This does not tell you which nodes are most like each other between the two networks, but does allow you to make network-level inferences. It also more naturally allows for ensemble methods, where you compare networks as a weighted average of the differences across multiple characterizations.
 
 # Network Classification
-We can combine network simulation and comparisons to test a hypothesized mechanism against network data.
+We can combine network simulation and comparisons to test a hypothesized mechanism against network data. Here the p-values are for the null hypothesis that the network was generated according to the particular mechanism being tested. Small p-values indicate the mechanism likely does not govern the system described by the network. Note that non-significant p-values do not prove the network was generated by that mechanism, only that it appears as similar to networks that are generated by that mechanism as they are to each other.
 
-```{r Classify networks}
+```{r Classify networks, fig.height = 4, fig.width = 4, fig.align = "left"}
+## Classification of an undisturbed Small-World network made above
+netcom::classify(networks_SW[[1]], 
+                 processes = c("SW", "ER"),
+                 best_fit_kind = "avg",
+                 resolution = 100,
+                 reps = 20,
+                 null_reps = 50,
+                 ks_dither = 1e-10,
+                 verbose = FALSE)
+
+## Classification of a disturbed Small-World network made above
+netcom::classify(networks_SW_disturbed[[1]], 
+                 processes = c("SW", "ER"),
+                 best_fit_kind = "avg",
+                 resolution = 100,
+                 reps = 100,
+                 null_reps = 250,
+                 ks_dither = 1e-10,
+                 verbose = FALSE)
 ```
 
-
-# Acknowledgements
-
-**netcom** is the product of years of collaborative research. We thank: Dan Doak, ...
+Pure mechanisms are readily inferred by comparing a network with many networks simualted from hypothesized mechanisms. Mixture mechanisms are not. This is because different mixtures can produce similar network structures. Fortunately, there is evidence we can still functionally classify network data describing realistically complex systems governed by mixtures of mechanisms @langendorf2020empirically.
 
 # References

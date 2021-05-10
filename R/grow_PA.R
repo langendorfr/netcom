@@ -31,11 +31,11 @@
 #' 
 #' @export
 
-grow_PA <- function(matrix, x, power, sum_v_max = "max", nascent_help = TRUE, retcon = FALSE, directed = TRUE) {
+grow_PA <- function(matrix, x, power, sum_v_max = "sum", nascent_help = TRUE, retcon = FALSE, directed = TRUE) {
     w <- x-1
 
-    out_degree <- rowSums(matrix[1:w, 1:w])
-    in_degree <- colSums(matrix[1:w, 1:w])
+    out_degree <- rowSums(as.matrix(matrix[1:w, 1:w]))
+    in_degree <- colSums(as.matrix(matrix[1:w, 1:w]))
 
     ## Give all nodes an extra edge so there is some nonzero probability of new nodes accumulating edges
     ## Note: This is likely less biased at small degrees than adding an edge only to zero degree nodes

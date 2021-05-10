@@ -33,8 +33,8 @@ stir_PA <- function(matrix, x, power, retcon = FALSE, sum_v_max = "max", nascent
     # w <- x-1
     n <- ncol(matrix)
 
-    out_degree <- rowSums(matrix[-x, -x])
-    in_degree <- colSums(matrix[-x, -x])
+    out_degree <- rowSums(as.matrix(matrix[-x, -x]))
+    in_degree <- colSums(as.matrix(matrix[-x, -x]))
 
     ## Give all nodes an extra edge so there is some nonzero probability of new nodes accumulating edges
     ## Note: This is likely less biased at small degrees than adding an edge only to zero degree nodes

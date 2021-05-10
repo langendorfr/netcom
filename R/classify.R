@@ -68,7 +68,7 @@
 #' 
 #' @export
 
-classify <- function(network, directed = FALSE, method = "DD", net_kind = "matrix", DD_kind = "all", DD_weight = 1, cause_orientation = "row", max_norm = FALSE, resolution = 100, resolution_min = 0.01, resolution_max = 0.99, reps = 3, processes = c("ER", "PA", "DM", "SW", "NM"), power_max = 5, connectance_max = 0.5, divergence_max = 0.5, mutation_max = 0.5, null_reps = 50, best_fit_kind = "avg", best_fit_sd = 1e-2, ks_dither = 0, ks_alternative = "two.sided", cores = 1, size_different = FALSE, DD_resize = "smaller", null_dist_trim = 1, verbose = TRUE) {
+classify <- function(network, directed = FALSE, method = "DD", net_kind = "matrix", DD_kind = c("in", "out", "entropy_in", "entropy_out", "clustering_coefficient", "page_rank", "communities", "motifs_3", "motifs_4", "eq_in", "eq_out", "eq_entropy_in", "eq_entropy_out", "eq_clustering_coefficient", "eq_page_rank", "eq_communities", "eq_motifs_3", "eq_motifs_4"), DD_weight = c(0.0735367966, 0.0739940162, 0.0714523761, 0.0708156931, 0.0601296752, 0.0448072016, 0.0249793608, 0.0733125084, 0.0697029389, 0.0504358835, 0.0004016029, 0.0563752664, 0.0561878218, 0.0540490099, 0.0504347104, 0.0558106667, 0.0568270319, 0.0567474398), cause_orientation = "row", max_norm = FALSE, resolution = 100, resolution_min = 0.01, resolution_max = 0.99, reps = 3, processes = c("ER", "PA", "DM", "SW", "NM"), power_max = 5, connectance_max = 0.5, divergence_max = 0.5, mutation_max = 0.5, null_reps = 50, best_fit_kind = "avg", best_fit_sd = 1e-2, ks_dither = 0, ks_alternative = "two.sided", cores = 1, size_different = FALSE, DD_resize = "smaller", null_dist_trim = 1, verbose = TRUE) {
 
     ## Matrix input checks
     if (net_kind == "matrix") {
@@ -145,7 +145,7 @@ classify <- function(network, directed = FALSE, method = "DD", net_kind = "matri
 
         ## Use the min of the average
         ## Even for a given process and parameter there are many possible networks
-        
+
         if (best_fit_kind == "avg") {
             parameters_scored_process = parameters_scored_process %>% group_by(Process, Parameter_Value) %>% summarize(Distance = mean(Distance), .groups = "drop")
         } else if (best_fit_kind == "min") {
@@ -169,8 +169,9 @@ classify <- function(network, directed = FALSE, method = "DD", net_kind = "matri
         null_dist <- make_Null(input_network = network,
                                net_kind = net_kind,
                                DD_kind = DD_kind,
+                               DD_weight = DD_weight,
                                process = best_fit$Process, 
-                               parameter = best_fit$Parameter_Value,
+                               parameter = 2, #best_fit$Parameter_Value,
                                power_max = power_max,
                                connectance_max = connectance_max,
                                divergence_max = divergence_max,

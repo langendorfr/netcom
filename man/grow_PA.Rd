@@ -8,7 +8,7 @@ grow_PA(
   matrix,
   x,
   power,
-  sum_v_max = "max",
+  sum_v_max = "sum",
   nascent_help = TRUE,
   retcon = FALSE,
   directed = TRUE

@@ -16,6 +16,7 @@ Encoding: UTF-8
 Depends: R (>= 3.1.0)
 Imports:
     dplyr,
+    tibble,
     stats,
     clue,
     expm,
