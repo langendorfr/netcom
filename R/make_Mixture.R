@@ -72,23 +72,23 @@ make_Mixture <- function(sequence, niches, p_ER = 0.5, power_PA = 2, divergence_
         }
 
         if (sequence[x] == "gER") {
-            matrix = grow_ER(matrix, s, p = p_ER, retcon = retcon, directed = directed) #TRUE)
+            matrix = grow_ER(matrix, s, p = p_ER, retcon = retcon, directed = T) #directed) #TRUE)
         } else if (sequence[x] == "gPA") {
-            matrix = grow_PA(matrix, s, power = power_PA, retcon = retcon, directed = directed) #TRUE)
+            matrix = grow_PA(matrix, s, power = power_PA, retcon = retcon, directed = T) #directed) #TRUE)
         } else if (sequence[x] == "gDD") {
-            matrix = grow_DD(matrix, s, divergence = divergence_DD, link = link_DD, directed = directed) #FALSE)
+            matrix = grow_DD(matrix, s, divergence = divergence_DD, link = link_DD, directed = F) #directed) #FALSE)
         } else if (sequence[x] == "gDM") {
-            matrix = grow_DM(matrix, s, divergence = divergence_DM, mutation = mutation_DM, link = link_DM, directed = directed) #FALSE)
+            matrix = grow_DM(matrix, s, divergence = divergence_DM, mutation = mutation_DM, link = link_DM, directed = F) #directed) #FALSE)
         } else if (sequence[x] == "gSW") {
-            matrix = grow_SW(matrix, s, rewire = rewire_SW, retcon = retcon, directed = directed) #FALSE)
+            matrix = grow_SW(matrix, s, rewire = rewire_SW, retcon = retcon, directed = F) #directed) #FALSE)
         } else if (sequence[x] == "gNM") {
-            matrix = grow_NM(matrix, s, connectance = connectance_NM, niches = niches, retcon = retcon, directed = directed) #TRUE)
+            matrix = grow_NM(matrix, s, connectance = connectance_NM, niches = niches, retcon = retcon, directed = T) #directed) #TRUE)
         } else if (sequence[x] == "rER") {
             matrix = stir_ER(matrix = matrix, x = x_rewire, p = p_ER)
         } else if (sequence[x] == "rPA") {
             matrix = stir_PA(matrix = matrix, x = x_rewire, power = power_PA)
         } else if (sequence[x] == "rDD") {
-            matrix = stir_DM(matrix = matrix, x = x_rewire, divergence = divergence_DD, link = link_DD, force_connected = force_connected)
+            matrix = stir_DD(matrix = matrix, x = x_rewire, divergence = divergence_DD, link = link_DD, force_connected = force_connected)
         } else if (sequence[x] == "rDM") {
             matrix = stir_DM(matrix = matrix, x = x_rewire, divergence = divergence_DM, mutation = mutation_DM, link = link_DM, force_connected = force_connected)
         } else if (sequence[x] == "rNM") {

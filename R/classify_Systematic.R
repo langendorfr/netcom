@@ -10,8 +10,6 @@
 #' 
 #' @param net_kind If the network is an adjacency matrix ("matrix") or an edge list ("list"). Defaults to "matrix".
 #' 
-#' @param mechanism_kind Either "canonical" or "mixture" can be used to simulate networks. If "mixture" is used, note that here it will only simulate pure mixtures made of a single mechanism. Defaults to "canonical".
-#' 
 #' @param DD_kind = A vector of network properties to be used to compare networks. Defaults to "all", which is the average of the in- and out-degrees.
 #' 
 #' @param DD_weight = Weights of each network property in DD_kind. Defaults to 1, which is equal weighting for each property.
@@ -40,7 +38,7 @@
 #' 
 #' @param null_reps Defaults to 50. The number of best fit networks to simulate that will be used to create a null distribution of distances between networks within the given process, which will then be used to test if the target network appears unusually distant from them and therefore likely not governed by that process.
 #' 
-#' @param best_fit_sd Defaults to 0. Standard Deviation used to simulate networks with a similar but not identical best fit parameter. This is important because simulating networks with the identical parameter can artificially inflate the false negative rate by assuming the best fit parameter is the true parameter. For large resolution and reps values this will become true, but can be computationally intractable for realistically large systems.
+#' @param best_fit_sd Defaults to 0.01. Standard Deviation used to simulate networks with a similar but not identical best fit parameter. This is important because simulating networks with the identical parameter artificially inflates the false negative rate by assuming the best fit parameter is the true parameter. For large resolution and reps values this will become true, but also computationally intractable for realistically large systems.
 #' 
 #' @param ks_dither Defaults to 0. The KS test cannot compute exact p-values when every pairwise network distance is not unique. Adding small amounts of noise makes each distance unique. We are not aware of a study on the impacts this has on accuracy so it is set to zero by default.
 #' 
@@ -70,7 +68,7 @@
 #' 
 #' @export
 
-classify <- function(network, directed = FALSE, method = "DD", net_kind = "matrix", mechanism_kind = "canonical", DD_kind = c("in", "out", "entropy_in", "entropy_out", "clustering_coefficient", "page_rank", "communities", "motifs_3", "motifs_4", "eq_in", "eq_out", "eq_entropy_in", "eq_entropy_out", "eq_clustering_coefficient", "eq_page_rank", "eq_communities", "eq_motifs_3", "eq_motifs_4"), DD_weight = c(0.0735367966, 0.0739940162, 0.0714523761, 0.0708156931, 0.0601296752, 0.0448072016, 0.0249793608, 0.0733125084, 0.0697029389, 0.0504358835, 0.0004016029, 0.0563752664, 0.0561878218, 0.0540490099, 0.0504347104, 0.0558106667, 0.0568270319, 0.0567474398), cause_orientation = "row", max_norm = FALSE, resolution = 100, resolution_min = 0.01, resolution_max = 0.99, reps = 3, processes = c("ER", "PA", "DM", "SW", "NM"), power_max = 5, connectance_max = 0.5, divergence_max = 0.5, mutation_max = 0.5, null_reps = 50, best_fit_kind = "avg", best_fit_sd = 0, ks_dither = 0, ks_alternative = "two.sided", cores = 1, size_different = FALSE, DD_resize = "smaller", null_dist_trim = 1, verbose = TRUE) {
+classify <- function(network, directed = FALSE, method = "DD", net_kind = "matrix", DD_kind = c("in", "out", "entropy_in", "entropy_out", "clustering_coefficient", "page_rank", "communities", "motifs_3", "motifs_4", "eq_in", "eq_out", "eq_entropy_in", "eq_entropy_out", "eq_clustering_coefficient", "eq_page_rank", "eq_communities", "eq_motifs_3", "eq_motifs_4"), DD_weight = c(0.0735367966, 0.0739940162, 0.0714523761, 0.0708156931, 0.0601296752, 0.0448072016, 0.0249793608, 0.0733125084, 0.0697029389, 0.0504358835, 0.0004016029, 0.0563752664, 0.0561878218, 0.0540490099, 0.0504347104, 0.0558106667, 0.0568270319, 0.0567474398), cause_orientation = "row", max_norm = FALSE, resolution = 100, resolution_min = 0.01, resolution_max = 0.99, reps = 3, processes = c("ER", "PA", "DM", "SW", "NM"), power_max = 5, connectance_max = 0.5, divergence_max = 0.5, mutation_max = 0.5, null_reps = 50, best_fit_kind = "avg", best_fit_sd = 1e-2, ks_dither = 0, ks_alternative = "two.sided", cores = 1, size_different = FALSE, DD_resize = "smaller", null_dist_trim = 1, verbose = TRUE) {
 
     ## Matrix input checks
     if (net_kind == "matrix") {
@@ -97,70 +95,83 @@ classify <- function(network, directed = FALSE, method = "DD", net_kind = "matri
         stop("Unknown network kind. Must be `list` or `matrix`.")
     }
 
-    ## Helper function to find the best fitting version of a mechanism by searching across its parameter space
-    best_fit_optim <- function(parameter) {
-        ## Create object with list of networks and table of corresponding parameters
-        state_space <- make_Systematic(net_size = net_size,
-                                    net_kind = net_kind,
-                                    mechanism_kind = mechanism_kind,
-                                    resolution = 1,
-                                    resolution_min = parameter,
-                                    resolution_max = parameter,
-                                    reps = reps,
-                                    processes = processes[p],
-                                    power_max = power_max,
-                                    connectance_max = connectance_max,
-                                    divergence_max = divergence_max,
-                                    mutation_max = mutation_max,
-                                    cores = cores,
-                                    directed = directed,
-                                    verbose = verbose)
+    ## Create object with list of networks and table of corresponding parameters
+    state_space <- make_Systematic(net_size = net_size,
+                                   net_kind = net_kind,
+                                   resolution = resolution,
+                                   resolution_min = resolution_min,
+                                   resolution_max = resolution_max,
+                                   reps = reps,
+                                   processes = processes,
+                                   power_max = power_max,
+                                   connectance_max = connectance_max,
+                                   divergence_max = divergence_max,
+                                   mutation_max = mutation_max,
+                                   cores = cores,
+                                   directed = directed,
+                                   verbose = verbose)
 
-        networks <- state_space$networks
-        parameters <- state_space$parameters
+    networks <- state_space$networks
+    parameters <- state_space$parameters
 
-        D_target <- compare_Target(target = network, 
-                                networks = networks, 
-                                #    net_size = net_size,
-                                net_kind = net_kind,
-                                method = method, 
-                                cause_orientation = cause_orientation, 
-                                DD_kind = DD_kind, 
-                                DD_weight = DD_weight,
-                                max_norm = max_norm, 
-                                #    size_different = size_different,
-                                cores = cores, 
-                                verbose = verbose)
+    D_target <- compare_Target(target = network, 
+                               networks = networks, 
+                            #    net_size = net_size,
+                               net_kind = net_kind,
+                               method = method, 
+                               cause_orientation = cause_orientation, 
+                               DD_kind = DD_kind, 
+                               DD_weight = DD_weight,
+                               max_norm = max_norm, 
+                            #    size_different = size_different,
+                               cores = cores, 
+                               verbose = verbose)
+    
+    # print("D_target")
+    # print(D_target)
+
+    parameters_scored <- dplyr::mutate(parameters, Distance = D_target)
+
+    ## Check each process one at a time
+    pvalues <- rep(NA, length(processes))
+    p_estimates <- rep(NA, length(processes))
+    for (p in seq_along(processes)) {
+        if (verbose) {print(paste0("Checking if the network is ", processes[p], "."))}
+
+        parameters_scored_process <- dplyr::filter(parameters_scored, Process == processes[p])
+
+        # print("parameters_scored_process")
+        # print(parameters_scored_process)
+
+        ## Use the min of the average
+        ## Even for a given process and parameter there are many possible networks
 
         if (best_fit_kind == "avg") {
-            optim_fit <- mean(D_target)
+            parameters_scored_process = parameters_scored_process %>% group_by(Process, Parameter_Value) %>% summarize(Distance = mean(Distance), .groups = "drop")
         } else if (best_fit_kind == "min") {
-            optim_fit <- min(D_target)
+            parameters_scored_process = parameters_scored_process %>% group_by(Process, Parameter_Value) %>% summarize(Distance = min(Distance), .groups = "drop")
         } else if (best_fit_kind == "max") {
-            optim_fit <- max(D_target)
+            parameters_scored_process = parameters_scored_process %>% group_by(Process, Parameter_Value) %>% summarize(Distance = max(Distance), .groups = "drop")
         } else if (best_fit_kind == "median") {
-            optim_fit <- median(D_target)
+            parameters_scored_process = parameters_scored_process %>% group_by(Process, Parameter_Value) %>% summarize(Distance = median(Distance), .groups = "drop")
         } else {
-            stop("best_fit_kind must be `avg`, `median`, `min`, or `max`.")
+            stop("best_fit_kind must be `avg`, `min`, or `max`.")
         }
 
-        if (verbose) { print(paste0("best_fit_optim: ", parameter, " => ", optim_fit)) }
+        best_fit <- dplyr::filter(parameters_scored_process, Distance == min(parameters_scored_process$Distance))
 
-        return(optim_fit)
-    }
+        ## Assuming there are multiple best fits, pick one randomly
+        best_fit = best_fit[sample(1:nrow(best_fit), size = 1), ]
 
-
-    ## Helper function to find the best fitting version of a mechanism by searching across its parameter space
-    null_fit_optim <- function(parameter) {
-
-        best_fit <- parameter
+        # print("best_fit")
+        # print(best_fit)
 
         null_dist <- make_Null(input_network = network,
                                net_kind = net_kind,
                                DD_kind = DD_kind,
                                DD_weight = DD_weight,
-                               process = processes[p], 
-                               parameter = best_fit,
+                               process = best_fit$Process, 
+                               parameter = best_fit$Parameter_Value, #2, #best_fit$Parameter_Value,
                                power_max = power_max,
                                connectance_max = connectance_max,
                                divergence_max = divergence_max,
@@ -187,7 +198,6 @@ classify <- function(network, directed = FALSE, method = "DD", net_kind = "matri
             null_dist_process = null_dist_process[1:round(length(null_dist_process)*null_dist_trim)]
         }
 
-        ### KS test
         ## alternative should be "less" because less than expected just means best_fit_sd is too big, but I was getting weird p-values of 1 so left the default as "two.sided"
         ks_test <- stats::ks.test(x = null_dist_network + rnorm(n = length(null_dist_network), mean = 0, sd = ks_dither), 
                                   y = null_dist_process + rnorm(n = length(null_dist_process), mean = 0, sd = ks_dither), 
@@ -195,110 +205,6 @@ classify <- function(network, directed = FALSE, method = "DD", net_kind = "matri
 
         # p_value <- 1 - sum(best_fit$Distance > null_dist) / length(null_dist)
         p_value <- ks_test$p.value
-
-        print(paste0(parameter, " => ", 1 - p_value))
-
-        return(1 - p_value)
-
-    }
-
-
-    ## Check each process one at a time
-    pvalues <- rep(NA, length(processes))
-    p_estimates <- rep(NA, length(processes))
-    for (p in seq_along(processes)) {
-        if (verbose) {print(paste0("Checking if the network is ", processes[p], "."))}
-
-        # optim_fit <- optimx::optimx(par = mean(c(resolution_min, resolution_max)), ## Start in the midde of the range of possible parameter values
-        #                             fn = best_fit_optim, 
-        #                             method = "L-BFGS-B", 
-        #                             lower = resolution_min, 
-        #                             upper = resolution_max) #[1,1]
-        # best_fit = optim_fit[1,1]
-
-        # optim_fit <- GenSA::GenSA(fn = best_fit_optim,  #null_fit_optim, #best_fit_optim, 
-        #                             lower = resolution_min, 
-        #                             upper = resolution_max,
-        #                             control = list(max.call = 1e2, maxit = 1e2, smooth = FALSE))
-        # best_fit = optim_fit$par
-
-        possible_pars <- seq(from = resolution_min, to = resolution_max, length.out = resolution)
-        possible_pars_fits <- rep(NA, length(possible_pars))
-        for (par in seq_along(possible_pars)) {
-            if (verbose) {print(paste0("Comparing the network to ", processes[p], " with parameter ", possible_pars[par], "."))}
-            possible_pars_fits[par] = best_fit_optim(possible_pars[par])
-        }
-
-        ## Use the first best fitting parameter in case there are multiple. Do not aggregate these in case they are different optima
-        best_fit <- possible_pars[which(possible_pars_fits == min(possible_pars_fits))][1]
-
-        null_dist <- make_Null(input_network = network,
-                               net_kind = net_kind,
-                               DD_kind = DD_kind,
-                               DD_weight = DD_weight,
-                               process = processes[p], 
-                               parameter = best_fit,
-                               power_max = power_max,
-                               connectance_max = connectance_max,
-                               divergence_max = divergence_max,
-                               net_size = net_size, 
-                               iters = null_reps, ## Note: length(null_dist) = ((iters^2)-iters)/2
-                               method = method,
-                               neighborhood = max(1, round(0.1 * net_size)),
-                               best_fit_sd = best_fit_sd,
-                               cores = cores,
-                               directed = directed,
-                               size_different = size_different,
-                               DD_resize = DD_resize,
-                               cause_orientation = cause_orientation,
-                               max_norm = max_norm,
-                               verbose = verbose)
-
-        ## Distances from target network to hypothesized mechanism with the best fit parameter
-        null_dist_network <- null_dist$D_null[1,-1]
-
-        ## Distance matrix is symmetric so only use the lower triangular values
-        # null_dist_process <- null_dist$D_null[-1,-1]
-        # null_dist_process = null_dist_process[lower.tri(null_dist_process, diag = FALSE)]
-
-        # if ((null_dist_trim > 0) & (null_dist_trim < 1)) {
-        #     null_dist_network = null_dist_network[1:round(length(null_dist_network)*null_dist_trim)]
-        #     null_dist_process = null_dist_process[1:round(length(null_dist_process)*null_dist_trim)]
-        # }
-
-
-
-
-        ## Best fitting network simulated from the mechanism with the best fit parameter
-        best_fit_null_network <- which(null_dist_network == min(null_dist_network))[1]
-        ## +1 because left out the first row for the target network in calculating `null_dist_network`
-        null_dist_process <- null_dist$D_null[1+best_fit_null_network, -c(1, 1+best_fit_null_network)]
-
-
-        ## Percentile of average distance to networks simulated from the mechanism with the best fit parameter
-        avg_null_distances <- (rowSums(null_dist$D_null)/nrow(null_dist$D_null))
-        p_value <- sum(avg_null_distances[-1] > avg_null_distances[1])/(length(avg_null_distances)-1)
-
-
-
-
-
-        ### KS test
-        ## alternative should be "less" because less than expected just means best_fit_sd is too big, but I was getting weird p-values of 1 so left the default as "two.sided"
-        # ks_test <- stats::ks.test(x = null_dist_network + rnorm(n = length(null_dist_network), mean = 0, sd = ks_dither), 
-        #                           y = null_dist_process + rnorm(n = length(null_dist_process), mean = 0, sd = ks_dither), 
-        #                           alternative = ks_alternative) %>% suppressWarnings() 
-
-        # # p_value <- 1 - sum(best_fit$Distance > null_dist) / length(null_dist)
-        # p_value <- ks_test$p.value
-
-        #### WMWU test
-        # p_value <- stats::wilcox.test(null_dist_network, sample(null_dist_process, length(null_dist_network)))$p.value
-        # p_value <- stats::wilcox.test(null_dist_network, null_dist_process, alternative = "greater")$p.value
-        
-        #### two-sample t-test on rank-transformed data, which is supposedly equivalent to the WMWU test
-        # p_value <- stats::t.test(x = rank(null_dist_network), y = rank(sample(null_dist_process, length(null_dist_network))))$p.value
-        # p_value <- stats::t.test(x = rank(null_dist_network), y = rank(null_dist_process))$p.value
 
         pvalues[p] = p_value
         # p_estimates[p] = stats::weighted.mean(x = null_dist$parameters, w = 1/(null_dist$D_null[1,-1]))

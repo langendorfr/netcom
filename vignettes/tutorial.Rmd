@@ -52,6 +52,17 @@ library(ggraph)
 library(ggfortify)
 ```
 
+```{r TemporarilyUseTheseFunctionsInsteadOfTheNetcomLibrary, message = FALSE}
+setwd("/Users/ryan/Code/netcom/R")
+netcom_scripts <- list.files(pattern = ".R")
+for (script in netcom_scripts) {
+    source(script)
+}
+source("make_Systematic_canonical.R")
+source("make_Null_canonical.R")
+```
+
+
 # Simulating Networks
 
 Network simulation is a powerful way to study complex systems. By simulating networks according to different mechanisms (network generating recipes) you can study the kinds of systems that emerge. By comparing these networks to each other you can classify networks, and by comparing them to empirical network data you can quantify the probability that a particular mechanism is at play in a given real world system.

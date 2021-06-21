@@ -61,7 +61,7 @@
 #' 
 #' @export
 
-make_Null <- function(input_network, net_kind, process, parameter, net_size, iters, method, neighborhood, resolution_min = 0.01, resolution_max = 0.99, directed = TRUE, DD_kind, power_max = 5, connectance_max = 0.5, divergence_max = 0.5, best_fit_sd = 0, cores = 1, size_different = FALSE, cause_orientation = "row", max_norm = FALSE, DD_resize = "smaller", verbose = FALSE) {
+make_Null <- function(input_network, net_kind, process, parameter, net_size, iters, method, neighborhood, DD_kind, DD_weight, resolution_min = 0.01, resolution_max = 0.99, directed = TRUE, power_max = 5, connectance_max = 0.5, divergence_max = 0.5, best_fit_sd = 0, cores = 1, size_different = FALSE, cause_orientation = "row", max_norm = FALSE, DD_resize = "smaller", verbose = FALSE) {
     ## Primary Directory
     # pd <- "/Users/ryan/Windows/Documents/Post UCB/Research/Relativism"
     # setwd(pd)
@@ -96,7 +96,7 @@ make_Null <- function(input_network, net_kind, process, parameter, net_size, ite
 
                 ## Add network to growing list, made from same process and parameter
                 if (process == "ER") {
-                    directed = TRUE
+                    # directed = TRUE
 
                     p_ER <- parameter + rnorm(n = 1, mean = 0, sd = best_fit_sd)
                     p_ER = min(p_ER, resolution_max)
@@ -129,9 +129,9 @@ make_Null <- function(input_network, net_kind, process, parameter, net_size, ite
                     }
 
                 } else if (process == "PA") {
-                    directed = TRUE
+                    # directed = TRUE
 
-                    power_PA <- parameter + (rnorm(n = 1, mean = 0, sd = best_fit_sd) * power_max)
+                    power_PA <- (parameter * power_max) + rnorm(n = 1, mean = 0, sd = best_fit_sd)
                     power_PA = min(power_PA, resolution_max * power_max)
                     power_PA = max(power_PA, resolution_min * power_max)
                     parameters = c(parameters, power_PA)
@@ -166,9 +166,9 @@ make_Null <- function(input_network, net_kind, process, parameter, net_size, ite
                     }
 
                 } else if (process == "DD") {
-                    directed = FALSE
+                    # directed = FALSE
 
-                    divergence_DD <- parameter + (rnorm(n = 1, mean = 0, sd = best_fit_sd) * divergence_max)
+                    divergence_DD <- (parameter * divergence_max) + rnorm(n = 1, mean = 0, sd = best_fit_sd)
                     divergence_DD = min(divergence_DD, resolution_max)
                     divergence_DD = max(divergence_DD, resolution_min)
                     parameters = c(parameters, divergence_DD)
@@ -181,9 +181,9 @@ make_Null <- function(input_network, net_kind, process, parameter, net_size, ite
                     networks[[counter]] = net
 
                 } else if (process == "DM") {
-                    directed = FALSE
+                    # directed = FALSE
 
-                    divergence_DM <- parameter + (rnorm(n = 1, mean = 0, sd = best_fit_sd) * divergence_max)
+                    divergence_DM <- (parameter  * divergence_max) + rnorm(n = 1, mean = 0, sd = best_fit_sd)
                     divergence_DM = min(divergence_DM, resolution_max)
                     divergence_DM = max(divergence_DM, resolution_min)
                     parameters = c(parameters, divergence_DM)
@@ -193,13 +193,13 @@ make_Null <- function(input_network, net_kind, process, parameter, net_size, ite
                     net <- make_DM(size = net_size, 
                                    net_kind = net_kind, 
                                    divergence = divergence_DM,
-                                   mutation = 0, #mutation_DM, 
+                                   mutation = mutation_DM, 
                                    directed = directed)
 
                     networks[[counter]] = net
 
                 } else if (process == "SW") {
-                    directed = FALSE
+                    # directed = FALSE
 
                     rewire_SW <- parameter + rnorm(n = 1, mean = 0, sd = best_fit_sd)
                     rewire_SW = min(rewire_SW, resolution_max)
@@ -220,9 +220,9 @@ make_Null <- function(input_network, net_kind, process, parameter, net_size, ite
                     networks[[counter]] <- net
 
                 } else if (process == "NM") {
-                    directed = TRUE
+                    # directed = TRUE
 
-                    connectance_NM <- parameter + (rnorm(n = 1, mean = 0, sd = best_fit_sd) * connectance_max)
+                    connectance_NM <- (parameter * connectance_max) + rnorm(n = 1, mean = 0, sd = best_fit_sd)
                     connectance_NM = min(connectance_NM, resolution_max * connectance_max)
                     connectance_NM = max(connectance_NM, resolution_min * connectance_max)
                     parameters = c(parameters, connectance_NM)
@@ -258,6 +258,7 @@ make_Null <- function(input_network, net_kind, process, parameter, net_size, ite
                     #   net_size = net_size,
                       cause_orientation = cause_orientation,
                       DD_kind = DD_kind,
+                      DD_weight = DD_weight,
                       DD_resize = DD_resize,
                       max_norm = max_norm,
                       size_different = size_different,
