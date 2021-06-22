@@ -337,7 +337,7 @@ compare_Target <- function(target, networks, net_size, net_kind, method = "DD", 
                     DD_difference_each[DD_kind_name] = DD_1_vs_2
                 }
 
-                DD_difference <- sum(DD_difference_each, na.rm = TRUE) %>% sqrt()
+                DD_difference <- sqrt(sum(DD_difference_each, na.rm = TRUE))
 
                 D_DD[net] = DD_difference
 
@@ -498,9 +498,9 @@ compare_Target <- function(target, networks, net_size, net_kind, method = "DD", 
                     Position_c <- seq(from = 0, to = 1, length = Length)
                     Points_c <- apply(Points, 2, function(u) spline(Position, u, xout = Position_c)$y) %>% as_tibble()
 
-                    D_DD[net] = ((DD_target - Points_c$DD)^2) %>% sum() %>% sqrt()
+                    D_DD[net] = sqrt( sum( ((DD_target - Points_c$DD)^2) ) )
                 } else {
-                    D_DD[net] = ((DD_target - DD)^2) %>% sum() %>% sqrt()
+                    D_DD[net] = sqrt( sum( ((DD_target - DD)^2) ) )
                 }
 
 

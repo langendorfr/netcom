@@ -61,7 +61,7 @@
 #' 
 #' @export
 
-make_Null <- function(input_network, net_kind, process, parameter, net_size, iters, method, neighborhood, DD_kind, DD_weight, resolution_min = 0.01, resolution_max = 0.99, directed = TRUE, power_max = 5, connectance_max = 0.5, divergence_max = 0.5, best_fit_sd = 0, cores = 1, size_different = FALSE, cause_orientation = "row", max_norm = FALSE, DD_resize = "smaller", verbose = FALSE) {
+make_Null_mixture <- function(input_network, net_kind, process, parameter, net_size, iters, method, neighborhood, DD_kind, DD_weight, resolution_min = 0.01, resolution_max = 0.99, directed = TRUE, power_max = 5, connectance_max = 0.5, divergence_max = 0.5, best_fit_sd = 0, cores = 1, size_different = FALSE, cause_orientation = "row", max_norm = FALSE, DD_resize = "smaller", verbose = FALSE) {
     ## Primary Directory
     # pd <- "/Users/ryan/Windows/Documents/Post UCB/Research/Relativism"
     # setwd(pd)

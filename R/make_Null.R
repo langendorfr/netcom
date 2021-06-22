@@ -14,6 +14,8 @@
 #' 
 #' @param net_kind If the network is an adjacency matrix ("matrix") or an edge list ("list"). Defaults to "matrix".
 #' 
+#' @param mechanism_kind Either "canonical" or "grow" can be used to simulate networks. If "grow" is used, note that here it will only simulate pure mixtures made of a single mechanism.
+#' 
 #' @param resolution The first step is to find the version of each process most similar to the target network. This parameter sets the number of parameter values to search across. Decrease to improve performance, but at the cost of accuracy. Defaults to 100.
 #' 
 #' @param resolution_min = The minimum parameter value to consider. Zero is not used because in many processes it results in degenerate systems (e.g. entirely unconnected networks). Currently process agnostic. Future versions will accept a vector of values, one for each process. Defaults to 0.01.
@@ -61,222 +63,51 @@
 #' 
 #' @export
 
-make_Null <- function(input_network, net_kind, process, parameter, net_size, iters, method, neighborhood, DD_kind, DD_weight, resolution_min = 0.01, resolution_max = 0.99, directed = TRUE, power_max = 5, connectance_max = 0.5, divergence_max = 0.5, best_fit_sd = 0, cores = 1, size_different = FALSE, cause_orientation = "row", max_norm = FALSE, DD_resize = "smaller", verbose = FALSE) {
-    ## Primary Directory
-    # pd <- "/Users/ryan/Windows/Documents/Post UCB/Research/Relativism"
-    # setwd(pd)
+make_Null <- function(input_network, net_kind, mechanism_kind, process, parameter, net_size, iters, method, neighborhood, DD_kind, DD_weight, resolution_min = 0.01, resolution_max = 0.99, directed = TRUE, power_max = 5, connectance_max = 0.5, divergence_max = 0.5, best_fit_sd = 0, cores = 1, size_different = FALSE, cause_orientation = "row", max_norm = FALSE, DD_resize = "smaller", verbose = FALSE) {
 
-    # ## Libraries
-    # library("tidyverse")
-    # library("vegan")
-    # library("igraph")
-
-    # ## Custom Functions
-    # source("grow_ER.R")
-    # source("grow_PA.R")
-    # source("grow_DD.R")
-    # source("grow_SW.R")
-    # source("grow_CM.R")
-
-    if (!(net_kind %in% c("matrix", "list"))) {
-        stop("Unknown net_kind. Must be `list` or `matrix`.")
-    }
-
-    ## Build list of networks with same process and parameter (+ some noise depending on the best_fit_sd parameter)
-    networks <- list()
-    parameters <- {}
-    
-    ## Start with the network being classified
-    networks[[1]] = input_network
-
-    ## +1 because include the network being classified
-    for (counter in 2:(iters+1)) {
-
-
-
-                ## Add network to growing list, made from same process and parameter
-                if (process == "ER") {
-                    # directed = TRUE
-
-                    p_ER <- parameter + rnorm(n = 1, mean = 0, sd = best_fit_sd)
-                    p_ER = min(p_ER, resolution_max)
-                    p_ER = max(p_ER, resolution_min)
-                    parameters = c(parameters, p_ER)
-                    
-                    mat <- make_Mixture(sequence = rep(paste0("g", process), net_size),
-                                        p_ER = p_ER,
-                                        directed = directed)
-
-                    if (net_kind == "matrix") {
-                        networks[[counter]] <- mat
-
-                    } else if (net_kind == "list") {
-                        edgelist <- net %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
-                        networks[[counter]] = edgelist
-
-                    } else {
-                        stop("Unknown network kind. Must be `list` or `matrix`.")
-                    }
-
-                } else if (process == "PA") {
-                    # directed = TRUE
-
-                    power_PA <- (parameter * power_max) + rnorm(n = 1, mean = 0, sd = best_fit_sd)
-                    power_PA = min(power_PA, resolution_max * power_max)
-                    power_PA = max(power_PA, resolution_min * power_max)
-                    parameters = c(parameters, power_PA)
-
-                    mat <- make_Mixture(sequence = rep(paste0("g", process), net_size),
-                                        power_PA = power_PA,
-                                        directed = directed)
-
-                    if (net_kind == "matrix") {
-                        networks[[counter]] <- mat
-
-                    } else if (net_kind == "list") {
-                        edgelist <- net %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
-                        networks[[counter]] = edgelist
-
-                    } else {
-                        stop("Unknown network kind. Must be `list` or `matrix`.")
-                    }
-
-                } else if (process == "DD") {
-                    # directed = FALSE
-
-                    divergence_DD <- (parameter * divergence_max) + rnorm(n = 1, mean = 0, sd = best_fit_sd)
-                    divergence_DD = min(divergence_DD, resolution_max)
-                    divergence_DD = max(divergence_DD, resolution_min)
-                    parameters = c(parameters, divergence_DD)
-
-                    mat <- make_Mixture(sequence = rep(paste0("g", process), net_size),
-                                        divergence_DD = divergence_DD,
-                                        directed = directed)
-
-                    if (net_kind == "matrix") {
-                        networks[[counter]] <- mat
-
-                    } else if (net_kind == "list") {
-                        edgelist <- net %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
-                        networks[[counter]] = edgelist
-
-                    } else {
-                        stop("Unknown network kind. Must be `list` or `matrix`.")
-                    }
-
-                } else if (process == "DM") {
-                    # directed = FALSE
-
-                    divergence_DM <- (parameter * divergence_max) + rnorm(n = 1, mean = 0, sd = best_fit_sd)
-                    divergence_DM = min(divergence_DM, resolution_max)
-                    divergence_DM = max(divergence_DM, resolution_min)
-                    parameters = c(parameters, divergence_DM)
-
-                    mutation_DM <- divergence_DM
-
-                    mat <- make_Mixture(sequence = rep(paste0("g", process), net_size),
-                                        divergence_DM = divergence_DM,
-                                        mutation_DM = mutation_DM,
-                                        directed = directed)
-
-                    if (net_kind == "matrix") {
-                        networks[[counter]] <- mat
-
-                    } else if (net_kind == "list") {
-                        edgelist <- net %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
-                        networks[[counter]] = edgelist
-
-                    } else {
-                        stop("Unknown network kind. Must be `list` or `matrix`.")
-                    }
-
-                } else if (process == "SW") {
-                    # directed = FALSE
-
-                    rewire_SW <- parameter + rnorm(n = 1, mean = 0, sd = best_fit_sd)
-                    rewire_SW = min(rewire_SW, resolution_max)
-                    rewire_SW = max(rewire_SW, resolution_min)
-                    parameters = c(parameters, rewire_SW)
-
-                    # ## SW neighborhood parameter based on net_size if missing
-                    # if (missing(neighborhood)) {
-                    #     neighborhood = max(1, round(0.1 * net_size))
-                    # }
-
-                    mat <- make_Mixture(sequence = rep(paste0("g", process), net_size),
-                                        rewire_SW = rewire_SW,
-                                        directed = directed)
-
-                    if (net_kind == "matrix") {
-                        networks[[counter]] <- mat
-
-                    } else if (net_kind == "list") {
-                        edgelist <- net %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
-                        networks[[counter]] = edgelist
-
-                    } else {
-                        stop("Unknown network kind. Must be `list` or `matrix`.")
-                    }
-
-                } else if (process == "NM") {
-                    # directed = TRUE
-
-                    connectance_NM <- (parameter * connectance_max) + rnorm(n = 1, mean = 0, sd = best_fit_sd)
-                    connectance_NM = min(connectance_NM, resolution_max * connectance_max)
-                    connectance_NM = max(connectance_NM, resolution_min * connectance_max)
-                    parameters = c(parameters, connectance_NM)
-
-                    niches <- runif(net_size) # %>% sort()
-
-                    mat <- make_Mixture(sequence = rep(paste0("g", process), net_size),
-                                        niches = niches,
-                                        connectance_NM = connectance_NM,
-                                        directed = directed)
-
-                    if (net_kind == "matrix") {
-                        networks[[counter]] <- mat
-
-                    } else if (net_kind == "list") {
-                        edgelist <- net %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
-                        networks[[counter]] = edgelist
-
-                    } else {
-                        stop("Unknown network kind. Must be `list` or `matrix`.")
-                    }
-
-                } else {
-                    stop("An unknown process was included in the simulation.")
-                }
-
-
-
-
-
-
-
-
-    } ## for (counter in 1:iters) {
-
-    ## Compare uuid networks to get distribution of their distances
-    # if (verbose == TRUE) { print("Mapping network state space.") }
-
-    D_null <- compare(networks = networks, 
-                      method = method, 
-                      net_kind = net_kind,
-                    #   net_size = net_size,
-                      cause_orientation = cause_orientation,
-                      DD_kind = DD_kind,
-                      DD_weight = DD_weight,
-                      DD_resize = DD_resize,
-                      max_norm = max_norm,
-                      size_different = size_different,
-                      cores = cores, 
-                      verbose = verbose)
-    
-    # D_null  %>% gplots::heatmap.2(trace = "none", Rowv = FALSE, Colv = FALSE, dendrogram = "none", col = colorRampPalette(c("white", "black"))(n = 299))
-    
-    null_list <- list(D_null = D_null,
-                      parameters = parameters)
+    null_list <- switch(mechanism_kind,
+                        "canonical" = make_Null_canonical(input_network = input_network,
+                                                            net_kind = net_kind,
+                                                            DD_kind = DD_kind,
+                                                            DD_weight = DD_weight,
+                                                            process = process, 
+                                                            parameter = parameter,
+                                                            power_max = power_max,
+                                                            connectance_max = connectance_max,
+                                                            divergence_max = divergence_max,
+                                                            net_size = net_size, 
+                                                            iters = iters, ## Note: length(null_dist) = ((iters^2)-iters)/2
+                                                            method = method,
+                                                            neighborhood = max(1, round(0.1 * net_size)),
+                                                            best_fit_sd = best_fit_sd,
+                                                            cores = cores,
+                                                            directed = directed,
+                                                            size_different = size_different,
+                                                            DD_resize = DD_resize,
+                                                            cause_orientation = cause_orientation,
+                                                            max_norm = max_norm,
+                                                            verbose = verbose),
+                        "grow" = make_Null_mixture(input_network = input_network,
+                                                    net_kind = net_kind,
+                                                    DD_kind = DD_kind,
+                                                    DD_weight = DD_weight,
+                                                    process = process, 
+                                                    parameter = parameter,
+                                                    power_max = power_max,
+                                                    connectance_max = connectance_max,
+                                                    divergence_max = divergence_max,
+                                                    net_size = net_size, 
+                                                    iters = iters, ## Note: length(null_dist) = ((iters^2)-iters)/2
+                                                    method = method,
+                                                    neighborhood = max(1, round(0.1 * net_size)),
+                                                    best_fit_sd = best_fit_sd,
+                                                    cores = cores,
+                                                    directed = directed,
+                                                    size_different = size_different,
+                                                    DD_resize = DD_resize,
+                                                    cause_orientation = cause_orientation,
+                                                    max_norm = max_norm,
+                                                    verbose = verbose))
 
     return(null_list)
 }

@@ -45,7 +45,7 @@
 #' 
 #' @export
 
-make_Systematic <- function(net_size, neighborhood, directed = TRUE, net_kind = "matrix", resolution = 100, resolution_min = 0.01, resolution_max = 0.99, reps = 3, processes = c("ER", "PA", "DM", "SW", "NM"), power_max = 5, connectance_max = 0.5, divergence_max = 0.5, mutation_max = 0.5, canonical = FALSE, cores = 1, verbose = TRUE) {
+make_Systematic_mixture <- function(net_size, neighborhood, directed = TRUE, net_kind = "matrix", resolution = 100, resolution_min = 0.01, resolution_max = 0.99, reps = 3, processes = c("ER", "PA", "DM", "SW", "NM"), power_max = 5, connectance_max = 0.5, divergence_max = 0.5, mutation_max = 0.5, canonical = FALSE, cores = 1, verbose = TRUE) {
     ## Libraries
 
     ### Main Body ---

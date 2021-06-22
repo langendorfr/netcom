@@ -24,7 +24,7 @@ options(digits = 2)
 ```
 
 # Abstract
-Network data are ubiquitous, reflecting a burgeoning systematics paradigm across physical, natural, and social sciences. The __netcom__ package provides generally applicable tools for inferring system functioning from network data. Instead of testing models of system formation and/or functioning with network data, __netcom__ compares the networks to each other. Patterns in the resulting state space of inter-network distances capture system functioning, risk, and underlying mechanisms.
+Network data are ubiquitous, reflecting a burgeoning systematics paradigm across physical, natural, and social sciences. The __netcom__ package provides generally applicable tools for inferring system functioning from network data. To do this, __netcom__ compares networks to each other, across empirical classifications and theoretical models of system formation and/or functioning. This is where its name comes from: __net__work __com__parison. Patterns in the resulting state space of inter-network distances capture system functioning, risk, and underlying mechanisms.
 
 # Installation
 
@@ -44,6 +44,7 @@ Once installed simply load the package and you will have access to all of its fu
 
 ```{r Setup, message = FALSE}
 library(netcom)
+library(igraph)
 library(dplyr)
 library(tibble)
 library(expm)
@@ -51,17 +52,6 @@ library(ggplot2)
 library(ggraph)
 library(ggfortify)
 ```
-
-```{r TemporarilyUseTheseFunctionsInsteadOfTheNetcomLibrary, message = FALSE}
-setwd("/Users/ryan/Code/netcom/R")
-netcom_scripts <- list.files(pattern = ".R")
-for (script in netcom_scripts) {
-    source(script)
-}
-source("make_Systematic_canonical.R")
-source("make_Null_canonical.R")
-```
-
 
 # Simulating Networks
 
@@ -183,7 +173,8 @@ for (net in 1:num_networks) {
     #                                      rewire = 0.2, 
     #                                      neighborhood = 2, 
     #                                      directed = FALSE)
-    networks_SW[[net]] = netcom::make_Mixture(rep("gSW", 20))
+    # networks_SW[[net]] = netcom::make_Mixture(rep("gSW", 20))
+    networks_SW[[net]] = netcom::make_Mixture(rep("gSW_0.1", 20))
 }
 
 ## Second set of disturbed networks
@@ -229,22 +220,12 @@ We can combine network simulation and comparisons to test a hypothesized mechani
 ## Classification of an undisturbed Small-World network made above
 netcom::classify(networks_SW[[1]], 
                  processes = c("SW", "ER"),
-                 best_fit_kind = "avg",
-                 resolution = 100,
-                 reps = 20,
-                 null_reps = 50,
-                 ks_dither = 1e-10,
-                 verbose = FALSE)
+                 mechanism_kind = "grow")
 
 ## Classification of a disturbed Small-World network made above
 netcom::classify(networks_SW_disturbed[[1]], 
                  processes = c("SW", "ER"),
-                 best_fit_kind = "avg",
-                 resolution = 100,
-                 reps = 100,
-                 null_reps = 250,
-                 ks_dither = 1e-10,
-                 verbose = FALSE)
+                 mechanism_kind = "grow")
 ```
 
 Pure mechanisms are readily inferred by comparing a network with many networks simualted from hypothesized mechanisms. Mixture mechanisms are not. This is because different mixtures can produce similar network structures. Fortunately, there is evidence we can still functionally classify network data describing realistically complex systems governed by mixtures of mechanisms @langendorf2020empirically.

@@ -143,11 +143,11 @@ compare <- function(networks, net_kind = "matrix", method = "DD", cause_orientat
                 eq_igraph_graph <- igraph::graph_from_adjacency_matrix(equilibrium_net, mode = "directed", weighted = TRUE, diag = TRUE, add.colnames = NULL, add.rownames = NA)
 
                 if ("communities" %in% DD_kind) {
-                    community_sizes <- igraph::graph_from_adjacency_matrix(networks[[net]], mode = "undirected", weighted = TRUE, diag = TRUE, add.colnames = NULL, add.rownames = NA) %>% igraph::cluster_fast_greedy(weights = NULL) %>% sizes() %>% sort(decreasing = TRUE)
+                    community_sizes <- igraph::graph_from_adjacency_matrix(networks[[net]], mode = "undirected", weighted = TRUE, diag = TRUE, add.colnames = NULL, add.rownames = NA) %>% igraph::cluster_fast_greedy(weights = NULL) %>% igraph::sizes() %>% sort(decreasing = TRUE)
                 }
 
                 if ("eq_communities" %in% DD_kind) {
-                    eq_community_sizes <- igraph::graph_from_adjacency_matrix(equilibrium_net, mode = "undirected", weighted = TRUE, diag = TRUE, add.colnames = NULL, add.rownames = NA) %>% igraph::cluster_fast_greedy(weights = NULL) %>% sizes() %>% sort(decreasing = TRUE)
+                    eq_community_sizes <- igraph::graph_from_adjacency_matrix(equilibrium_net, mode = "undirected", weighted = TRUE, diag = TRUE, add.colnames = NULL, add.rownames = NA) %>% igraph::cluster_fast_greedy(weights = NULL) %>% igraph::sizes() %>% sort(decreasing = TRUE)
                 }
 
                 for (DD_kind_name in seq_along(DD_kind)) {
@@ -281,7 +281,7 @@ compare <- function(networks, net_kind = "matrix", method = "DD", cause_orientat
                             DD_difference_each[DD_kind_name] = DD_1_vs_2
                         }
 
-                        DD_difference <- sum(DD_difference_each, na.rm = TRUE) %>% sqrt()
+                        DD_difference <- sqrt(sum(DD_difference_each, na.rm = TRUE))
 
                         ## Add to the growing D_DD matrix
                         D_DD[net_1, net_2] = DD_difference
@@ -473,7 +473,7 @@ compare <- function(networks, net_kind = "matrix", method = "DD", cause_orientat
                         }
 
 
-                        DD_difference <- ((DD_1 - DD_2)^2) %>% sum() %>% sqrt()
+                        DD_difference <- sqrt( sum( ((DD_1 - DD_2)^2) ) )
 
                         ## Add to the growing D_DD matrix
                         D_DD[net_1, net_2] = DD_difference

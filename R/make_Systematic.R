@@ -10,7 +10,7 @@
 #' 
 #' @param net_kind If the network is an adjacency matrix ("matrix") or an edge list ("list"). Defaults to "matrix".
 #' 
-#' @param mechanism_kind Either "canonical" or "mixture" can be used to simulate networks. If "mixture" is used, note that here it will only simulate pure mixtures made of a single mechanism. Defaults to "canonical".
+#' @param mechanism_kind Either "canonical" or "grow" can be used to simulate networks. If "grow" is used, note that here it will only simulate pure mixtures made of a single mechanism. Defaults to "canonical".
 #' 
 #' @param resolution The first step is to find the version of each process most similar to the target network. This parameter sets the number of parameter values to search across. Decrease to improve performance, but at the cost of accuracy. Defaults to 100.
 #' 
@@ -52,12 +52,11 @@ make_Systematic <- function(net_size, neighborhood, directed = TRUE, net_kind = 
     return_list <- switch(mechanism_kind,
                             "canonical" = make_Systematic_canonical(net_size = net_size,
                                                                     net_kind = net_kind,
-                                                                    mechanism_kind = mechanism_kind,
                                                                     resolution = resolution,
-                                                                    resolution_min = parameter,
-                                                                    resolution_max = parameter,
+                                                                    resolution_min = resolution_min,
+                                                                    resolution_max = resolution_max,
                                                                     reps = reps,
-                                                                    processes = processes[p],
+                                                                    processes = processes,
                                                                     power_max = power_max,
                                                                     connectance_max = connectance_max,
                                                                     divergence_max = divergence_max,
@@ -65,21 +64,20 @@ make_Systematic <- function(net_size, neighborhood, directed = TRUE, net_kind = 
                                                                     cores = cores,
                                                                     directed = directed,
                                                                     verbose = verbose),
-                            "mixture" = make_Systematic_mixture(net_size = net_size,
-                                                                net_kind = net_kind,
-                                                                mechanism_kind = mechanism_kind,
-                                                                resolution = resolution,
-                                                                resolution_min = parameter,
-                                                                resolution_max = parameter,
-                                                                reps = reps,
-                                                                processes = processes[p],
-                                                                power_max = power_max,
-                                                                connectance_max = connectance_max,
-                                                                divergence_max = divergence_max,
-                                                                mutation_max = mutation_max,
-                                                                cores = cores,
-                                                                directed = directed,
-                                                                verbose = verbose))
+                            "grow" = make_Systematic_mixture(net_size = net_size,
+                                                            net_kind = net_kind,
+                                                            resolution = resolution,
+                                                            resolution_min = resolution_min,
+                                                            resolution_max = resolution_max,
+                                                            reps = reps,
+                                                            processes = processes,
+                                                            power_max = power_max,
+                                                            connectance_max = connectance_max,
+                                                            divergence_max = divergence_max,
+                                                            mutation_max = mutation_max,
+                                                            cores = cores,
+                                                            directed = directed,
+                                                            verbose = verbose))
 
     return(return_list)
 }

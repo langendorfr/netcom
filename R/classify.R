@@ -10,7 +10,7 @@
 #' 
 #' @param net_kind If the network is an adjacency matrix ("matrix") or an edge list ("list"). Defaults to "matrix".
 #' 
-#' @param mechanism_kind Either "canonical" or "mixture" can be used to simulate networks. If "mixture" is used, note that here it will only simulate pure mixtures made of a single mechanism. Defaults to "canonical".
+#' @param mechanism_kind Either "canonical" or "grow" can be used to simulate networks. If "grow" is used, note that here it will only simulate pure mixtures made of a single mechanism. Defaults to "canonical".
 #' 
 #' @param DD_kind = A vector of network properties to be used to compare networks. Defaults to "all", which is the average of the in- and out-degrees.
 #' 
@@ -70,7 +70,7 @@
 #' 
 #' @export
 
-classify <- function(network, directed = FALSE, method = "DD", net_kind = "matrix", mechanism_kind = "canonical", DD_kind = c("in", "out", "entropy_in", "entropy_out", "clustering_coefficient", "page_rank", "communities", "motifs_3", "motifs_4", "eq_in", "eq_out", "eq_entropy_in", "eq_entropy_out", "eq_clustering_coefficient", "eq_page_rank", "eq_communities", "eq_motifs_3", "eq_motifs_4"), DD_weight = c(0.0735367966, 0.0739940162, 0.0714523761, 0.0708156931, 0.0601296752, 0.0448072016, 0.0249793608, 0.0733125084, 0.0697029389, 0.0504358835, 0.0004016029, 0.0563752664, 0.0561878218, 0.0540490099, 0.0504347104, 0.0558106667, 0.0568270319, 0.0567474398), cause_orientation = "row", max_norm = FALSE, resolution = 100, resolution_min = 0.01, resolution_max = 0.99, reps = 3, processes = c("ER", "PA", "DM", "SW", "NM"), power_max = 5, connectance_max = 0.5, divergence_max = 0.5, mutation_max = 0.5, null_reps = 50, best_fit_kind = "avg", best_fit_sd = 0, ks_dither = 0, ks_alternative = "two.sided", cores = 1, size_different = FALSE, DD_resize = "smaller", null_dist_trim = 1, verbose = TRUE) {
+classify <- function(network, directed = FALSE, method = "DD", net_kind = "matrix", mechanism_kind = "canonical", DD_kind = c("in", "out", "entropy_in", "entropy_out", "clustering_coefficient", "page_rank", "communities", "motifs_3", "motifs_4", "eq_in", "eq_out", "eq_entropy_in", "eq_entropy_out", "eq_clustering_coefficient", "eq_page_rank", "eq_communities", "eq_motifs_3", "eq_motifs_4"), DD_weight = c(0.0735367966, 0.0739940162, 0.0714523761, 0.0708156931, 0.0601296752, 0.0448072016, 0.0249793608, 0.0733125084, 0.0697029389, 0.0504358835, 0.0004016029, 0.0563752664, 0.0561878218, 0.0540490099, 0.0504347104, 0.0558106667, 0.0568270319, 0.0567474398), cause_orientation = "row", max_norm = FALSE, resolution = 100, resolution_min = 0.01, resolution_max = 0.99, reps = 3, processes = c("ER", "PA", "DM", "SW", "NM"), power_max = 5, connectance_max = 0.5, divergence_max = 0.5, mutation_max = 0.5, null_reps = 50, best_fit_kind = "avg", best_fit_sd = 0, ks_dither = 0, ks_alternative = "two.sided", cores = 1, size_different = FALSE, DD_resize = "smaller", null_dist_trim = 1, verbose = FALSE) {
 
     ## Matrix input checks
     if (net_kind == "matrix") {
@@ -98,7 +98,7 @@ classify <- function(network, directed = FALSE, method = "DD", net_kind = "matri
     }
 
     ## Helper function to find the best fitting version of a mechanism by searching across its parameter space
-    best_fit_optim <- function(parameter) {
+    best_fit_optim <- function(parameter, process) {
         ## Create object with list of networks and table of corresponding parameters
         state_space <- make_Systematic(net_size = net_size,
                                     net_kind = net_kind,
@@ -107,7 +107,7 @@ classify <- function(network, directed = FALSE, method = "DD", net_kind = "matri
                                     resolution_min = parameter,
                                     resolution_max = parameter,
                                     reps = reps,
-                                    processes = processes[p],
+                                    processes = process,
                                     power_max = power_max,
                                     connectance_max = connectance_max,
                                     divergence_max = divergence_max,
@@ -151,15 +151,16 @@ classify <- function(network, directed = FALSE, method = "DD", net_kind = "matri
 
 
     ## Helper function to find the best fitting version of a mechanism by searching across its parameter space
-    null_fit_optim <- function(parameter) {
+    null_fit_optim <- function(parameter, process) {
 
         best_fit <- parameter
 
         null_dist <- make_Null(input_network = network,
                                net_kind = net_kind,
+                               mechanism_kind = mechanism_kind,
                                DD_kind = DD_kind,
                                DD_weight = DD_weight,
-                               process = processes[p], 
+                               process = process, 
                                parameter = best_fit,
                                power_max = power_max,
                                connectance_max = connectance_max,
@@ -226,7 +227,7 @@ classify <- function(network, directed = FALSE, method = "DD", net_kind = "matri
         possible_pars_fits <- rep(NA, length(possible_pars))
         for (par in seq_along(possible_pars)) {
             if (verbose) {print(paste0("Comparing the network to ", processes[p], " with parameter ", possible_pars[par], "."))}
-            possible_pars_fits[par] = best_fit_optim(possible_pars[par])
+            possible_pars_fits[par] = best_fit_optim(parameter = possible_pars[par], process = processes[p])
         }
 
         ## Use the first best fitting parameter in case there are multiple. Do not aggregate these in case they are different optima
@@ -234,6 +235,7 @@ classify <- function(network, directed = FALSE, method = "DD", net_kind = "matri
 
         null_dist <- make_Null(input_network = network,
                                net_kind = net_kind,
+                               mechanism_kind = mechanism_kind,
                                DD_kind = DD_kind,
                                DD_weight = DD_weight,
                                process = processes[p], 
@@ -306,8 +308,8 @@ classify <- function(network, directed = FALSE, method = "DD", net_kind = "matri
     }
 
     return_tbl <- tibble(process = processes, 
-                         p_value = pvalues, #round(pvalues, 5),
-                         par_estimate = p_estimates) #round(p_estimates, 5))
+                         par_estimate = p_estimates, #round(p_estimates, 5),
+                         p_value = pvalues) #round(pvalues, 5))
     
 
     # ## Warn about strangely close best_fit distances
@@ -316,7 +318,6 @@ classify <- function(network, directed = FALSE, method = "DD", net_kind = "matri
     #         warning(paste0("Network appears strangely similar to process ", return_tbl$Process[row]))
     #     }
     # }
-
 
     return(return_tbl)
 }
