@@ -4,7 +4,7 @@
 \alias{stir_ER}
 \title{Stir an Erdos-Renyi Random Network}
 \usage{
-stir_ER(matrix, x, p, retcon = FALSE)
+stir_ER(matrix, x, p, directed, retcon = FALSE)
 }
 \arguments{
 \item{matrix}{Existing network to experience growth.}

@@ -27,7 +27,7 @@
 #' 
 #' @export
 
-stir_DD <- function(matrix, x, divergence, link, force_connected = FALSE) {
+stir_DD <- function(matrix, x, divergence, link, directed, force_connected = FALSE) {
     ids <- (1:ncol(matrix))[-x]
 
     DD <- function() {
@@ -45,8 +45,11 @@ stir_DD <- function(matrix, x, divergence, link, force_connected = FALSE) {
             ##!! Do this differently than grow_DD, which uses `if (matrix[i, x] == 1)`
             if (matrix[x, i] == 1) {
                 if (runif(1) < divergence) {
-                # matrix[i, x] <- 0
-                matrix[x, i] <- 0
+                    matrix[x, i] <- 0
+
+                    if (!directed) {
+                        matrix[i, x] <- 0
+                    }   
                 }
             }
         }

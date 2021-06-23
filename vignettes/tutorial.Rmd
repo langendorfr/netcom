@@ -75,12 +75,12 @@ As an example, here is a recipe for a realistically complex mixture network:
 
 ```{r Easily simulate mixture network, fig.height = 4, fig.width = 4, fig.align = "left"}
 ## 1. Start by creating a sequence of network evolutions.
-sequence <- c("gER", "gER", "gER", "gER", "gER", "gER", "gER",
-              "rPA", "rPA", "rPA", 
-              "gER", "gER", "gER")
+sequence <- c("gER_0.3", "gER_0.3", "gER_0.3", "gER_0.3", "gER_0.3", "gER_0.3", "gER_0.3",
+              "rPA_2", "rPA_2", "rPA_2", 
+              "gER_0.3", "gER_0.3", "gER_0.3")
 
 ## 2. Simulate a network according to the rules of this system evolution.
-network <- make_Mixture(sequence)
+network <- make_Mixture(sequence, directed = TRUE)
 
 
 ## Finally, plot the simulated network. netcom typically stores networks as matrices,
@@ -122,7 +122,7 @@ for (node in 3:7) {
 rewire_ids <- sample(1:7, 3, replace = FALSE)
 for (node in rewire_ids) {
     network_exists <- network[1:7, 1:7]
-    network_exists <- netcom::stir_PA(network_exists, x = node, power = 2)
+    network_exists <- netcom::stir_PA(network_exists, x = node, power = 2, directed = TRUE)
     network[1:7, 1:7] <- network_exists
 }
 
@@ -130,7 +130,7 @@ for (node in rewire_ids) {
 ## have a probability of attachment of 0.5.
 p_interaction <- 0.5
 for (node in 8:10) {
-    network = netcom::grow_ER(network, x = node, p = p_interaction)
+    network = netcom::grow_ER(network, x = node, p = p_interaction, directed = TRUE)
 }
 
 ## Finally, plot the simulated network. Remember, netcom typically stores networks as matrices,
@@ -174,13 +174,13 @@ for (net in 1:num_networks) {
     #                                      neighborhood = 2, 
     #                                      directed = FALSE)
     # networks_SW[[net]] = netcom::make_Mixture(rep("gSW", 20))
-    networks_SW[[net]] = netcom::make_Mixture(rep("gSW_0.1", 20))
+    networks_SW[[net]] = netcom::make_Mixture(rep("gSW_0.15", 20), directed = TRUE)
 }
 
 ## Second set of disturbed networks
 networks_SW_disturbed <- list()
 for (net in 1:num_networks) {
-    networks_SW_disturbed[[net]] = netcom::make_Mixture(rep(c(rep("gSW", 3), rep("rER", 2)), 4))
+    networks_SW_disturbed[[net]] = netcom::make_Mixture(rep(c(rep("gSW_0.3", 3), rep("rER_0.76", 2)), 4), directed = TRUE)
 }
 
 ## Pairwise compare all of the networks to each other 
@@ -220,11 +220,13 @@ We can combine network simulation and comparisons to test a hypothesized mechani
 ## Classification of an undisturbed Small-World network made above
 netcom::classify(networks_SW[[1]], 
                  processes = c("SW", "ER"),
+                 directed = TRUE,
                  mechanism_kind = "grow")
 
 ## Classification of a disturbed Small-World network made above
 netcom::classify(networks_SW_disturbed[[1]], 
                  processes = c("SW", "ER"),
+                 directed = TRUE,
                  mechanism_kind = "grow")
 ```
 

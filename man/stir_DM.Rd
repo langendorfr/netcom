@@ -4,7 +4,15 @@
 \alias{stir_DM}
 \title{Stirs a Duplication and Mutation Network}
 \usage{
-stir_DM(matrix, x, divergence, mutation, link = 0, force_connected = FALSE)
+stir_DM(
+  matrix,
+  x,
+  divergence,
+  mutation,
+  directed,
+  link = 0,
+  force_connected = FALSE
+)
 }
 \arguments{
 \item{matrix}{Existing network to experience growth.}

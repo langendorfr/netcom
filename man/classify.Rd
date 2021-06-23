@@ -6,7 +6,7 @@
 \usage{
 classify(
   network,
-  directed = FALSE,
+  directed,
   method = "DD",
   net_kind = "matrix",
   mechanism_kind = "canonical",

@@ -8,6 +8,7 @@ stir_PA(
   matrix,
   x,
   power,
+  directed,
   retcon = FALSE,
   sum_v_max = "max",
   nascent_help = TRUE

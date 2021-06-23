@@ -29,7 +29,7 @@
 #' 
 #' @export
 
-stir_DM <- function(matrix, x, divergence, mutation, link = 0, force_connected = FALSE) {
+stir_DM <- function(matrix, x, divergence, mutation, directed, link = 0, force_connected = FALSE) {
     ids <- (1:ncol(matrix))[-x]
 
     DD <- function() {
@@ -47,13 +47,19 @@ stir_DM <- function(matrix, x, divergence, mutation, link = 0, force_connected =
             ##!! Do this differently than grow_DD, which uses `if (matrix[i, x] == 1)`
             if (matrix[x, i] == 1) {
                 if (runif(1) < divergence) {
-                # matrix[i, x] <- 0
-                matrix[x, i] <- 0
+                    matrix[x, i] <- 0
+
+                    if (!directed) {
+                        matrix[i, x] <- 0
+                    }
                 }
             } else if (matrix[x, i] == 0) {
                 if (runif(1) < mutation) {
-                # matrix[i, x] <- 0
-                matrix[x, i] <- 1
+                    matrix[x, i] <- 1
+                    
+                    if (!directed) {
+                        matrix[i, x] <- 0
+                    }
                 }
             } else {
                 stop("Unknown matrix element. Only unweighted (binary) networks are supported in this release.")

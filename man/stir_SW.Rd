@@ -4,7 +4,7 @@
 \alias{stir_SW}
 \title{Stirs a Small-World Network}
 \usage{
-stir_SW(matrix, x, rewire)
+stir_SW(matrix, x, rewire, directed)
 }
 \arguments{
 \item{matrix}{Existing network to experience growth.}

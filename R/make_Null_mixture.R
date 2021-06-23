@@ -103,8 +103,8 @@ make_Null_mixture <- function(input_network, net_kind, process, parameter, net_s
                     p_ER = max(p_ER, resolution_min)
                     parameters = c(parameters, p_ER)
                     
-                    mat <- make_Mixture(sequence = rep(paste0("g", process), net_size),
-                                        p_ER = p_ER,
+                    mat <- make_Mixture(sequence = rep(paste0("g", process, "_", p_ER), net_size),
+                                        # p_ER = p_ER,
                                         directed = directed)
 
                     if (net_kind == "matrix") {
@@ -126,8 +126,8 @@ make_Null_mixture <- function(input_network, net_kind, process, parameter, net_s
                     power_PA = max(power_PA, resolution_min * power_max)
                     parameters = c(parameters, power_PA)
 
-                    mat <- make_Mixture(sequence = rep(paste0("g", process), net_size),
-                                        power_PA = power_PA,
+                    mat <- make_Mixture(sequence = rep(paste0("g", process, "_", power_PA), net_size),
+                                        # power_PA = power_PA,
                                         directed = directed)
 
                     if (net_kind == "matrix") {
@@ -149,8 +149,8 @@ make_Null_mixture <- function(input_network, net_kind, process, parameter, net_s
                     divergence_DD = max(divergence_DD, resolution_min)
                     parameters = c(parameters, divergence_DD)
 
-                    mat <- make_Mixture(sequence = rep(paste0("g", process), net_size),
-                                        divergence_DD = divergence_DD,
+                    mat <- make_Mixture(sequence = rep(paste0("g", process, "_", divergence_DD), net_size),
+                                        # divergence_DD = divergence_DD,
                                         directed = directed)
 
                     if (net_kind == "matrix") {
@@ -174,9 +174,9 @@ make_Null_mixture <- function(input_network, net_kind, process, parameter, net_s
 
                     mutation_DM <- divergence_DM
 
-                    mat <- make_Mixture(sequence = rep(paste0("g", process), net_size),
-                                        divergence_DM = divergence_DM,
-                                        mutation_DM = mutation_DM,
+                    mat <- make_Mixture(sequence = rep(paste0("g", process, "_", divergence_DM), net_size),
+                                        # divergence_DM = divergence_DM,
+                                        # mutation_DM = mutation_DM,
                                         directed = directed)
 
                     if (net_kind == "matrix") {
@@ -203,8 +203,8 @@ make_Null_mixture <- function(input_network, net_kind, process, parameter, net_s
                     #     neighborhood = max(1, round(0.1 * net_size))
                     # }
 
-                    mat <- make_Mixture(sequence = rep(paste0("g", process), net_size),
-                                        rewire_SW = rewire_SW,
+                    mat <- make_Mixture(sequence = rep(paste0("g", process, "_", rewire_SW), net_size),
+                                        # rewire_SW = rewire_SW,
                                         directed = directed)
 
                     if (net_kind == "matrix") {
@@ -228,9 +228,9 @@ make_Null_mixture <- function(input_network, net_kind, process, parameter, net_s
 
                     niches <- runif(net_size) # %>% sort()
 
-                    mat <- make_Mixture(sequence = rep(paste0("g", process), net_size),
+                    mat <- make_Mixture(sequence = rep(paste0("g", process, "_", connectance_NM), net_size),
                                         niches = niches,
-                                        connectance_NM = connectance_NM,
+                                        # connectance_NM = connectance_NM,
                                         directed = directed)
 
                     if (net_kind == "matrix") {

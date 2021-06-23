@@ -29,7 +29,7 @@
 #' 
 #' @export
 
-stir_PA <- function(matrix, x, power, retcon = FALSE, sum_v_max = "max", nascent_help = TRUE) {
+stir_PA <- function(matrix, x, power, directed, retcon = FALSE, sum_v_max = "max", nascent_help = TRUE) {
     # w <- x-1
     n <- ncol(matrix)
 
@@ -74,6 +74,10 @@ stir_PA <- function(matrix, x, power, retcon = FALSE, sum_v_max = "max", nascent
     }
 
     matrix[x, -x] = in_new
+
+    if (!directed) {
+        matrix[-x, x] = matrix[x, -x]
+    }
 
     return(matrix)
 }

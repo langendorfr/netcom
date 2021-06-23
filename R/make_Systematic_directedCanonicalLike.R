@@ -76,8 +76,8 @@ make_Systematic_directedCanonicalLike <- function(net_size, neighborhood, direct
                     directed = TRUE
 
                     p_ER <- master_par_systematic[i]
-                    mat <- make_Mixture(sequence = rep(paste0("g", processes[p]), net_size),
-                                        p_ER = p_ER,
+                    mat <- make_Mixture(sequence = rep(paste0("g", processes[p], "_", p_ER), net_size),
+                                        # p_ER = p_ER,
                                         directed = directed)
 
                     if (net_kind == "matrix") {
@@ -98,8 +98,8 @@ make_Systematic_directedCanonicalLike <- function(net_size, neighborhood, direct
                     directed = TRUE
 
                     power_PA <- power_max * master_par_systematic[i]
-                    mat <- make_Mixture(sequence = rep(paste0("g", processes[p]), net_size),
-                                        power_PA = power_PA,
+                    mat <- make_Mixture(sequence = rep(paste0("g", processes[p], "_", power_PA), net_size),
+                                        # power_PA = power_PA,
                                         directed = directed)
 
                     if (net_kind == "matrix") {
@@ -121,8 +121,8 @@ make_Systematic_directedCanonicalLike <- function(net_size, neighborhood, direct
 
                     divergence_DD <- divergence_max * master_par_systematic[i]
 
-                    mat <- make_Mixture(sequence = rep(paste0("g", processes[p]), net_size),
-                                        divergence_DD = divergence_DD,
+                    mat <- make_Mixture(sequence = rep(paste0("g", processes[p], "_", divergence_DD), net_size),
+                                        # divergence_DD = divergence_DD,
                                         directed = directed)
 
                     if (net_kind == "matrix") {
@@ -145,9 +145,9 @@ make_Systematic_directedCanonicalLike <- function(net_size, neighborhood, direct
                     divergence_DM <- divergence_max * master_par_systematic[i]
                     mutation_DM <- mutation_max * master_par_systematic[i]
 
-                    mat <- make_Mixture(sequence = rep(paste0("g", processes[p]), net_size),
-                                        divergence_DM = divergence_DM,
-                                        mutation_DM = mutation_DM,
+                    mat <- make_Mixture(sequence = rep(paste0("g", processes[p], "_", divergence_DM), net_size),
+                                        # divergence_DM = divergence_DM,
+                                        # mutation_DM = mutation_DM,
                                         directed = directed)
 
                     if (net_kind == "matrix") {
@@ -175,8 +175,8 @@ make_Systematic_directedCanonicalLike <- function(net_size, neighborhood, direct
                     #     neighborhood = max(1, round(0.1 * net_size))
                     # }
 
-                    mat <- make_Mixture(sequence = rep(paste0("g", processes[p]), net_size),
-                                        rewire_SW = rewire_SW,
+                    mat <- make_Mixture(sequence = rep(paste0("g", processes[p], "_", rewire_SW), net_size),
+                                        # rewire_SW = rewire_SW,
                                         directed = directed)
 
                     if (net_kind == "matrix") {
@@ -199,9 +199,9 @@ make_Systematic_directedCanonicalLike <- function(net_size, neighborhood, direct
                     connectance_NM <- connectance_max * master_par_systematic[i]
                     niches <- runif(net_size) # %>% sort()
 
-                    mat <- make_Mixture(sequence = rep(paste0("g", processes[p]), net_size),
+                    mat <- make_Mixture(sequence = rep(paste0("g", processes[p], "_", connectance_NM), net_size),
                                         niches = niches,
-                                        connectance_NM = connectance_NM,
+                                        # connectance_NM = connectance_NM,
                                         directed = directed)
 
                     if (net_kind == "matrix") {

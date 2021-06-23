@@ -56,7 +56,7 @@ stir_NM <- function(matrix, x, niches, connectance = 0.5, directed = TRUE) {
     matrix[x, interactions] = 1
 
     matrix[1:x, x] = 0
-    if (directed == FALSE) {
+    if (!directed) {
         matrix[1:x, x] = matrix[x, 1:x]
     }
   

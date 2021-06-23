@@ -4,7 +4,7 @@
 \alias{stir_DD}
 \title{Sitrs a Duplication and Divergence Network}
 \usage{
-stir_DD(matrix, x, divergence, link, force_connected = FALSE)
+stir_DD(matrix, x, divergence, link, directed, force_connected = FALSE)
 }
 \arguments{
 \item{matrix}{Existing network to be rewired (stirred).}
