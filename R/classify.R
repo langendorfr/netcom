@@ -4,7 +4,7 @@
 #'
 #' @param network The network to be classified.
 #' 
-#' @param directed Defaults to TRUE. Whether the target network is directed.
+#' @param directed Whether the target network is directed. If missing this will be inferred by the symmetry of the input network.
 #' 
 #' @param method This determines the method used to compare networks at the heart of the classification. Currently "DD" (Degree Distribution) and "align" (the align function which compares networks by the entropy of diffusion on them) are supported. Future versions will allow user-defined methods. Defaults to "DD".
 #' 
@@ -86,6 +86,23 @@ classify <- function(network, directed, method = "DD", net_kind = "matrix", mech
                 stop("Row & Column names must have the same order.")
             }
         }
+    }
+
+    ## Determine if the network is directed
+    directed_inferred <- !isSymmetric(network)
+    if (missing(directed)) {
+        directed <- directed_inferred
+    }
+
+    ## Warn if the network appears to be un/directed differently from what was specified by the user
+    if (directed_inferred != directed) {
+        if (directed) {
+            warning_directed <- "is "
+        } else {
+            warning_directed <- "is not "
+        }
+
+        warning(paste0("You specified that the network ", warning_directed, "directed, but the symmetry of the network implies this is not the case." ))
     }
 
     ## Network size
@@ -281,9 +298,13 @@ classify <- function(network, directed, method = "DD", net_kind = "matrix", mech
         avg_null_distances <- (rowSums(null_dist$D_null)/nrow(null_dist$D_null))
         p_value <- sum(avg_null_distances[-1] > avg_null_distances[1])/(length(avg_null_distances)-1)
 
-
-
-
+                                    avg_null_distances <- apply(null_dist$D_null, 2, mean)
+                                    var_null_distances <- apply(null_dist$D_null, 2, var)
+                                    avg_null_distances = avg_null_distances * var_null_distances
+                                    p_value <- sum(avg_null_distances[-1] > avg_null_distances[1])/(length(avg_null_distances)-1)
+                                    if (p_value > 0.5) {
+                                        p_value = 1 - p_value
+                                    }
 
         ### KS test
         ## alternative should be "less" because less than expected just means best_fit_sd is too big, but I was getting weird p-values of 1 so left the default as "two.sided"

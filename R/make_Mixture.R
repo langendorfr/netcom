@@ -23,14 +23,36 @@
 #' 
 #' @export
 
-make_Mixture <- function(sequence, directed niches, mechanism_kind = "grow", retcon = FALSE, link_DD = 0, link_DM = 0) {
+make_Mixture <- function(mechanism, directed, parameter, kind, niches, retcon = FALSE, link_DD = 0, link_DM = 0, force_connected = FALSE) {
 
-    # if (ncol(as.data.frame(do.call(rbind, strsplit(sequence, "_")))) != 1) {
-    sequence_pars <- as.data.frame(do.call(rbind, strsplit(sequence, "_")))[[2]] %>% as.numeric()
-    sequence = paste0(as.data.frame(do.call(rbind, strsplit(sequence, "_")))[[3]], as.data.frame(do.call(rbind, strsplit(sequence, "_")))[[1]])
+    ## Old way of all information being in a single `sequence` vector that gets parsed
+    # if (ncol(as.data.frame(do.call(rbind, strsplit(sequence, "_")))) == 3) {
+    #     sequence_pars <- as.data.frame(do.call(rbind, strsplit(sequence, "_")))[[2]] %>% as.numeric()
+    #     if (all(as.data.frame(do.call(rbind, strsplit(sequence, "_")))[[3]] %in% c("grow", "rewire"))) {
+    #         sequence = paste0(substr(as.data.frame(do.call(rbind, strsplit(sequence, "_")))[[3]], 1, 1), as.data.frame(do.call(rbind, strsplit(sequence, "_")))[[1]])
+    #     } else {
+    #         stop("Sequence's third variable, after the second underscore, must be either 'grow' or 'rewire'. For example: sequence <- c('SW_0.15_grow', 'SW_0.6_rewire', 'SW_0.2_grow', 'SW_0.2_grow')")
+    #     }
+    # } else if (ncol(as.data.frame(do.call(rbind, strsplit(sequence, "_")))) == 2) {
+    #     sequence_pars <- as.data.frame(do.call(rbind, strsplit(sequence, "_")))[[2]] %>% as.numeric()
+    #     sequence = paste0("g", as.data.frame(do.call(rbind, strsplit(sequence, "_")))[[1]])
     # }
 
-    size <- sum(substr(sequence, 1, 1) == "g")
+    ## New way of having a vector for each piece of information
+    if (missing(directed)) {
+        directed <- rep(TRUE, length(mechanism))
+    }
+
+    if (missing(kind)) {
+        kind <- rep("grow", length(mechanism))
+    }
+
+    ## Handle constant parameter
+    if (length(parameter) == 1) {
+        parameters = rep(parameter, length(mechanism))
+    }
+
+    size <- sum(kind == "grow")
     matrix <- matrix(0, size, size)
 
     ## Start with the first two nodes connected
@@ -48,43 +70,47 @@ make_Mixture <- function(sequence, directed niches, mechanism_kind = "grow", ret
     ## Keep track of growing size, which is different than `x` because rewiring events do not add nodes
     s <- 2
 
-    for (x in 3:length(sequence)) {
-        kind <- substr(sequence[x], 1, 1)
-        if (kind == "g") {
+    for (x in 3:length(mechanism)) {
+        if (kind[x] == "grow") {
             s = s + 1
-        } else if (kind == "r") {
+        } else if (kind[x] == "rewire") {
             x_rewire <- sample(1:s, 1)
         } else {
-            stop("ERROR: Kind of network evolution not specified correctly. `sequence` must begin with either `g` or `r`, for growing and rewiring events respectively.")
+            stop("ERROR: Kind of network evolution not specified correctly. `kind` must be a vector of either `grow` or `rewire`, for growing and rewiring events respectively.")
         }
 
-        if (sequence[x] == "gER") {
-            matrix = grow_ER(matrix, s, p = sequence_pars[x], retcon = retcon, directed = directed) #TRUE)
-        } else if (sequence[x] == "gPA") {
-            # print(paste0("asldkfjasldkfjasdlfj:    ", sequence_pars[x]))
-            matrix = grow_PA(matrix, s, power = sequence_pars[x], retcon = retcon, directed = directed) #TRUE)
-        } else if (sequence[x] == "gDD") {
-            matrix = grow_DD(matrix, s, divergence = sequence_pars[x], link = link_DD, directed = directed) #FALSE)
-        } else if (sequence[x] == "gDM") {
-            matrix = grow_DM(matrix, s, divergence = sequence_pars[x], mutation = sequence_pars[x], link = link_DM, directed = directed) #FALSE)
-        } else if (sequence[x] == "gSW") {
-            matrix = grow_SW(matrix, s, rewire = sequence_pars[x], retcon = retcon, directed = directed) #FALSE)
-        } else if (sequence[x] == "gNM") {
-            matrix = grow_NM(matrix, s, connectance = sequence_pars[x], niches = niches, retcon = retcon, directed = directed) #TRUE)
-        } else if (sequence[x] == "rER") {
-            matrix = stir_ER(matrix = matrix, x = x_rewire, p = sequence_pars[x], directed = directed)
-        } else if (sequence[x] == "rPA") {
-            matrix = stir_PA(matrix = matrix, x = x_rewire, power = sequence_pars[x], directed = directed)
-        } else if (sequence[x] == "rDD") {
-            matrix = stir_DD(matrix = matrix, x = x_rewire, divergence = sequence_pars[x], link = link_DD, force_connected = force_connected, directed = directed)
-        } else if (sequence[x] == "rDM") {
-            matrix = stir_DM(matrix = matrix, x = x_rewire, divergence = sequence_pars[x], mutation = sequence_pars[x], link = link_DM, force_connected = force_connected, directed = directed)
-        } else if (sequence[x] == "rNM") {
-            matrix = stir_NM(matrix = matrix, x = x_rewire, niches = niches, connectance = sequence_pars[x], directed = directed)
-        } else if (sequence[x] == "rSW") {
-            matrix = stir_SW(matrix = matrix, x = x_rewire, rewire = sequence_pars[x], directed = directed)
-        } else {
-            stop("ERROR: Model not specified.")
+        if (kind[x] == "grow") {
+            if (mechanism[x] == "ER") {
+                matrix = grow_ER(matrix, s, p = parameter[x], retcon = retcon, directed = directed[x]) #TRUE)
+            } else if (mechanism[x] == "PA") {
+                matrix = grow_PA(matrix, s, power = parameter[x], retcon = retcon, directed = directed[x]) #TRUE)
+            } else if (mechanism[x] == "DD") {
+                matrix = grow_DD(matrix, s, divergence = parameter[x], link = link_DD, directed = directed[x]) #FALSE)
+            } else if (mechanism[x] == "DM") {
+                matrix = grow_DM(matrix, s, divergence = parameter[x], mutation = parameter[x], link = link_DM, directed = directed[x]) #FALSE)
+            } else if (mechanism[x] == "SW") {
+                matrix = grow_SW(matrix, s, rewire = parameter[x], retcon = retcon, directed = directed[x]) #FALSE)
+            } else if (mechanism[x] == "NM") {
+                matrix = grow_NM(matrix, s, connectance = parameter[x], niches = niches, retcon = retcon, directed = directed[x]) #TRUE)
+            } else {
+                stop("ERROR: Model not specified.")
+            }
+        } else if (kind[x] == "rewire") {
+            if (mechanism[x] == "ER") {
+                matrix = stir_ER(matrix = matrix, x = x_rewire, p = parameter[x], directed = directed[x])
+            } else if (mechanism[x] == "PA") {
+                matrix = stir_PA(matrix = matrix, x = x_rewire, power = parameter[x], directed = directed[x])
+            } else if (mechanism[x] == "DD") {
+                matrix = stir_DD(matrix = matrix, x = x_rewire, divergence = parameter[x], link = link_DD, force_connected = force_connected, directed = directed[x])
+            } else if (mechanism[x] == "DM") {
+                matrix = stir_DM(matrix = matrix, x = x_rewire, divergence = parameter[x], mutation = parameter[x], link = link_DM, force_connected = force_connected, directed = directed[x])
+            } else if (mechanism[x] == "NM") {
+                matrix = stir_NM(matrix = matrix, x = x_rewire, niches = niches, connectance = parameter[x], directed = directed[x])
+            } else if (mechanism[x] == "SW") {
+                matrix = stir_SW(matrix = matrix, x = x_rewire, rewire = parameter[x], directed = directed[x]   )
+            } else {
+                stop("ERROR: Model not specified.")
+            }
         }
     }
 

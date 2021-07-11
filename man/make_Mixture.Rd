@@ -10,7 +10,8 @@ make_Mixture(
   niches,
   retcon = FALSE,
   link_DD = 0,
-  link_DM = 0
+  link_DM = 0,
+  force_connected = FALSE
 )
 }
 \arguments{

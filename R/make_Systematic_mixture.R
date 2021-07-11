@@ -78,7 +78,7 @@ make_Systematic_mixture <- function(net_size, neighborhood, directed = TRUE, net
                     if (canonical) {directed = TRUE}
 
                     p_ER <- master_par_systematic[i]
-                    mat <- make_Mixture(sequence = rep(paste0("g", processes[p], "_", p_ER), net_size),
+                    mat <- make_Mixture(sequence = rep(paste0(processes[p], "_", p_ER, "_grow"), net_size),
                                         # p_ER = p_ER,
                                         directed = directed)
 
@@ -100,7 +100,7 @@ make_Systematic_mixture <- function(net_size, neighborhood, directed = TRUE, net
                     if (canonical) {directed = TRUE}
 
                     power_PA <- power_max * master_par_systematic[i]
-                    mat <- make_Mixture(sequence = rep(paste0("g", processes[p], "_", power_PA), net_size),
+                    mat <- make_Mixture(sequence = rep(paste0(processes[p], "_", power_PA, "_grow"), net_size),
                                         # power_PA = power_PA,
                                         directed = directed)
 
@@ -123,7 +123,7 @@ make_Systematic_mixture <- function(net_size, neighborhood, directed = TRUE, net
 
                     divergence_DD <- divergence_max * master_par_systematic[i]
 
-                    mat <- make_Mixture(sequence = rep(paste0("g", processes[p], "_", divergence_DD), net_size),
+                    mat <- make_Mixture(sequence = rep(paste0(processes[p], "_", divergence_DD, "_grow"), net_size),
                                         # divergence_DD = divergence_DD,
                                         directed = directed)
 
@@ -147,7 +147,7 @@ make_Systematic_mixture <- function(net_size, neighborhood, directed = TRUE, net
                     divergence_DM <- divergence_max * master_par_systematic[i]
                     mutation_DM <- mutation_max * master_par_systematic[i]
 
-                    mat <- make_Mixture(sequence = rep(paste0("g", processes[p], "_", divergence_DM), net_size),
+                    mat <- make_Mixture(sequence = rep(paste0(processes[p], "_", divergence_DM, "_grow"), net_size),
                                         # divergence_DM = divergence_DM,
                                         # mutation_DM = mutation_DM,
                                         directed = directed)
@@ -177,7 +177,7 @@ make_Systematic_mixture <- function(net_size, neighborhood, directed = TRUE, net
                     #     neighborhood = max(1, round(0.1 * net_size))
                     # }
 
-                    mat <- make_Mixture(sequence = rep(paste0("g", processes[p], "_", rewire_SW), net_size),
+                    mat <- make_Mixture(sequence = rep(paste0(processes[p], "_", rewire_SW, "_grow"), net_size),
                                         # rewire_SW = rewire_SW,
                                         directed = directed)
 
@@ -201,7 +201,7 @@ make_Systematic_mixture <- function(net_size, neighborhood, directed = TRUE, net
                     connectance_NM <- connectance_max * master_par_systematic[i]
                     niches <- runif(net_size) # %>% sort()
 
-                    mat <- make_Mixture(sequence = rep(paste0("g", processes[p], "_", connectance_NM), net_size),
+                    mat <- make_Mixture(sequence = rep(paste0(processes[p], "_", connectance_NM, "_grow"), net_size),
                                         niches = niches,
                                         # connectance_NM = connectance_NM,
                                         directed = directed)

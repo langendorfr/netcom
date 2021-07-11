@@ -3,7 +3,7 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](http://www.gnu.org/licenses/gpl-3.0)
 [![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/netcom)](https://cran.r-project.org/package=netcom)
 
-`netcom` is an R package to infer network functioning by emprically comparing networks to each other.
+`netcom` is an R package to infer system functioning by emprically comparing networks to each other.
 
 Langendorf, R. E. & Burgess, M. G. (2020) Empirically classifying network mechanisms. arXiv preprint arXiv:2012.15863.
 

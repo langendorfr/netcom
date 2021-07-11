@@ -43,7 +43,7 @@
 #' 
 #' @export
 
-stir_Mixture <- function(matrix, sequence, stirs = 100, p_ER = 0.5, power_PA = 2, divergence_DM = 0.8, mutation_DM = 0.1, link_DM = 0.2, connectance_NM = 0.2, rewire_SW = 0.1, force_connected = FALSE, directed = TRUE) {
+stir_Mixture <- function(matrix, sequence, stirs = 100, p_ER = 0.5, power_PA = 2, divergence_DD = 0.8, link_DD = 0.2, divergence_DM = 0.8, mutation_DM = 0.1, link_DM = 0.2, connectance_NM = 0.2, rewire_SW = 0.1, force_connected = FALSE, directed = TRUE) {
     # ## Primary Directory
     # pd <- "/Users/ryan/Windows/Documents/Post UCB/Research/Relativism"
     # setwd(pd)
@@ -80,6 +80,8 @@ stir_Mixture <- function(matrix, sequence, stirs = 100, p_ER = 0.5, power_PA = 2
                 matrix = stir_ER(matrix = matrix, x = x, p = p_ER)
             } else if (sequence[x] == "PA") {
                 matrix = stir_PA(matrix = matrix, x = x, power = power_PA)
+            } else if (sequence[x] == "DD") {
+                matrix = stir_DD(matrix = matrix, x = x, divergence = divergence_DD, link = link_DD, force_connected = force_connected)
             } else if (sequence[x] == "DM") {
                 matrix = stir_DM(matrix = matrix, x = x, divergence = divergence_DM, mutation = mutation_DM, link = link_DM, force_connected = force_connected)
             } else if (sequence[x] == "NM") {

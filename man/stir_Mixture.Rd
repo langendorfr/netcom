@@ -10,6 +10,8 @@ stir_Mixture(
   stirs = 100,
   p_ER = 0.5,
   power_PA = 2,
+  divergence_DD = 0.8,
+  link_DD = 0.2,
   divergence_DM = 0.8,
   mutation_DM = 0.1,
   link_DM = 0.2,
@@ -30,6 +32,10 @@ stir_Mixture(
 
 \item{power_PA}{Preferential Attachment parameter specifying the power of attachment, which determines how much new nodes prefer to attach to nodes that are already attached to by other nodes. Defaults to 2.}
 
+\item{divergence_DD}{Duplication and Divergence parameter specifying the probability of new nodes losing edges that exist in the node they duplicated. Defaults to 0.1.}
+
+\item{link_DD}{Duplication and Divergence parameter specifying the probability of an edge between a new node and the node it duplicated.}
+
 \item{divergence_DM}{Duplication and Mutation parameter specifying the probability of new nodes losing edges that exist in the node they duplicated. Defaults to 0.}
 
 \item{mutation_DM}{Duplication and Mutation parameter specifying the probability of new nodes gaining edges that did not exist in the node they duplicated. Defaults to 0.1.}
@@ -43,10 +49,6 @@ stir_Mixture(
 \item{force_connected}{Binary argument determining if the newly grown node has to be connected to the existing network. Defaults to FALSE, to prevent rare computational slow-downs when it is unlikely to create a connected network. Defaults to FALSE.}
 
 \item{directed}{Binary variable determining if the network is directed, resulting in off-diagonal asymmetry in the adjacency matrix. Defaults to TRUE.}
-
-\item{divergence_DD}{Duplication and Divergence parameter specifying the probability of new nodes losing edges that exist in the node they duplicated. Defaults to 0.1.}
-
-\item{link_DD}{Duplication and Divergence parameter specifying the probability of an edge between a new node and the node it duplicated.}
 }
 \value{
 An unweighted mixture mechanism adjacency matrix.

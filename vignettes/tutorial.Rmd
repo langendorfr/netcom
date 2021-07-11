@@ -24,7 +24,7 @@ options(digits = 2)
 ```
 
 # Abstract
-Network data are ubiquitous, reflecting a burgeoning systematics paradigm across physical, natural, and social sciences. The __netcom__ package provides generally applicable tools for inferring system functioning from network data. To do this, __netcom__ compares networks to each other, across empirical classifications and theoretical models of system formation and/or functioning. This is where its name comes from: __net__work __com__parison. Patterns in the resulting state space of inter-network distances capture system functioning, risk, and underlying mechanisms.
+Network data are ubiquitous, reflecting a burgeoning systematics paradigm across physical, natural, and social sciences. The __netcom__ package provides widely applicable tools for inferring system functioning from network data. To do this, __netcom__ compares networks to each other, across empirical classifications and theoretical models of system formation and/or functioning. This is where its name comes from: __net__work __com__parison. Patterns in the resulting state space of inter-network distances capture system functioning, risk, and underlying mechanisms.
 
 # Installation
 
@@ -34,7 +34,7 @@ You can install the __netcom__ package two main ways. A release version of the p
 install.packages("netcom")
 ```
 
-Alternatively, the most recent version can be installed from GitHub: https://github.com/langendorfr/netcom. This can be accomplished with the **devtools** package.
+Alternatively, the (usually) more recent development version can be installed from GitHub: https://github.com/langendorfr/netcom. This can be accomplished with the **devtools** package. We recommend new users install the other version, from CRAN, which is has less functioning but has been more reliably tested.
 
 ```{r GitHub installation, eval = FALSE}
 devtools::install_github("langendorfr/netcom")
@@ -43,14 +43,14 @@ devtools::install_github("langendorfr/netcom")
 Once installed simply load the package and you will have access to all of its functionality. Here we also load data manipulation and visualization packages necessary for the rest of this vignette.
 
 ```{r Setup, message = FALSE}
-library(netcom)
-library(igraph)
-library(dplyr)
-library(tibble)
-library(expm)
-library(ggplot2)
-library(ggraph)
-library(ggfortify)
+library(netcom)     # This library
+library(igraph)     # General puprose network library
+library(dplyr)      # Data manipulation
+library(tibble)     # Table data format
+library(expm)       # Matrix multiplication
+library(ggplot2)    # Plotting
+library(ggraph)     # Graph plotting extension for ggplot2
+library(ggfortify)  # Statistical plotting extension for ggplot2
 ```
 
 # Simulating Networks
@@ -61,7 +61,7 @@ __netcom__ can simulate networks according to five common mechanisms:
 
 1. Erdos-Renyi random (ER) @erdos1959random
 2. Preferential Attachment (PA) @barabasi1999emergence
-3. Duplication and Mutation (DM) @ispolatov2005duplication
+3. Duplication and Divergence (DD) @ispolatov2005duplication
 4. Small-World (SW) @watts1998collective
 5. Niche Model (NM) @williams2000simple
 
@@ -74,13 +74,33 @@ Note that both ways of simulating networks (growing and rewiring) involve assign
 As an example, here is a recipe for a realistically complex mixture network:
 
 ```{r Easily simulate mixture network, fig.height = 4, fig.width = 4, fig.align = "left"}
-## 1. Start by creating a sequence of network evolutions.
-sequence <- c("gER_0.3", "gER_0.3", "gER_0.3", "gER_0.3", "gER_0.3", "gER_0.3", "gER_0.3",
-              "rPA_2", "rPA_2", "rPA_2", 
-              "gER_0.3", "gER_0.3", "gER_0.3")
+## 1. Start by creating a sequence of network evolutions. There are four components to this sequence that can be defined for each step in the network's evolution, or once which will be used for every step in the newtwork's evolution.
+mechanism <- c(
+    rep("ER", 7),
+    rep("PA", 2),
+    rep("ER", 3)
+)
+
+kind <- c(
+    rep("grow", 7),
+    rep("rewire", 2),
+    rep("grow", 3)
+)
+
+parameter <- c(
+    rep(0.3, 7),
+    rep(2, 2),
+    rep(0.3, 3)
+)
+
+directed <- c(
+    rep(TRUE, 7),
+    rep(FALSE, 2),
+    rep(TRUE, 3)
+)
 
 ## 2. Simulate a network according to the rules of this system evolution.
-network <- make_Mixture(sequence, directed = TRUE)
+network <- make_Mixture(mechanism = mechanism, kind = kind, parameter = parameter, directed = directed)
 
 
 ## Finally, plot the simulated network. netcom typically stores networks as matrices,
@@ -98,7 +118,7 @@ network %>%
                        end_cap = circle(4, "mm"))
 ```
 
-This is a system that grows randomly at first, adding three nodes that attach to other nodes according to the Erdos-Renyi (ER) random model. Node the first three elements of _sequence_ start with the letter _g_ signifying these are growth events. The next two events starts with the letter _r_ signifying rewiring events. These do not change the size of the network (number of nodes). Only the edges between currently existing nodes are affected, as happens for the next two events where two nodes are rewired according to the Preferential Attachment (PA) model. Note that these events include all currently existing nodes. In this way a rewiring event can result in a node interacting with a node that was grown (added to the network) after it.
+This is a system that grows randomly at first, adding three nodes that attach to other nodes according to the Erdos-Renyi (ER) random model. Node the first three elements of _kind_ are _"grow"_ signifying these are growth events. The next two events are _"rewire"_ signifying rewiring events. These do not change the size of the network (number of nodes). Only the edges between currently existing nodes are affected, as happens for the next two events where two nodes are rewired according to the Preferential Attachment (PA) model. Note that these events include all currently existing nodes. In this way a rewiring event can result in a node interacting with a node that was grown (added to the network) after it.
 
 If you want to simulate a more complicated network you can use the functions called by *make_Mixture()*. These require more care as you must specify the node being acted on by each event. This works by initializing an empty matrix of the final network's size and then iteratively interacting with the row-column ID of each node. Here is an example of the same mixture network as above, but with a changing probability of attachment:
 
@@ -166,21 +186,17 @@ Network alignment offers useful insights at both the level of the entire network
 num_networks <- 10
 
 ## First set of undisturbed networks.
+## You can omit the '_grow' suffix which is the default, as long as every node is the be grown.
 networks_SW <- list()
 for (net in 1:num_networks) {
-    # networks_SW[[net]] = netcom::make_SW(size = 10, 
-    #                                      net_kind = "matrix", 
-    #                                      rewire = 0.2, 
-    #                                      neighborhood = 2, 
-    #                                      directed = FALSE)
-    # networks_SW[[net]] = netcom::make_Mixture(rep("gSW", 20))
-    networks_SW[[net]] = netcom::make_Mixture(rep("gSW_0.15", 20), directed = TRUE)
+    # networks_SW[[net]] = netcom::make_Mixture(rep("SW_0.15", 10), directed = TRUE)
+    networks_SW[[net]] = make_Mixture(rep("DD_0.15", 20), directed = TRUE)
 }
 
 ## Second set of disturbed networks
 networks_SW_disturbed <- list()
 for (net in 1:num_networks) {
-    networks_SW_disturbed[[net]] = netcom::make_Mixture(rep(c(rep("gSW_0.3", 3), rep("rER_0.76", 2)), 4), directed = TRUE)
+    networks_SW_disturbed[[net]] = netcom::make_Mixture(c(rep(c(rep("DD_0.3_grow", 3), rep("ER_0.76_rewire", 1)), 3), "DD_0.1_grow"), directed = TRUE)
 }
 
 ## Pairwise compare all of the networks to each other 
@@ -219,13 +235,13 @@ We can combine network simulation and comparisons to test a hypothesized mechani
 ```{r Classify networks, fig.height = 4, fig.width = 4, fig.align = "left"}
 ## Classification of an undisturbed Small-World network made above
 netcom::classify(networks_SW[[1]], 
-                 processes = c("SW", "ER"),
+                 processes = c("SW", "DD", "NM", "PA", "ER", "DD"),
                  directed = TRUE,
                  mechanism_kind = "grow")
 
 ## Classification of a disturbed Small-World network made above
 netcom::classify(networks_SW_disturbed[[1]], 
-                 processes = c("SW", "ER"),
+                 processes = c("SW", "DD", "NM", "PA", "ER", "DD"),
                  directed = TRUE,
                  mechanism_kind = "grow")
 ```

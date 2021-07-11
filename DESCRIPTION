@@ -24,11 +24,13 @@ Imports:
     Matrix,
     pdist,
     pracma,
-    vegan
+    vegan,
+    magrittr
 LazyData: true
 RoxygenNote: 7.1.1
 Suggests: 
     rmarkdown,
     knitr,
-    testthat
+    testthat (>= 3.0.0)
 VignetteBuilder: knitr
+Config/testthat/edition: 3
