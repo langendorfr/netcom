@@ -118,59 +118,8 @@ network %>%
                        end_cap = circle(4, "mm"))
 ```
 
-This is a system that grows randomly at first, adding three nodes that attach to other nodes according to the Erdos-Renyi (ER) random model. Node the first three elements of _kind_ are _"grow"_ signifying these are growth events. The next two events are _"rewire"_ signifying rewiring events. These do not change the size of the network (number of nodes). Only the edges between currently existing nodes are affected, as happens for the next two events where two nodes are rewired according to the Preferential Attachment (PA) model. Note that these events include all currently existing nodes. In this way a rewiring event can result in a node interacting with a node that was grown (added to the network) after it.
+This is a system that grows randomly at first, adding three nodes that attach to other nodes according to the Erdos-Renyi (ER) random model. Node the first three elements of _kind_ are _"grow"_ signifying these are growth events. The next two events are _"rewire"_ signifying rewiring events. These do not change the size of the network (number of nodes). Only the edges between currently existing nodes are affected, as happens for the next two events where two nodes are rewired according to the Preferential Attachment (PA) model. Note that these events include all currently existing nodes. In this way a rewiring event can result in a node interacting with a node that was grown (added to the network) after it. Using *make_Mixture()* you can specify realistically complicated network evolutions by specifying changing governing dynamics in the sequences contained in the input parameters _mechanism_, _kind_, _parameter_, and _directed_.
 
-If you want to simulate a more complicated network you can use the functions called by *make_Mixture()*. These require more care as you must specify the node being acted on by each event. This works by initializing an empty matrix of the final network's size and then iteratively interacting with the row-column ID of each node. Here is an example of the same mixture network as above, but with a changing probability of attachment:
-
-```{r Manually simulate mixture network, fig.height = 4, fig.width = 4, fig.align = "left"}
-## 1. Start by creating a network of the desired final size with only two variables that
-## interact with each other.
-network_size <- 10
-network <- matrix(0, nrow = network_size, ncol = network_size)
-network[1, 0] = 1
-network[0, 1] = 1
-
-## 2. Grow five new nodes. All ten follow the Erdos-Renyi random mechanism, but with a 
-## decreasing probability of interaction, going from 1 to 0.1.
-p_interaction <- 1
-for (node in 3:7) {
-    network = netcom::grow_ER(network, x = node, p = p_interaction)
-    p_interaction = p_interaction - 0.1
-}
-
-## 3. Rewire three of the nodes using preferential attachment a power of 2.
-rewire_ids <- sample(1:7, 3, replace = FALSE)
-for (node in rewire_ids) {
-    network_exists <- network[1:7, 1:7]
-    network_exists <- netcom::stir_PA(network_exists, x = node, power = 2, directed = TRUE)
-    network[1:7, 1:7] <- network_exists
-}
-
-## 4. Grow 3 new nodes (10 total) using the Erdos-Renyi random mechanism again. All eight 
-## have a probability of attachment of 0.5.
-p_interaction <- 0.5
-for (node in 8:10) {
-    network = netcom::grow_ER(network, x = node, p = p_interaction, directed = TRUE)
-}
-
-## Finally, plot the simulated network. Remember, netcom typically stores networks as matrices,
-## so to plot a network you will have to transform it into a linked list.
-network %>% 
-    reshape2::melt() %>% 
-    dplyr::filter(value == 1) %>% 
-    ggraph(layout = "stress") + 
-        theme_void() +
-        geom_node_point(size = 10,
-                        color = "slateblue") +
-        geom_edge_link(arrow = arrow(type = "closed",
-                                     length = unit(3, "mm")),
-                       start_cap = circle(4, "mm"),
-                       end_cap = circle(4, "mm"))
-```
-
-This models a community that grows randomly, but with a decreasing chance of new members interacting. Several choose to rethink their interactions, preferring to interact with members that have lots of interactions. Subsequent growth then involves a constant higher level of interactions with new members.
-
-Learning to use individual *grow_* and *stir_* functions can help you add your own, extending the mechanisms available for simulation and classification.
 
 # Comparing Networks
 
@@ -187,27 +136,31 @@ num_networks <- 10
 
 ## First set of undisturbed networks.
 ## You can omit the '_grow' suffix which is the default, as long as every node is the be grown.
-networks_SW <- list()
+networks_undisturbed <- list()
 for (net in 1:num_networks) {
-    # networks_SW[[net]] = netcom::make_Mixture(rep("SW_0.15", 10), directed = TRUE)
-    networks_SW[[net]] = make_Mixture(rep("DD_0.15", 20), directed = TRUE)
+    networks_undisturbed[[net]] = make_Mixture(mechanism = rep("DD", 20), parameter = 0.15, directed = TRUE)
 }
 
 ## Second set of disturbed networks
-networks_SW_disturbed <- list()
+networks_disturbed <- list()
 for (net in 1:num_networks) {
-    networks_SW_disturbed[[net]] = netcom::make_Mixture(c(rep(c(rep("DD_0.3_grow", 3), rep("ER_0.76_rewire", 1)), 3), "DD_0.1_grow"), directed = TRUE)
+    networks_disturbed[[net]] = make_Mixture(
+        mechanism = c("DD", "DD", "DD", "ER", "DD"),
+        parameter = c(0.3, 0.3, 0.3, 0.76, 0.1),
+        kind = c("grow", "grow", "grow", "rewire", "grow"),
+        directed = TRUE
+    )
 }
 
 ## Pairwise compare all of the networks to each other 
-networks <- c(networks_SW, networks_SW_disturbed)
+networks <- c(networks_undisturbed, networks_disturbed)
 comparisons <- matrix(NA, nrow = length(networks), ncol = length(networks))
 for (row in 1:length(networks)) {
     for (col in 1:length(networks)) {
         
         ## Take advantage of the symmetry of this alignment algorithm
         if (col > row) {
-            comparisons[row, col] = netcom::align(networks[[row]], networks[[col]])$score
+            comparisons[row, col] = align(networks[[row]], networks[[col]])$score
             comparisons[col, row] = comparisons[row, col]
         }
 
@@ -218,8 +171,8 @@ diag(comparisons) = 0
 
 ## PCA of comparisons
 stats::prcomp(comparisons) %>%
-    ggplot2::autoplot(data = tibble(Kind = c(rep("Small-World", num_networks),
-                                             rep("Disturbed Small-World", num_networks))), 
+    ggplot2::autoplot(data = tibble(Kind = c(rep("Duplication & Divergence", num_networks),
+                                             rep("Disturbed Duplication & Divergence", num_networks))), 
                       colour = "Kind",
                       size = 5) + 
     theme_bw() +
@@ -234,16 +187,20 @@ We can combine network simulation and comparisons to test a hypothesized mechani
 
 ```{r Classify networks, fig.height = 4, fig.width = 4, fig.align = "left"}
 ## Classification of an undisturbed Small-World network made above
-netcom::classify(networks_SW[[1]], 
-                 processes = c("SW", "DD", "NM", "PA", "ER", "DD"),
-                 directed = TRUE,
-                 mechanism_kind = "grow")
+classify(
+    network = networks_undisturbed[[1]], 
+    processes = c("SW", "DD", "NM", "PA", "ER", "DD"),
+    directed = TRUE,
+    mechanism_kind = "grow"
+)
 
 ## Classification of a disturbed Small-World network made above
-netcom::classify(networks_SW_disturbed[[1]], 
-                 processes = c("SW", "DD", "NM", "PA", "ER", "DD"),
-                 directed = TRUE,
-                 mechanism_kind = "grow")
+classify(
+    network = networks_disturbed[[1]], 
+    processes = c("SW", "DD", "NM", "PA", "ER", "DD"),
+    directed = TRUE,
+    mechanism_kind = "grow"
+)
 ```
 
 Pure mechanisms are readily inferred by comparing a network with many networks simualted from hypothesized mechanisms. Mixture mechanisms are not. This is because different mixtures can produce similar network structures. Fortunately, there is evidence we can still functionally classify network data describing realistically complex systems governed by mixtures of mechanisms @langendorf2020empirically.

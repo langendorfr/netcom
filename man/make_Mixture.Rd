@@ -5,8 +5,10 @@
 \title{Make a Mixture Mechanism Network}
 \usage{
 make_Mixture(
-  sequence,
+  mechanism,
   directed,
+  parameter,
+  kind,
   niches,
   retcon = FALSE,
   link_DD = 0,
@@ -15,13 +17,13 @@ make_Mixture(
 )
 }
 \arguments{
-\item{sequence}{A vector of mechanism names corresponding to the mechanisms each node acts in accordance with. Needs to be the same length as the number of nodes in the network. Note that the first two mechanisms are irrelevant because the first two nodes default to connecting to each other. Currently supported mechanisms: "ER" (Erdos-Renyi random), "PA", (Preferential Attachment), "DD", (Duplication and Divergence), "DM" (Duplication and Mutation), "SW", (Small-World), and "NM" (Niche Model).}
-
 \item{directed}{Binary variable determining if the network is directed, resulting in off-diagonal asymmetry in the adjacency matrix.}
 
 \item{niches}{Used by the Niche Model to determine which nodes interact. Needs to be a vector of the same length as the number of nodes, and range between zero and one.}
 
 \item{retcon}{Binary variable determining if already existing nodes can attach to new nodes. Defaults to FALSE.}
+
+\item{sequence}{A vector of mechanism names corresponding to the mechanisms each node acts in accordance with. Needs to be the same length as the number of nodes in the network. Note that the first two mechanisms are irrelevant because the first two nodes default to connecting to each other. Currently supported mechanisms: "ER" (Erdos-Renyi random), "PA", (Preferential Attachment), "DD", (Duplication and Divergence), "DM" (Duplication and Mutation), "SW", (Small-World), and "NM" (Niche Model).}
 }
 \value{
 An unweighted mixture mechanism adjacency matrix.

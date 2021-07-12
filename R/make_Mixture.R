@@ -39,17 +39,22 @@ make_Mixture <- function(mechanism, directed, parameter, kind, niches, retcon = 
     # }
 
     ## New way of having a vector for each piece of information
-    if (missing(directed)) {
-        directed <- rep(TRUE, length(mechanism))
-    }
 
+    ## Handle missing kind which can be assumed to be "grow"
+    ## All other information (mechanism, directed, and kind) should be specified
     if (missing(kind)) {
         kind <- rep("grow", length(mechanism))
     }
 
-    ## Handle constant parameter
+    ## Handle constant inputs
     if (length(parameter) == 1) {
-        parameters = rep(parameter, length(mechanism))
+        parameter = rep(parameter, length(mechanism))
+    }
+    if (length(kind) == 1) {
+        kind = rep(kind, length(mechanism))
+    }
+    if (length(directed) == 1) {
+        directed = rep(directed, length(mechanism))
     }
 
     size <- sum(kind == "grow")

@@ -50,7 +50,7 @@ make_Systematic_mixture <- function(net_size, neighborhood, directed = TRUE, net
 
     ### Main Body ---
     if (!(net_kind %in% c("matrix", "list"))) {
-        stop("Unknown net_kind. Must be `list` or `matrix`.")
+        stop("Unknown net_kind. Must be 'list' or 'matrix'.")
     }
 
     # if (!(net_kind == "matrix")) {

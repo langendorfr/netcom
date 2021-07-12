@@ -44,7 +44,7 @@ classify(
 \arguments{
 \item{network}{The network to be classified.}
 
-\item{directed}{Defaults to TRUE. Whether the target network is directed.}
+\item{directed}{Whether the target network is directed. If missing this will be inferred by the symmetry of the input network.}
 
 \item{method}{This determines the method used to compare networks at the heart of the classification. Currently "DD" (Degree Distribution) and "align" (the align function which compares networks by the entropy of diffusion on them) are supported. Future versions will allow user-defined methods. Defaults to "DD".}
 
