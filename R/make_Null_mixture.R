@@ -92,8 +92,6 @@ make_Null_mixture <- function(input_network, net_kind, process, parameter, net_s
     ## +1 because include the network being classified
     for (counter in 2:(iters+1)) {
 
-
-
                 ## Add network to growing list, made from same process and parameter
                 if (process == "ER") {
                     # directed = TRUE
@@ -102,10 +100,13 @@ make_Null_mixture <- function(input_network, net_kind, process, parameter, net_s
                     p_ER = min(p_ER, resolution_max)
                     p_ER = max(p_ER, resolution_min)
                     parameters = c(parameters, p_ER)
-                    
-                    mat <- make_Mixture(sequence = rep(paste0(process, "_", p_ER, "_grow"), net_size),
-                                        # p_ER = p_ER,
-                                        directed = directed)
+
+                    mat <- make_Mixture(
+                        mechanism = rep(process, net_size),
+                        parameter = p_ER,
+                        kind = "grow",
+                        directed = directed
+                    )
 
                     if (net_kind == "matrix") {
                         networks[[counter]] <- mat
@@ -126,9 +127,12 @@ make_Null_mixture <- function(input_network, net_kind, process, parameter, net_s
                     power_PA = max(power_PA, resolution_min * power_max)
                     parameters = c(parameters, power_PA)
 
-                    mat <- make_Mixture(sequence = rep(paste0(process, "_", power_PA, "_grow"), net_size),
-                                        # power_PA = power_PA,
-                                        directed = directed)
+                    mat <- make_Mixture(
+                        mechanism = rep(process, net_size),
+                        parameter = power_PA,
+                        kind = "grow",
+                        directed = directed
+                    )
 
                     if (net_kind == "matrix") {
                         networks[[counter]] <- mat
@@ -149,9 +153,12 @@ make_Null_mixture <- function(input_network, net_kind, process, parameter, net_s
                     divergence_DD = max(divergence_DD, resolution_min)
                     parameters = c(parameters, divergence_DD)
 
-                    mat <- make_Mixture(sequence = rep(paste0(process, "_", divergence_DD, "_grow"), net_size),
-                                        # divergence_DD = divergence_DD,
-                                        directed = directed)
+                    mat <- make_Mixture(
+                        mechanism = rep(process, net_size),
+                        parameter = divergence_DD,
+                        kind = "grow",
+                        directed = directed
+                    )
 
                     if (net_kind == "matrix") {
                         networks[[counter]] <- mat
@@ -172,12 +179,15 @@ make_Null_mixture <- function(input_network, net_kind, process, parameter, net_s
                     divergence_DM = max(divergence_DM, resolution_min)
                     parameters = c(parameters, divergence_DM)
 
+                    ## Right now there is no way to use more than one parameter per model, so make_Mixture() uses the single input parameter for both
                     mutation_DM <- divergence_DM
 
-                    mat <- make_Mixture(sequence = rep(paste0(process, "_", divergence_DM, "_grow"), net_size),
-                                        # divergence_DM = divergence_DM,
-                                        # mutation_DM = mutation_DM,
-                                        directed = directed)
+                    mat <- make_Mixture(
+                        mechanism = rep(process, net_size),
+                        parameter = divergence_DM,
+                        kind = "grow",
+                        directed = directed
+                    )
 
                     if (net_kind == "matrix") {
                         networks[[counter]] <- mat
@@ -198,14 +208,12 @@ make_Null_mixture <- function(input_network, net_kind, process, parameter, net_s
                     rewire_SW = max(rewire_SW, resolution_min)
                     parameters = c(parameters, rewire_SW)
 
-                    # ## SW neighborhood parameter based on net_size if missing
-                    # if (missing(neighborhood)) {
-                    #     neighborhood = max(1, round(0.1 * net_size))
-                    # }
-
-                    mat <- make_Mixture(sequence = rep(paste0(process, "_", rewire_SW), "_grow", net_size),
-                                        # rewire_SW = rewire_SW,
-                                        directed = directed)
+                    mat <- make_Mixture(
+                        mechanism = rep(process, net_size),
+                        parameter = rewire_SW,
+                        kind = "grow",
+                        directed = directed
+                    )
 
                     if (net_kind == "matrix") {
                         networks[[counter]] <- mat
@@ -228,10 +236,13 @@ make_Null_mixture <- function(input_network, net_kind, process, parameter, net_s
 
                     niches <- runif(net_size) # %>% sort()
 
-                    mat <- make_Mixture(sequence = rep(paste0(process, "_", connectance_NM, "_grow"), net_size),
-                                        niches = niches,
-                                        # connectance_NM = connectance_NM,
-                                        directed = directed)
+                    mat <- make_Mixture(
+                        mechanism = rep(process, net_size),
+                        niches = niches,
+                        parameter = connectance_NM,
+                        kind = "grow",
+                        directed = directed
+                    )
 
                     if (net_kind == "matrix") {
                         networks[[counter]] <- mat

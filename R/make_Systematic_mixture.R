@@ -58,9 +58,11 @@ make_Systematic_mixture <- function(net_size, neighborhood, directed = TRUE, net
     # }
 
     networks <- list()
-    parameters <- tibble(Process = character(),
-                        Parameter_Name = character(),
-                        Parameter_Value = numeric())
+    parameters <- tibble(
+        Process = character(),
+        Parameter_Name = character(),
+        Parameter_Value = numeric()
+    )
     master_par_systematic <- seq(from = resolution_min, to = resolution_max, length.out = resolution)
 
     counter <- 0
@@ -78,9 +80,12 @@ make_Systematic_mixture <- function(net_size, neighborhood, directed = TRUE, net
                     if (canonical) {directed = TRUE}
 
                     p_ER <- master_par_systematic[i]
-                    mat <- make_Mixture(sequence = rep(paste0(processes[p], "_", p_ER, "_grow"), net_size),
-                                        # p_ER = p_ER,
-                                        directed = directed)
+                    mat <- make_Mixture(
+                        mechanism = rep(processes[p], net_size),
+                        parameter = p_ER,
+                        kind = "grow",
+                        directed = directed
+                    )
 
                     if (net_kind == "matrix") {
                         networks[[counter]] <- mat
@@ -90,7 +95,7 @@ make_Systematic_mixture <- function(net_size, neighborhood, directed = TRUE, net
                         networks[[counter]] = edgelist
 
                     } else {
-                        stop("Unknown network kind. Must be `list` or `matrix`.")
+                        stop("Unknown network kind. Must be 'list' or 'matrix'.")
                     }
 
                     parameters_addition <- tibble(Process = processes[p], Parameter_Name = "p_ER", Parameter_Value = p_ER)
@@ -100,9 +105,12 @@ make_Systematic_mixture <- function(net_size, neighborhood, directed = TRUE, net
                     if (canonical) {directed = TRUE}
 
                     power_PA <- power_max * master_par_systematic[i]
-                    mat <- make_Mixture(sequence = rep(paste0(processes[p], "_", power_PA, "_grow"), net_size),
-                                        # power_PA = power_PA,
-                                        directed = directed)
+                    mat <- make_Mixture(
+                        mechanism = rep(processes[p], net_size),
+                        parameter = power_PA,
+                        kind = "grow",
+                        directed = directed
+                    )
 
                     if (net_kind == "matrix") {
                         networks[[counter]] <- mat
@@ -123,9 +131,12 @@ make_Systematic_mixture <- function(net_size, neighborhood, directed = TRUE, net
 
                     divergence_DD <- divergence_max * master_par_systematic[i]
 
-                    mat <- make_Mixture(sequence = rep(paste0(processes[p], "_", divergence_DD, "_grow"), net_size),
-                                        # divergence_DD = divergence_DD,
-                                        directed = directed)
+                    mat <- make_Mixture(
+                        mechanism = rep(processes[p], net_size),
+                        parameter = divergence_DD,
+                        kind = "grow",
+                        directed = directed
+                    )
 
                     if (net_kind == "matrix") {
                         networks[[counter]] <- mat
@@ -144,13 +155,16 @@ make_Systematic_mixture <- function(net_size, neighborhood, directed = TRUE, net
                 } else if (processes[p] == "DM") {
                     if (canonical) {directed = FALSE}
 
+                    ## Right now there is no way to use more than one parameter per model, so make_Mixture() uses the single input parameter for both
                     divergence_DM <- divergence_max * master_par_systematic[i]
                     mutation_DM <- mutation_max * master_par_systematic[i]
 
-                    mat <- make_Mixture(sequence = rep(paste0(processes[p], "_", divergence_DM, "_grow"), net_size),
-                                        # divergence_DM = divergence_DM,
-                                        # mutation_DM = mutation_DM,
-                                        directed = directed)
+                    mat <- make_Mixture(
+                        mechanism = rep(processes[p], net_size),
+                        parameter = divergence_DM,
+                        kind = "grow",
+                        directed = directed
+                    )
 
                     if (net_kind == "matrix") {
                         networks[[counter]] <- mat
@@ -172,14 +186,12 @@ make_Systematic_mixture <- function(net_size, neighborhood, directed = TRUE, net
 
                     rewire_SW <- master_par_systematic[i]
 
-                    # ## SW neighborhood parameter based on net_size if missing
-                    # if (missing(neighborhood)) {
-                    #     neighborhood = max(1, round(0.1 * net_size))
-                    # }
-
-                    mat <- make_Mixture(sequence = rep(paste0(processes[p], "_", rewire_SW, "_grow"), net_size),
-                                        # rewire_SW = rewire_SW,
-                                        directed = directed)
+                    mat <- make_Mixture(
+                        mechanism = rep(processes[p], net_size),
+                        parameter = rewire_SW,
+                        kind = "grow",
+                        directed = directed
+                    )
 
                     if (net_kind == "matrix") {
                         networks[[counter]] <- mat
@@ -201,10 +213,13 @@ make_Systematic_mixture <- function(net_size, neighborhood, directed = TRUE, net
                     connectance_NM <- connectance_max * master_par_systematic[i]
                     niches <- runif(net_size) # %>% sort()
 
-                    mat <- make_Mixture(sequence = rep(paste0(processes[p], "_", connectance_NM, "_grow"), net_size),
-                                        niches = niches,
-                                        # connectance_NM = connectance_NM,
-                                        directed = directed)
+                    mat <- make_Mixture(
+                        mechanism = rep(processes[p], net_size),
+                        niches = niches,
+                        parameter = connectance_NM,
+                        kind = "grow",
+                        directed = directed
+                    )
 
                     if (net_kind == "matrix") {
                         networks[[counter]] <- mat
