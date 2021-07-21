@@ -57,7 +57,13 @@ comparisons <- 50
 network_target <- matrix(sample(c(0,1), size = size^2, replace = TRUE), nrow = size, ncol = size)
 network_others <- list()
 for (net in 1:comparisons) {
-     networks_others[[net]] = matrix(sample(c(0,1), size = size^2, replace = TRUE), nrow = size, ncol = size)
+     networks_others[[net]] = matrix(
+         sample(
+             c(0,1),
+             size = size^2,
+             replace = TRUE),
+         nrow = size,
+         ncol = size)
 }
 compare_Target(target = network_target, networks = networks_others, net_size = size, method = "DD")
 
