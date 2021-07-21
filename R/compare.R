@@ -40,7 +40,13 @@
 #' comparisons <- 50
 #' networks <- list()
 #' for (net in 1:comparisons) {
-#'      networks[[net]] = matrix(sample(c(0,1), size = size^2, replace = TRUE), nrow = size, ncol = size)
+#'      networks[[net]] = matrix(
+#'          sample(
+#'              c(0,1), 
+#'              size = size^2, 
+#'              replace = TRUE), 
+#'          nrow = size,
+#'          ncol = size)
 #' }
 #' compare(networks = networks)
 #' 

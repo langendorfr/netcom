@@ -11,13 +11,15 @@ Langendorf, R. E. & Goldberg, D. S. (2019) Aligning statistical dynamics capture
 
 ## Installation
 
-1. Install the release version of `netcom` from CRAN.
+You can install the **netcom** package two main ways.
+
+1. A release version of the package can be installed from CRAN (the Comprehensive R Archive Network): https://cran.r-project.org/package=netcom.
 
    ```R
    install.packages("netcom").
    ```
 
-2. Install the development version of `netcom` from GitHub using `devtools`.
+2. Alternatively, the (usually) more recent development version can be installed from GitHub: https://github.com/langendorfr/netcom. This can be accomplished with the **devtools** package. We recommend new users install the other version, from CRAN, which is has less functioning but has been more reliably tested.
    ```R
    install.packages("devtools")
    devtools::install_github("langendorfr/netcom")

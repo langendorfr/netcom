@@ -24,7 +24,7 @@ options(digits = 2)
 ```
 
 # Abstract
-Network data are ubiquitous, reflecting a burgeoning systematics paradigm across physical, natural, and social sciences. The __netcom__ package provides widely applicable tools for inferring system functioning from network data. To do this, __netcom__ compares networks to each other, across empirical classifications and theoretical models of system formation and/or functioning. This is where its name comes from: __net__work __com__parison. Patterns in the resulting state space of inter-network distances capture system functioning, risk, and underlying mechanisms.
+Network data are ubiquitous, reflecting a burgeoning systematics paradigm across physical, natural, and social sciences. The __netcom__ package provides widely applicable tools for inferring system functioning from network data. To do this, __netcom__ compares networks to each other, across empirical classifications and theoretical models of system formation and/or functioning. This is where its name comes from: <b>net</b>work <b>com</b>parison. Patterns in the resulting state space of inter-network distances capture system functioning, risk, and underlying mechanisms.
 
 # Installation
 
@@ -34,7 +34,7 @@ You can install the __netcom__ package two main ways. A release version of the p
 install.packages("netcom")
 ```
 
-Alternatively, the (usually) more recent development version can be installed from GitHub: https://github.com/langendorfr/netcom. This can be accomplished with the **devtools** package. We recommend new users install the other version, from CRAN, which is has less functioning but has been more reliably tested.
+Alternatively, the (usually) more recent development version can be installed from GitHub: https://github.com/langendorfr/netcom. This can be accomplished with the __devtools__ package. We recommend new users install the other version, from CRAN, which is has less functioning but has been more reliably tested.
 
 ```{r GitHub installation, eval = FALSE}
 devtools::install_github("langendorfr/netcom")
@@ -65,7 +65,7 @@ __netcom__ can simulate networks according to five common mechanisms:
 4. Small-World (SW) @watts1998collective
 5. Niche Model (NM) @williams2000simple
 
-There are two ways to simulate a mechanism. (i) Grow a network adding nodes one at a time. Each new node can only use information about already existing nodes in determining which to interact with (share an edge). (ii) Take an already formed network and have a node re-choose which of the other nodes to interact with (share an edge). This is called rewiring. Notably, the sequence of rewired nodes need not be a unique ordered list of the nodes in the network. Nodes can be rewired multiple times or never. Growing networks imparts a chronological hierarchy, where no edge is bidirectional. This captures system evolution where novel entites are introduced, but is less able to describe systems of continously interacting variables. Rewired networks are more appropriate here, but can be biased by the starting network and order in which nodes are rewired. Also, rewiring nodes enough times to reach an equilibrium is computationally intensive.
+There are two ways to simulate a mechanism. (i) Grow a network adding nodes one at a time. Each new node can only use information about already existing nodes in determining which to interact with (share an edge). (ii) Take an already formed network and have a node re-choose which of the other nodes to interact with (share an edge). This is called rewiring. Notably, the sequence of rewired nodes need not be a unique ordered list of the nodes in the network. Nodes can be rewired multiple times or never. Growing networks imparts a chronological hierarchy, where no edge is bidirectional. This captures system evolution where novel entites are introduced, but is less able to describe systems of continously interacting variables. Rewired networks are more appropriate here, but can be biased by the starting network and the order in which nodes are rewired. Also, rewiring nodes enough times to reach an equilibrium can be computationally intensive.
 
 ## Mixture Networks
 
@@ -106,8 +106,8 @@ network <- make_Mixture(mechanism = mechanism, kind = kind, parameter = paramete
 ## Finally, plot the simulated network. netcom typically stores networks as matrices,
 ## so to plot a network you will have to transform it into a linked list.
 network %>% 
-    reshape2::melt() %>% 
-    dplyr::filter(value == 1) %>% 
+    melt() %>% 
+    filter(value == 1) %>% 
     ggraph(layout = "stress") + 
         theme_void() +
         geom_node_point(size = 10,
@@ -118,7 +118,7 @@ network %>%
                        end_cap = circle(4, "mm"))
 ```
 
-This is a system that grows randomly at first, adding three nodes that attach to other nodes according to the Erdos-Renyi (ER) random model. Node the first three elements of _kind_ are _"grow"_ signifying these are growth events. The next two events are _"rewire"_ signifying rewiring events. These do not change the size of the network (number of nodes). Only the edges between currently existing nodes are affected, as happens for the next two events where two nodes are rewired according to the Preferential Attachment (PA) model. Note that these events include all currently existing nodes. In this way a rewiring event can result in a node interacting with a node that was grown (added to the network) after it. Using *make_Mixture()* you can specify realistically complicated network evolutions by specifying changing governing dynamics in the sequences contained in the input parameters _mechanism_, _kind_, _parameter_, and _directed_.
+This is a system that grows randomly at first, adding seven nodes that attach to other nodes according to the Erdos-Renyi (ER) random model. Note the first three elements of _kind_ are _"grow"_ signifying these are growth events. The next two events are _"rewire"_ signifying rewiring events. These do not change the size of the network (number of nodes). Only the edges between currently existing nodes are affected, as happens for the next two events where two nodes are rewired according to the Preferential Attachment (PA) model. These events include all currently existing nodes so a rewiring event can result in a node interacting with a node that was grown (added to the network) after it. Using *make_Mixture()* you can specify realistically complicated network evolutions by specifying changing governing dynamics in the sequences contained in the input parameters _mechanism_, _kind_, _parameter_, and _directed_.
 
 
 # Comparing Networks
@@ -138,16 +138,20 @@ num_networks <- 10
 ## You can omit the '_grow' suffix which is the default, as long as every node is the be grown.
 networks_undisturbed <- list()
 for (net in 1:num_networks) {
-    networks_undisturbed[[net]] = make_Mixture(mechanism = rep("DD", 20), parameter = 0.15, directed = TRUE)
+    networks_undisturbed[[net]] = make_Mixture(
+        mechanism = rep("DD", 20), 
+        parameter = 0.15, 
+        directed = TRUE
+    )
 }
 
 ## Second set of disturbed networks
 networks_disturbed <- list()
 for (net in 1:num_networks) {
     networks_disturbed[[net]] = make_Mixture(
-        mechanism = c("DD", "DD", "DD", "ER", "DD"),
-        parameter = c(0.3, 0.3, 0.3, 0.76, 0.1),
-        kind = c("grow", "grow", "grow", "rewire", "grow"),
+        mechanism = rep(c("DD", "DD", "DD", "ER", "ER", "ER", "DD", "DD"), 4),
+        parameter = rep(c(0.3, 0.3, 0.3, 0.76, 0.76, 0.76, 0.1, 0.1), 4),
+        kind = rep(c("grow", "grow", "grow", "rewire", "rewire", "rewire", "grow", "grow"), 4),
         directed = TRUE
     )
 }
@@ -171,19 +175,27 @@ diag(comparisons) = 0
 
 ## PCA of comparisons
 stats::prcomp(comparisons) %>%
-    ggplot2::autoplot(data = tibble(Kind = c(rep("Duplication & Divergence", num_networks),
-                                             rep("Disturbed Duplication & Divergence", num_networks))), 
-                      colour = "Kind",
-                      size = 5) + 
+    autoplot(
+        data = tibble(
+            Kind = c(
+                rep("Duplication & Divergence", num_networks),
+                rep("Disturbed Duplication & Divergence", num_networks)
+            )
+        ), 
+        colour = "Kind",
+        size = 5
+    ) + 
     theme_bw() +
-    theme(legend.position = "bottom",
-          legend.title = element_blank())
+    theme(
+        legend.position = "bottom",
+        legend.title = element_blank()
+    )
 ```
 
 Aligning networks is not the only way to compare them. For example, the average degree (number of interactions) in a network can be compared. This does not tell you which nodes are most like each other between the two networks, but does allow you to make network-level inferences. It also more naturally allows for ensemble methods, where you compare networks as a weighted average of the differences across multiple characterizations.
 
 # Network Classification
-We can combine network simulation and comparisons to test a hypothesized mechanism against network data. Here the p-values are for the null hypothesis that the network was generated according to the particular mechanism being tested. Small p-values indicate the mechanism likely does not govern the system described by the network. Note that non-significant p-values do not prove the network was generated by that mechanism, only that it appears as similar to networks that are generated by that mechanism as they are to each other.
+We can combine network simulation and comparisons to test a hypothesized mechanism against network data. Here the p-values are for the null hypothesis that the network was generated according to the particular mechanism being tested. Small p-values indicate the mechanism likely does not govern the system described by the network. Note that non-significant p-values do not prove the network was generated by that mechanism, only that it appears no more dissimilar to networks that are generated by that mechanism than they are to each other.
 
 ```{r Classify networks, fig.height = 4, fig.width = 4, fig.align = "left"}
 ## Classification of an undisturbed Small-World network made above
@@ -203,6 +215,6 @@ classify(
 )
 ```
 
-Pure mechanisms are readily inferred by comparing a network with many networks simualted from hypothesized mechanisms. Mixture mechanisms are not. This is because different mixtures can produce similar network structures. Fortunately, there is evidence we can still functionally classify network data describing realistically complex systems governed by mixtures of mechanisms @langendorf2020empirically.
+Pure mechanisms are readily inferred by comparing a network with many networks simualted from hypothesized mechanisms. Mixture mechanisms are not. This is because different mixtures can produce similar network structures. Fortunately, we can still functionally classify network data describing realistically complex systems governed by mixtures of mechanisms @langendorf2020empirically.
 
 # References

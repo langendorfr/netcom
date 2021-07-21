@@ -9,3 +9,6 @@ r:
 
 r_github_packages:
   - langendorfr/netcom
+
+global:
+  - _R_CHECK_FORCE_SUGGESTS_: false
