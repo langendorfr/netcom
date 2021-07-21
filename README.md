@@ -1,4 +1,4 @@
-# netcom
+# netcom <img src="man/figures/netcom_sticker.png" align="right" width="120" />
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](http://www.gnu.org/licenses/gpl-3.0)
 [![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/netcom)](https://cran.r-project.org/package=netcom)
