@@ -21,11 +21,14 @@
 #' @references Williams, R. J., & Martinez, N. D. (2000). Simple rules yield complex food webs. Nature, 404(6774), 180-183.
 #' 
 #' @examples
+#' # Import netcom
+#' library(netcom)
+#' 
 #' size <- 10
 #' existing_network <- matrix(sample(c(0,1), size = size^2, replace = TRUE), nrow = size, ncol = size)
 #' new_network_prep <- matrix(0, nrow = size + 1, ncol = size + 1)
 #' new_network_prep[1:size, 1:size] = existing_network
-#' new_network <- grow_NM(matrix = new_network_prep, x = size + 1, niches = runif(size))
+#' new_network <- grow_NM(matrix = new_network_prep, x = size + 1, niches = stats::runif(size))
 #' 
 #' @export
 
@@ -40,7 +43,7 @@ grow_NM <- function(matrix, x, niches, connectance = 0.2, directed = TRUE, retco
     beta <- (1/(2*connectance)) - 1
 
     n_i <- niches[x]
-    r_i <- 1-((1-runif(1))^(1/beta))
+    r_i <- 1-((1-stats::runif(1))^(1/beta))
 
     r_i = r_i * n_i
 
@@ -48,7 +51,7 @@ grow_NM <- function(matrix, x, niches, connectance = 0.2, directed = TRUE, retco
     #     r_i = 2 * n_i
     # }
 
-    c_i <- runif(n = 1, min = r_i/2, max = n_i)
+    c_i <- stats::runif(n = 1, min = r_i/2, max = n_i)
 
     range_min <- c_i - (r_i/2)
     range_max <- c_i + (r_i/2)

@@ -36,7 +36,6 @@ classify(
   ks_alternative = "two.sided",
   cores = 1,
   size_different = FALSE,
-  DD_resize = "smaller",
   null_dist_trim = 1,
   verbose = FALSE
 )
@@ -80,6 +79,8 @@ classify(
 
 \item{null_reps}{Defaults to 50. The number of best fit networks to simulate that will be used to create a null distribution of distances between networks within the given process, which will then be used to test if the target network appears unusually distant from them and therefore likely not governed by that process.}
 
+\item{best_fit_kind}{Defaults to "avg". If null_reps is more than 1, the fit of each parameter has to be an aggregate statistic of the fit of all the null_reps networks. Must be `avg`, `median`, `min`, or `max`.}
+
 \item{best_fit_sd}{Defaults to 0. Standard Deviation used to simulate networks with a similar but not identical best fit parameter. This is important because simulating networks with the identical parameter can artificially inflate the false negative rate by assuming the best fit parameter is the true parameter. For large resolution and reps values this will become true, but can be computationally intractable for realistically large systems.}
 
 \item{ks_dither}{Defaults to 0. The KS test cannot compute exact p-values when every pairwise network distance is not unique. Adding small amounts of noise makes each distance unique. We are not aware of a study on the impacts this has on accuracy so it is set to zero by default.}
@@ -89,8 +90,6 @@ classify(
 \item{cores}{Defaults to 1. The number of cores to run the classification on. When set to 1 parallelization will be ignored.}
 
 \item{size_different}{= If there is a difference in the size of the networks used in the null distribution. Defaults to FALSE.}
-
-\item{DD_resize}{= If networks being compared are a different size, this parameter determines if upscaling "larger" or downscaling "smaller" occurs. Unlikely to be relevant here. Defaults to "smaller".}
 
 \item{null_dist_trim}{= Number between zero and one that determines how much of each network comparison distribution (unknown network compared to simulated networks, simulated networks compared to each other) should be used. Prevents p-value convergence with large sample sizes. Defaults to 1, which means all comparisons are used (no trimming).}
 

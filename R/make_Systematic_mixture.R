@@ -41,6 +41,9 @@
 #' @references Langendorf, R. E., & Burgess, M. G. (2020). Empirically Classifying Network Mechanisms. arXiv preprint arXiv:2012.15863.
 #' 
 #' @examples
+#' # Import netcom
+#' library(netcom)
+#' 
 #' make_Systematic(net_size = 10)
 #' 
 #' @export
@@ -58,7 +61,7 @@ make_Systematic_mixture <- function(net_size, neighborhood, directed = TRUE, net
     # }
 
     networks <- list()
-    parameters <- tibble(
+    parameters <- tibble::tibble(
         Process = character(),
         Parameter_Name = character(),
         Parameter_Value = numeric()
@@ -98,7 +101,7 @@ make_Systematic_mixture <- function(net_size, neighborhood, directed = TRUE, net
                         stop("Unknown network kind. Must be 'list' or 'matrix'.")
                     }
 
-                    parameters_addition <- tibble(Process = processes[p], Parameter_Name = "p_ER", Parameter_Value = p_ER)
+                    parameters_addition <- tibble::tibble(Process = processes[p], Parameter_Name = "p_ER", Parameter_Value = p_ER)
                     parameters = dplyr::bind_rows(parameters, parameters_addition)
 
                 } else if (processes[p] == "PA") {
@@ -123,7 +126,7 @@ make_Systematic_mixture <- function(net_size, neighborhood, directed = TRUE, net
                         stop("Unknown network kind. Must be `list` or `matrix`.")
                     }
 
-                    parameters_addition <- tibble(Process = processes[p], Parameter_Name = "power_PA", Parameter_Value = power_PA)
+                    parameters_addition <- tibble::tibble(Process = processes[p], Parameter_Name = "power_PA", Parameter_Value = power_PA)
                     parameters = dplyr::bind_rows(parameters, parameters_addition)
 
                 } else if (processes[p] == "DD") {
@@ -149,7 +152,7 @@ make_Systematic_mixture <- function(net_size, neighborhood, directed = TRUE, net
                         stop("Unknown network kind. Must be `list` or `matrix`.")
                     }
 
-                    parameters_addition <- tibble(Process = processes[p], Parameter_Name = "divergence_DD", Parameter_Value = divergence_DD)
+                    parameters_addition <- tibble::tibble(Process = processes[p], Parameter_Name = "divergence_DD", Parameter_Value = divergence_DD)
                     parameters = dplyr::bind_rows(parameters, parameters_addition)
 
                 } else if (processes[p] == "DM") {
@@ -178,7 +181,7 @@ make_Systematic_mixture <- function(net_size, neighborhood, directed = TRUE, net
                     }
 
                     ## Note for this divergence_DM = mutation_DM
-                    parameters_addition <- tibble(Process = processes[p], Parameter_Name = "mutation_DM", Parameter_Value = mutation_DM)
+                    parameters_addition <- tibble::tibble(Process = processes[p], Parameter_Name = "mutation_DM", Parameter_Value = mutation_DM)
                     parameters = dplyr::bind_rows(parameters, parameters_addition)
 
                 } else if (processes[p] == "SW") {
@@ -204,14 +207,14 @@ make_Systematic_mixture <- function(net_size, neighborhood, directed = TRUE, net
                         stop("Unknown network kind. Must be `list` or `matrix`.")
                     }
 
-                    parameters_addition <- tibble(Process = processes[p], Parameter_Name = "rewire_SW", Parameter_Value = rewire_SW)
+                    parameters_addition <- tibble::tibble(Process = processes[p], Parameter_Name = "rewire_SW", Parameter_Value = rewire_SW)
                     parameters = dplyr::bind_rows(parameters, parameters_addition)
 
                 } else if (processes[p] == "NM") {
                     if (canonical) {directed = TRUE}
 
                     connectance_NM <- connectance_max * master_par_systematic[i]
-                    niches <- runif(net_size) # %>% sort()
+                    niches <- stats::runif(net_size) # %>% sort()
 
                     mat <- make_Mixture(
                         mechanism = rep(processes[p], net_size),
@@ -232,7 +235,7 @@ make_Systematic_mixture <- function(net_size, neighborhood, directed = TRUE, net
                         stop("Unknown network kind. Must be `list` or `matrix`.")
                     }
 
-                    parameters_addition <- tibble(Process = processes[p], Parameter_Name = "connectance_NM", Parameter_Value = connectance_NM)
+                    parameters_addition <- tibble::tibble(Process = processes[p], Parameter_Name = "connectance_NM", Parameter_Value = connectance_NM)
                     parameters = dplyr::bind_rows(parameters, parameters_addition)
                     
                 } else {

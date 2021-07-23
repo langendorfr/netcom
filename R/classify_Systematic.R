@@ -38,6 +38,8 @@
 #' 
 #' @param null_reps Defaults to 50. The number of best fit networks to simulate that will be used to create a null distribution of distances between networks within the given process, which will then be used to test if the target network appears unusually distant from them and therefore likely not governed by that process.
 #' 
+#' @param best_fit_kind Defaults to "avg". If null_reps is more than 1, the fit of each parameter has to be an aggregate statistic of the fit of all the null_reps networks. Must be `avg`, `median`, `min`, or `max`.
+#' 
 #' @param best_fit_sd Defaults to 0.01. Standard Deviation used to simulate networks with a similar but not identical best fit parameter. This is important because simulating networks with the identical parameter artificially inflates the false negative rate by assuming the best fit parameter is the true parameter. For large resolution and reps values this will become true, but also computationally intractable for realistically large systems.
 #' 
 #' @param ks_dither Defaults to 0. The KS test cannot compute exact p-values when every pairwise network distance is not unique. Adding small amounts of noise makes each distance unique. We are not aware of a study on the impacts this has on accuracy so it is set to zero by default.
@@ -47,8 +49,6 @@
 #' @param cores Defaults to 1. The number of cores to run the classification on. When set to 1 parallelization will be ignored.
 #' 
 #' @param size_different = If there is a difference in the size of the networks used in the null distribution. Defaults to FALSE.
-#' 
-#' @param DD_resize = If networks being compared are a different size, this parameter determines if upscaling "larger" or downscaling "smaller" occurs. Unlikely to be relevant here. Defaults to "smaller".
 #' 
 #' @param null_dist_trim = Number between zero and one that determines how much of each network comparison distribution (unknown network compared to simulated networks, simulated networks compared to each other) should be used. Prevents p-value convergence with large sample sizes. Defaults to 1, which means all comparisons are used (no trimming).
 #' 
@@ -61,6 +61,9 @@
 #' @references Langendorf, R. E., & Burgess, M. G. (2020). Empirically Classifying Network Mechanisms. arXiv preprint arXiv:2012.15863.
 #' 
 #' @examples
+#' # Import netcom
+#' library(netcom)
+#' 
 #' # Adjacency matrix
 #' size <- 10
 #' network <- matrix(sample(c(0,1), size = size^2, replace = TRUE), nrow = size, ncol = size)
@@ -68,7 +71,7 @@
 #' 
 #' @export
 
-classify_Systematic <- function(network, directed = FALSE, method = "DD", net_kind = "matrix", DD_kind = c("in", "out", "entropy_in", "entropy_out", "clustering_coefficient", "page_rank", "communities", "motifs_3", "motifs_4", "eq_in", "eq_out", "eq_entropy_in", "eq_entropy_out", "eq_clustering_coefficient", "eq_page_rank", "eq_communities", "eq_motifs_3", "eq_motifs_4"), DD_weight = c(0.0735367966, 0.0739940162, 0.0714523761, 0.0708156931, 0.0601296752, 0.0448072016, 0.0249793608, 0.0733125084, 0.0697029389, 0.0504358835, 0.0004016029, 0.0563752664, 0.0561878218, 0.0540490099, 0.0504347104, 0.0558106667, 0.0568270319, 0.0567474398), cause_orientation = "row", max_norm = FALSE, resolution = 100, resolution_min = 0.01, resolution_max = 0.99, reps = 3, processes = c("ER", "PA", "DM", "SW", "NM"), power_max = 5, connectance_max = 0.5, divergence_max = 0.5, mutation_max = 0.5, null_reps = 50, best_fit_kind = "avg", best_fit_sd = 1e-2, ks_dither = 0, ks_alternative = "two.sided", cores = 1, size_different = FALSE, DD_resize = "smaller", null_dist_trim = 1, verbose = TRUE) {
+classify_Systematic <- function(network, directed = FALSE, method = "DD", net_kind = "matrix", DD_kind = c("in", "out", "entropy_in", "entropy_out", "clustering_coefficient", "page_rank", "communities", "motifs_3", "motifs_4", "eq_in", "eq_out", "eq_entropy_in", "eq_entropy_out", "eq_clustering_coefficient", "eq_page_rank", "eq_communities", "eq_motifs_3", "eq_motifs_4"), DD_weight = c(0.0735367966, 0.0739940162, 0.0714523761, 0.0708156931, 0.0601296752, 0.0448072016, 0.0249793608, 0.0733125084, 0.0697029389, 0.0504358835, 0.0004016029, 0.0563752664, 0.0561878218, 0.0540490099, 0.0504347104, 0.0558106667, 0.0568270319, 0.0567474398), cause_orientation = "row", max_norm = FALSE, resolution = 100, resolution_min = 0.01, resolution_max = 0.99, reps = 3, processes = c("ER", "PA", "DM", "SW", "NM"), power_max = 5, connectance_max = 0.5, divergence_max = 0.5, mutation_max = 0.5, null_reps = 50, best_fit_kind = "avg", best_fit_sd = 1e-2, ks_dither = 0, ks_alternative = "two.sided", cores = 1, size_different = FALSE, null_dist_trim = 1, verbose = TRUE) {
 
     ## Matrix input checks
     if (net_kind == "matrix") {
@@ -147,13 +150,13 @@ classify_Systematic <- function(network, directed = FALSE, method = "DD", net_ki
         ## Even for a given process and parameter there are many possible networks
 
         if (best_fit_kind == "avg") {
-            parameters_scored_process = parameters_scored_process %>% group_by(Process, Parameter_Value) %>% summarize(Distance = mean(Distance), .groups = "drop")
+            parameters_scored_process = parameters_scored_process %>% dplyr::group_by(Process, Parameter_Value) %>% dplyr::summarize(Distance = mean(Distance), .groups = "drop")
         } else if (best_fit_kind == "min") {
-            parameters_scored_process = parameters_scored_process %>% group_by(Process, Parameter_Value) %>% summarize(Distance = min(Distance), .groups = "drop")
+            parameters_scored_process = parameters_scored_process %>% dplyr::group_by(Process, Parameter_Value) %>% dplyr::summarize(Distance = min(Distance), .groups = "drop")
         } else if (best_fit_kind == "max") {
-            parameters_scored_process = parameters_scored_process %>% group_by(Process, Parameter_Value) %>% summarize(Distance = max(Distance), .groups = "drop")
+            parameters_scored_process = parameters_scored_process %>% dplyr::group_by(Process, Parameter_Value) %>% dplyr::summarize(Distance = max(Distance), .groups = "drop")
         } else if (best_fit_kind == "median") {
-            parameters_scored_process = parameters_scored_process %>% group_by(Process, Parameter_Value) %>% summarize(Distance = median(Distance), .groups = "drop")
+            parameters_scored_process = parameters_scored_process %>% dplyr::group_by(Process, Parameter_Value) %>% dplyr::summarize(Distance = stats::median(Distance), .groups = "drop")
         } else {
             stop("best_fit_kind must be `avg`, `min`, or `max`.")
         }
@@ -183,7 +186,6 @@ classify_Systematic <- function(network, directed = FALSE, method = "DD", net_ki
                                cores = cores,
                                directed = directed,
                                size_different = size_different,
-                               DD_resize = DD_resize,
                                cause_orientation = cause_orientation,
                                max_norm = max_norm,
                                verbose = verbose)
@@ -199,8 +201,8 @@ classify_Systematic <- function(network, directed = FALSE, method = "DD", net_ki
         }
 
         ## alternative should be "less" because less than expected just means best_fit_sd is too big, but I was getting weird p-values of 1 so left the default as "two.sided"
-        ks_test <- stats::ks.test(x = null_dist_network + rnorm(n = length(null_dist_network), mean = 0, sd = ks_dither), 
-                                  y = null_dist_process + rnorm(n = length(null_dist_process), mean = 0, sd = ks_dither), 
+        ks_test <- stats::ks.test(x = null_dist_network + stats::rnorm(n = length(null_dist_network), mean = 0, sd = ks_dither), 
+                                  y = null_dist_process + stats::rnorm(n = length(null_dist_process), mean = 0, sd = ks_dither), 
                                   alternative = ks_alternative) %>% suppressWarnings() 
 
         # p_value <- 1 - sum(best_fit$Distance > null_dist) / length(null_dist)
@@ -211,7 +213,7 @@ classify_Systematic <- function(network, directed = FALSE, method = "DD", net_ki
         p_estimates[p] = stats::weighted.mean(x = null_dist$parameters, w = exp(-null_dist$D_null[1,-1]) )
     }
 
-    return_tbl <- tibble(process = processes, 
+    return_tbl <- tibble::tibble(process = processes, 
                          p_value = pvalues, #round(pvalues, 5),
                          par_estimate = p_estimates) #round(p_estimates, 5))
     

@@ -39,6 +39,9 @@
 #' @references Langendorf, R. E., & Burgess, M. G. (2020). Empirically Classifying Network Mechanisms. arXiv preprint arXiv:2012.15863.
 #' 
 #' @examples
+#' # Import netcom
+#' library(netcom)
+#' 
 #' make_Systematic(net_size = 10)
 #' 
 #' @export
@@ -56,7 +59,7 @@ make_Systematic_directedCanonicalLike <- function(net_size, neighborhood, direct
     # }
 
     networks <- list()
-    parameters <- tibble(Process = character(),
+    parameters <- tibble::tibble(Process = character(),
                         Parameter_Name = character(),
                         Parameter_Value = numeric())
     master_par_systematic <- seq(from = resolution_min, to = resolution_max, length.out = resolution)
@@ -76,9 +79,12 @@ make_Systematic_directedCanonicalLike <- function(net_size, neighborhood, direct
                     directed = TRUE
 
                     p_ER <- master_par_systematic[i]
-                    mat <- make_Mixture(sequence = rep(paste0("g", processes[p], "_", p_ER), net_size),
-                                        # p_ER = p_ER,
-                                        directed = directed)
+                    mat <- make_Mixture(
+                        mechanism = rep(processes[p], net_size),
+                        parameter = p_ER,
+                        kind = "grow",
+                        directed = directed
+                    )
 
                     if (net_kind == "matrix") {
                         networks[[counter]] <- mat
@@ -91,16 +97,19 @@ make_Systematic_directedCanonicalLike <- function(net_size, neighborhood, direct
                         stop("Unknown network kind. Must be `list` or `matrix`.")
                     }
 
-                    parameters_addition <- tibble(Process = processes[p], Parameter_Name = "p_ER", Parameter_Value = p_ER)
+                    parameters_addition <- tibble::tibble(Process = processes[p], Parameter_Name = "p_ER", Parameter_Value = p_ER)
                     parameters = dplyr::bind_rows(parameters, parameters_addition)
 
                 } else if (processes[p] == "PA") {
                     directed = TRUE
 
                     power_PA <- power_max * master_par_systematic[i]
-                    mat <- make_Mixture(sequence = rep(paste0("g", processes[p], "_", power_PA), net_size),
-                                        # power_PA = power_PA,
-                                        directed = directed)
+                    mat <- make_Mixture(
+                        mechanism = rep(processes[p], net_size),
+                        parameter = power_PA,
+                        kind = "grow",
+                        directed = directed
+                    )
 
                     if (net_kind == "matrix") {
                         networks[[counter]] <- mat
@@ -113,7 +122,7 @@ make_Systematic_directedCanonicalLike <- function(net_size, neighborhood, direct
                         stop("Unknown network kind. Must be `list` or `matrix`.")
                     }
 
-                    parameters_addition <- tibble(Process = processes[p], Parameter_Name = "power_PA", Parameter_Value = power_PA)
+                    parameters_addition <- tibble::tibble(Process = processes[p], Parameter_Name = "power_PA", Parameter_Value = power_PA)
                     parameters = dplyr::bind_rows(parameters, parameters_addition)
 
                 } else if (processes[p] == "DD") {
@@ -121,9 +130,12 @@ make_Systematic_directedCanonicalLike <- function(net_size, neighborhood, direct
 
                     divergence_DD <- divergence_max * master_par_systematic[i]
 
-                    mat <- make_Mixture(sequence = rep(paste0("g", processes[p], "_", divergence_DD), net_size),
-                                        # divergence_DD = divergence_DD,
-                                        directed = directed)
+                    mat <- make_Mixture(
+                        mechanism = rep(processes[p], net_size),
+                        parameter = divergence_DD,
+                        kind = "grow",
+                        directed = directed
+                    )
 
                     if (net_kind == "matrix") {
                         networks[[counter]] <- mat
@@ -136,7 +148,7 @@ make_Systematic_directedCanonicalLike <- function(net_size, neighborhood, direct
                         stop("Unknown network kind. Must be `list` or `matrix`.")
                     }
 
-                    parameters_addition <- tibble(Process = processes[p], Parameter_Name = "divergence_DD", Parameter_Value = divergence_DD)
+                    parameters_addition <- tibble::tibble(Process = processes[p], Parameter_Name = "divergence_DD", Parameter_Value = divergence_DD)
                     parameters = dplyr::bind_rows(parameters, parameters_addition)
 
                 } else if (processes[p] == "DM") {
@@ -145,10 +157,12 @@ make_Systematic_directedCanonicalLike <- function(net_size, neighborhood, direct
                     divergence_DM <- divergence_max * master_par_systematic[i]
                     mutation_DM <- mutation_max * master_par_systematic[i]
 
-                    mat <- make_Mixture(sequence = rep(paste0("g", processes[p], "_", divergence_DM), net_size),
-                                        # divergence_DM = divergence_DM,
-                                        # mutation_DM = mutation_DM,
-                                        directed = directed)
+                    mat <- make_Mixture(
+                        mechanism = rep(processes[p], net_size),
+                        parameter = divergence_DM,
+                        kind = "grow",
+                        directed = directed
+                    )
 
                     if (net_kind == "matrix") {
                         networks[[counter]] <- mat
@@ -162,7 +176,7 @@ make_Systematic_directedCanonicalLike <- function(net_size, neighborhood, direct
                     }
 
                     ## Note for this divergence_DM = mutation_DM
-                    parameters_addition <- tibble(Process = processes[p], Parameter_Name = "mutation_DM", Parameter_Value = mutation_DM)
+                    parameters_addition <- tibble::tibble(Process = processes[p], Parameter_Name = "mutation_DM", Parameter_Value = mutation_DM)
                     parameters = dplyr::bind_rows(parameters, parameters_addition)
 
                 } else if (processes[p] == "SW") {
@@ -175,9 +189,12 @@ make_Systematic_directedCanonicalLike <- function(net_size, neighborhood, direct
                     #     neighborhood = max(1, round(0.1 * net_size))
                     # }
 
-                    mat <- make_Mixture(sequence = rep(paste0("g", processes[p], "_", rewire_SW), net_size),
-                                        # rewire_SW = rewire_SW,
-                                        directed = directed)
+                    mat <- make_Mixture(
+                        mechanism = rep(processes[p], net_size),
+                        parameter = rewire_SW,
+                        kind = "grow",
+                        directed = directed
+                    )
 
                     if (net_kind == "matrix") {
                         networks[[counter]] <- mat
@@ -190,19 +207,22 @@ make_Systematic_directedCanonicalLike <- function(net_size, neighborhood, direct
                         stop("Unknown network kind. Must be `list` or `matrix`.")
                     }
 
-                    parameters_addition <- tibble(Process = processes[p], Parameter_Name = "rewire_SW", Parameter_Value = rewire_SW)
+                    parameters_addition <- tibble::tibble(Process = processes[p], Parameter_Name = "rewire_SW", Parameter_Value = rewire_SW)
                     parameters = dplyr::bind_rows(parameters, parameters_addition)
 
                 } else if (processes[p] == "NM") {
                     directed = TRUE
 
                     connectance_NM <- connectance_max * master_par_systematic[i]
-                    niches <- runif(net_size) # %>% sort()
+                    niches <- stats::runif(net_size) # %>% sort()
 
-                    mat <- make_Mixture(sequence = rep(paste0("g", processes[p], "_", connectance_NM), net_size),
-                                        niches = niches,
-                                        # connectance_NM = connectance_NM,
-                                        directed = directed)
+                    mat <- make_Mixture(
+                        mechanism = rep(processes[p], net_size),
+                        niches = niches,
+                        parameter = connectance_NM,
+                        kind = "grow",
+                        directed = directed
+                    )
 
                     if (net_kind == "matrix") {
                         networks[[counter]] <- mat
@@ -215,7 +235,7 @@ make_Systematic_directedCanonicalLike <- function(net_size, neighborhood, direct
                         stop("Unknown network kind. Must be `list` or `matrix`.")
                     }
 
-                    parameters_addition <- tibble(Process = processes[p], Parameter_Name = "connectance_NM", Parameter_Value = connectance_NM)
+                    parameters_addition <- tibble::tibble(Process = processes[p], Parameter_Name = "connectance_NM", Parameter_Value = connectance_NM)
                     parameters = dplyr::bind_rows(parameters, parameters_addition)
                     
                 } else {

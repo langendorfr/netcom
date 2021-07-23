@@ -19,6 +19,9 @@
 #' @references Watts, D. J., & Strogatz, S. H. (1998). Collective dynamics of ‘small-world’networks. nature, 393(6684), 440-442.
 #' 
 #' @examples
+#' # Import netcom
+#' library(netcom)
+#' 
 #' size <- 10
 #' existing_network <- matrix(sample(c(0,1), size = size^2, replace = TRUE), nrow = size, ncol = size)
 #' new_network_prep <- matrix(0, nrow = size + 1, ncol = size + 1)
@@ -63,7 +66,7 @@ make_SW <- function(size, net_kind, rewire, neighborhood, directed = FALSE) {
         
         if (directed == TRUE) {
             for (edge in 1:nrow(edge_ids)) {
-                if (runif(1) <= rewire) {
+                if (stats::runif(1) <= rewire) {
                     ## Prevent rewiring to self or current target
                     possible_ids <- which(matrix[edge_ids[edge, 1], ] == 0)
                     impossible_ids <- edge_ids[edge,]
@@ -85,7 +88,7 @@ make_SW <- function(size, net_kind, rewire, neighborhood, directed = FALSE) {
                 ## Only consider the lower diagonal and apply changes to both edges
                 ## The is asymmetric in which node is kept in the edge, but resulting network structures are invariant to this choice
                 if (edge_ids[edge, 2] < edge_ids[edge, 1]) {
-                    if (runif(1) <= rewire) {
+                    if (stats::runif(1) <= rewire) {
                         ## Prevent rewiring to self or current target
                         possible_ids <- which(matrix[edge_ids[edge, 1], ] == 0)
                         impossible_ids <- edge_ids[edge,]

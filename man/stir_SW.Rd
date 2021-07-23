@@ -12,6 +12,8 @@ stir_SW(matrix, x, rewire, directed)
 \item{x}{The ID of the node to be grown.}
 
 \item{rewire}{Small-World parameter specifying the probability each edge is randomly rewired, allowing for the possiblity of bridges between connected communities.}
+
+\item{directed}{Binary variable determining if the network is directed, resulting in off-diagonal asymmetry in the adjacency matrix.}
 }
 \value{
 An adjacency matrix.

@@ -8,6 +8,8 @@
 #' 
 #' @param p Probability possible edges exist. Needs to be between zero and one.
 #' 
+#' @param directed Binary variable determining if the network is directed, resulting in off-diagonal asymmetry in the adjacency matrix.
+#' 
 #' @param retcon Binary variable determining if already existing nodes can attach to new nodes. Defaults to FALSE.
 #'
 #' @details Different from Duplication & Mutation models in that edges can only be lost.
@@ -17,6 +19,9 @@
 #' @references Erdos, P. and Renyi, A., On random graphs, Publicationes Mathematicae 6, 290–297 (1959).
 #' 
 #' @examples
+#' # Import netcom
+#' library(netcom)
+#' 
 #' size <- 10
 #' existing_network <- matrix(sample(c(0,1), size = size^2, replace = TRUE), nrow = size, ncol = size)
 #' new_network_prep <- matrix(0, nrow = size + 1, ncol = size + 1)
@@ -30,8 +35,8 @@ stir_ER <- function(matrix, x, p, directed, retcon = FALSE) {
     n <- ncol(matrix)
 
     ## Add zero because no self loops; diag(matrix) = 0
-    before <- 1 * (runif(w) <= p)
-    after <- 1 * (runif(n-x) <= p)
+    before <- 1 * (stats::runif(w) <= p)
+    after <- 1 * (stats::runif(n-x) <= p)
     matrix[x, ] = c(before, 0, after)
 
     if (!directed) {

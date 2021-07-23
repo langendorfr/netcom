@@ -39,6 +39,9 @@
 #' @references Langendorf, R. E., & Burgess, M. G. (2020). Empirically Classifying Network Mechanisms. arXiv preprint arXiv:2012.15863.
 #' 
 #' @examples
+#' # Import netcom
+#' library(netcom)
+#' 
 #' make_Systematic(net_size = 10)
 #' 
 #' @export
@@ -56,7 +59,7 @@ make_Systematic_canonical <- function(net_size, neighborhood, directed = TRUE, n
     # }
 
     networks <- list()
-    parameters <- tibble(Process = character(),
+    parameters <- tibble::tibble(Process = character(),
                         Parameter_Name = character(),
                         Parameter_Value = numeric())
     master_par_systematic <- seq(from = resolution_min, to = resolution_max, length.out = resolution)
@@ -70,13 +73,11 @@ make_Systematic_canonical <- function(net_size, neighborhood, directed = TRUE, n
             for (r in 1:reps) {
                 counter = counter + 1
 
-                if (verbose == TRUE) {
-                    # print(c(processes[p], i, r))
-                }
+                # if (verbose == TRUE) {
+                #     # print(c(processes[p], i, r))
+                # }
 
                 if (processes[p] == "ER") {
-                    # directed = TRUE
-
                     p_ER <- master_par_systematic[i]
                     net <- igraph::sample_gnp(n = net_size, 
                                             p = p_ER, 
@@ -101,12 +102,10 @@ make_Systematic_canonical <- function(net_size, neighborhood, directed = TRUE, n
                         stop("Unknown network kind. Must be `list` or `matrix`.")
                     }
 
-                    parameters_addition <- tibble(Process = processes[p], Parameter_Name = "p_ER", Parameter_Value = p_ER)
+                    parameters_addition <- tibble::tibble(Process = processes[p], Parameter_Name = "p_ER", Parameter_Value = p_ER)
                     parameters = dplyr::bind_rows(parameters, parameters_addition)
 
                 } else if (processes[p] == "PA") {
-                    # directed = TRUE
-
                     power_PA <- power_max * master_par_systematic[i]
                     net <- igraph::sample_pa(n = net_size, 
                                             power = power_PA,
@@ -137,12 +136,10 @@ make_Systematic_canonical <- function(net_size, neighborhood, directed = TRUE, n
                         stop("Unknown network kind. Must be `list` or `matrix`.")
                     }
 
-                    parameters_addition <- tibble(Process = processes[p], Parameter_Name = "power_PA", Parameter_Value = power_PA)
+                    parameters_addition <- tibble::tibble(Process = processes[p], Parameter_Name = "power_PA", Parameter_Value = power_PA)
                     parameters = dplyr::bind_rows(parameters, parameters_addition)
 
                 } else if (processes[p] == "DD") {
-                    # directed = FALSE
-
                     divergence_DD <- divergence_max * master_par_systematic[i]
 
                     net <- make_DD(size = net_size, 
@@ -152,12 +149,10 @@ make_Systematic_canonical <- function(net_size, neighborhood, directed = TRUE, n
  
                     networks[[counter]] = net
 
-                    parameters_addition <- tibble(Process = processes[p], Parameter_Name = "divergence_DD", Parameter_Value = divergence_DD)
+                    parameters_addition <- tibble::tibble(Process = processes[p], Parameter_Name = "divergence_DD", Parameter_Value = divergence_DD)
                     parameters = dplyr::bind_rows(parameters, parameters_addition)
 
                 } else if (processes[p] == "DM") {
-                    # directed = FALSE
-
                     divergence_DM <- divergence_max * master_par_systematic[i]
                     mutation_DM <- mutation_max * master_par_systematic[i]
 
@@ -170,12 +165,10 @@ make_Systematic_canonical <- function(net_size, neighborhood, directed = TRUE, n
                     networks[[counter]] = net
 
                     ## Note for this divergence_DM = mutation_DM
-                    parameters_addition <- tibble(Process = processes[p], Parameter_Name = "mutation_DM", Parameter_Value = mutation_DM)
+                    parameters_addition <- tibble::tibble(Process = processes[p], Parameter_Name = "mutation_DM", Parameter_Value = mutation_DM)
                     parameters = dplyr::bind_rows(parameters, parameters_addition)
 
                 } else if (processes[p] == "SW") {
-                    # directed = FALSE
-
                     rewire_SW <- master_par_systematic[i]
 
                     ## SW neighborhood parameter based on net_size if missing
@@ -191,14 +184,12 @@ make_Systematic_canonical <- function(net_size, neighborhood, directed = TRUE, n
 
                     networks[[counter]] <- net
 
-                    parameters_addition <- tibble(Process = processes[p], Parameter_Name = "rewire_SW", Parameter_Value = rewire_SW)
+                    parameters_addition <- tibble::tibble(Process = processes[p], Parameter_Name = "rewire_SW", Parameter_Value = rewire_SW)
                     parameters = dplyr::bind_rows(parameters, parameters_addition)
 
                 } else if (processes[p] == "NM") {
-                    # directed = TRUE
-
                     connectance_NM <- connectance_max * master_par_systematic[i]
-                    niches <- runif(net_size) # %>% sort()
+                    niches <- stats::runif(net_size) # %>% sort()
                     net <- make_NM(size = net_size,
                                    net_kind = net_kind,
                                    niches = niches, 
@@ -207,7 +198,7 @@ make_Systematic_canonical <- function(net_size, neighborhood, directed = TRUE, n
                                    grow = TRUE)
                     networks[[counter]] <- net
 
-                    parameters_addition <- tibble(Process = processes[p], Parameter_Name = "connectance_NM", Parameter_Value = connectance_NM)
+                    parameters_addition <- tibble::tibble(Process = processes[p], Parameter_Name = "connectance_NM", Parameter_Value = connectance_NM)
                     parameters = dplyr::bind_rows(parameters, parameters_addition)
                     
                 } else {

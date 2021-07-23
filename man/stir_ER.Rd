@@ -13,6 +13,8 @@ stir_ER(matrix, x, p, directed, retcon = FALSE)
 
 \item{p}{Probability possible edges exist. Needs to be between zero and one.}
 
+\item{directed}{Binary variable determining if the network is directed, resulting in off-diagonal asymmetry in the adjacency matrix.}
+
 \item{retcon}{Binary variable determining if already existing nodes can attach to new nodes. Defaults to FALSE.}
 }
 \value{

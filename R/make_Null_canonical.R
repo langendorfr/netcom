@@ -6,21 +6,17 @@
 #' 
 #' @param net_size Number of nodes in the network.
 #' 
+#' @param iters Number of replicates in the null distribution. Note that length(null_dist) = ((iters^2)-iters)/2.
+#' 
 #' @param neighborhood The range of nodes that form connected communities. Note: This implementation results in overlap of communities.
 #' 
-#' @param directed Whether the target network is directed. Defaults to TRUE.
+#' @param directed Whether the target network is directed.
 #' 
-#' @param DD_kind = A vector of network properties to be used to compare networks. Defaults to "all", which is the average of the in- and out-degrees.
+#' @param DD_kind = A vector of network properties to be used to compare networks.
+#' 
+#' @param DD_weight = A vector of weights for the relative importance of the network properties in DD_kind being used to compare networks. Should be the same length as DD_kind.
 #' 
 #' @param net_kind If the network is an adjacency matrix ("matrix") or an edge list ("list"). Defaults to "matrix".
-#' 
-#' @param resolution The first step is to find the version of each process most similar to the target network. This parameter sets the number of parameter values to search across. Decrease to improve performance, but at the cost of accuracy. Defaults to 100.
-#' 
-#' @param resolution_min = The minimum parameter value to consider. Zero is not used because in many processes it results in degenerate systems (e.g. entirely unconnected networks). Currently process agnostic. Future versions will accept a vector of values, one for each process. Defaults to 0.01.
-#' 
-#' @param resolution_max The maximum parameter value to consider. One is not used because in many processes it results in degenerate systems (e.g. entirely connected networks). Currently process agnostic. Future versions will accept a vector of values, one for each process. Defaults to 0.99.
-#' 
-#' @param reps Defaults to 3. The number of networks to simulate for each parameter. More replicates increases accuracy by making the estimation of the parameter that produces networks most similar to the target network less idiosyncratic.
 #' 
 #' @param process Name of mechanism. Currently only "ER", "PA", "DD", "DM" "SW", and "NM" are supported. Future versions will accept user-defined network-generating functions and associated parameters. ER = Erdos-Renyi random. PA = Preferential Attachment. DD = Duplication and Divergence. DM = Duplication and Mutation. SW = Small World. NM = Niche Model.
 #' 
@@ -30,15 +26,15 @@
 #'
 #' @param size_different If there is a difference in the size of the networks used in the null distribution. Defaults to FALSE.
 #' 
-#' @param DD_resize = If networks being compared are a different size, this parameter determines if upscaling "larger" or downscaling "smaller" occurs. Unlikely to be relevant here. Defaults to "smaller".
+#' #' @param resolution_min = The minimum parameter value to consider. Zero is not used because in many processes it results in degenerate systems (e.g. entirely unconnected networks). Currently process agnostic. Future versions will accept a vector of values, one for each process. Defaults to 0.01.
+#' 
+#' @param resolution_max The maximum parameter value to consider. One is not used because in many processes it results in degenerate systems (e.g. entirely connected networks). Currently process agnostic. Future versions will accept a vector of values, one for each process. Defaults to 0.99.
 #' 
 #' @param power_max = Defaults to 5. The maximum power of attachment in the Preferential Attachment process (PA).
 #' 
 #' @param connectance_max = Defaults to 0.5. The maximum connectance parameter for the Niche Model.
 #' 
 #' @param divergence_max = Defaults to 0.5. The maximum divergence parameter for the Duplication and Divergence/Mutation mechanisms.
-#' 
-#' @param mutation_max = Defaults to 0.5. The maximum mutation parameter for the Duplication and Mutation mechanism.
 #' 
 #' @param best_fit_sd Defaults to 0.01. Standard Deviation used to simulate networks with a similar but not identical best fit parameter. This is important because simulating networks with the identical parameter artificially inflates the false negative rate by assuming the best fit parameter is the true parameter. For large resolution and reps values this will become true, but also computationally intractable for realistically large systems.
 #' 
@@ -57,11 +53,14 @@
 #' @references Langendorf, R. E., & Burgess, M. G. (2020). Empirically Classifying Network Mechanisms. arXiv preprint arXiv:2012.15863.
 #' 
 #' @examples
+#' # Import netcom
+#' library(netcom)
+#' 
 #' make_Systematic(net_size = 10)
 #' 
 #' @export
 
-make_Null_canonical <- function(input_network, net_kind, process, parameter, net_size, iters, method, neighborhood, DD_kind, DD_weight, resolution_min = 0.01, resolution_max = 0.99, directed = TRUE, power_max = 5, connectance_max = 0.5, divergence_max = 0.5, best_fit_sd = 0, cores = 1, size_different = FALSE, cause_orientation = "row", max_norm = FALSE, DD_resize = "smaller", verbose = FALSE) {
+make_Null_canonical <- function(input_network, net_kind, process, parameter, net_size, iters, method, neighborhood, DD_kind, DD_weight, directed, resolution_min = 0.01, resolution_max = 0.99, power_max = 5, connectance_max = 0.5, divergence_max = 0.5, best_fit_sd = 0, cores = 1, size_different = FALSE, cause_orientation = "row", max_norm = FALSE, verbose = FALSE) {
     ## Primary Directory
     # pd <- "/Users/ryan/Windows/Documents/Post UCB/Research/Relativism"
     # setwd(pd)
@@ -96,9 +95,7 @@ make_Null_canonical <- function(input_network, net_kind, process, parameter, net
 
                 ## Add network to growing list, made from same process and parameter
                 if (process == "ER") {
-                    # directed = TRUE
-
-                    p_ER <- parameter + rnorm(n = 1, mean = 0, sd = best_fit_sd)
+                    p_ER <- parameter + stats::rnorm(n = 1, mean = 0, sd = best_fit_sd)
                     p_ER = min(p_ER, resolution_max)
                     p_ER = max(p_ER, resolution_min)
                     parameters = c(parameters, p_ER)
@@ -119,8 +116,6 @@ make_Null_canonical <- function(input_network, net_kind, process, parameter, net
                         networks[[counter]] <- mat
 
                     } else if (net_kind == "list") {
-                        # edgelist <- igraph::as_edgelist(net)
-                        # edgelist <- mat %>% as.matrix() %>% reshape2::melt() %>% dplyr::filter(value != 0)
                         edgelist <- net %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
                         networks[[counter]] = edgelist
 
@@ -129,9 +124,7 @@ make_Null_canonical <- function(input_network, net_kind, process, parameter, net
                     }
 
                 } else if (process == "PA") {
-                    # directed = TRUE
-
-                    power_PA <- (parameter * power_max) + rnorm(n = 1, mean = 0, sd = best_fit_sd)
+                    power_PA <- (parameter * power_max) + stats::rnorm(n = 1, mean = 0, sd = best_fit_sd)
                     power_PA = min(power_PA, resolution_max * power_max)
                     power_PA = max(power_PA, resolution_min * power_max)
                     parameters = c(parameters, power_PA)
@@ -166,9 +159,7 @@ make_Null_canonical <- function(input_network, net_kind, process, parameter, net
                     }
 
                 } else if (process == "DD") {
-                    # directed = FALSE
-
-                    divergence_DD <- (parameter * divergence_max) + rnorm(n = 1, mean = 0, sd = best_fit_sd)
+                    divergence_DD <- (parameter * divergence_max) + stats::rnorm(n = 1, mean = 0, sd = best_fit_sd)
                     divergence_DD = min(divergence_DD, resolution_max)
                     divergence_DD = max(divergence_DD, resolution_min)
                     parameters = c(parameters, divergence_DD)
@@ -181,9 +172,7 @@ make_Null_canonical <- function(input_network, net_kind, process, parameter, net
                     networks[[counter]] = net
 
                 } else if (process == "DM") {
-                    # directed = FALSE
-
-                    divergence_DM <- (parameter  * divergence_max) + rnorm(n = 1, mean = 0, sd = best_fit_sd)
+                    divergence_DM <- (parameter  * divergence_max) + stats::rnorm(n = 1, mean = 0, sd = best_fit_sd)
                     divergence_DM = min(divergence_DM, resolution_max)
                     divergence_DM = max(divergence_DM, resolution_min)
                     parameters = c(parameters, divergence_DM)
@@ -199,9 +188,7 @@ make_Null_canonical <- function(input_network, net_kind, process, parameter, net
                     networks[[counter]] = net
 
                 } else if (process == "SW") {
-                    # directed = FALSE
-
-                    rewire_SW <- parameter + rnorm(n = 1, mean = 0, sd = best_fit_sd)
+                    rewire_SW <- parameter + stats::rnorm(n = 1, mean = 0, sd = best_fit_sd)
                     rewire_SW = min(rewire_SW, resolution_max)
                     rewire_SW = max(rewire_SW, resolution_min)
                     parameters = c(parameters, rewire_SW)
@@ -220,14 +207,12 @@ make_Null_canonical <- function(input_network, net_kind, process, parameter, net
                     networks[[counter]] <- net
 
                 } else if (process == "NM") {
-                    # directed = TRUE
-
-                    connectance_NM <- (parameter * connectance_max) + rnorm(n = 1, mean = 0, sd = best_fit_sd)
+                    connectance_NM <- (parameter * connectance_max) + stats::rnorm(n = 1, mean = 0, sd = best_fit_sd)
                     connectance_NM = min(connectance_NM, resolution_max * connectance_max)
                     connectance_NM = max(connectance_NM, resolution_min * connectance_max)
                     parameters = c(parameters, connectance_NM)
 
-                    niches <- runif(net_size) # %>% sort()
+                    niches <- stats::runif(net_size) # %>% sort()
                     net <- make_NM(size = net_size,
                                    net_kind = net_kind,
                                    niches = niches, 
@@ -240,13 +225,6 @@ make_Null_canonical <- function(input_network, net_kind, process, parameter, net
                     stop("An unknown process was included in the simulation.")
                 }
 
-
-
-
-
-
-
-
     } ## for (counter in 1:iters) {
 
     ## Compare uuid networks to get distribution of their distances
@@ -255,18 +233,14 @@ make_Null_canonical <- function(input_network, net_kind, process, parameter, net
     D_null <- compare(networks = networks, 
                       method = method, 
                       net_kind = net_kind,
-                    #   net_size = net_size,
                       cause_orientation = cause_orientation,
                       DD_kind = DD_kind,
                       DD_weight = DD_weight,
-                      DD_resize = DD_resize,
                       max_norm = max_norm,
                       size_different = size_different,
                       cores = cores, 
                       verbose = verbose)
-    
-    # D_null  %>% gplots::heatmap.2(trace = "none", Rowv = FALSE, Colv = FALSE, dendrogram = "none", col = colorRampPalette(c("white", "black"))(n = 299))
-    
+
     null_list <- list(D_null = D_null,
                       parameters = parameters)
 

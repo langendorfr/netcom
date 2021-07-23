@@ -23,6 +23,9 @@
 #' @references Ispolatov, I., Krapivsky, P. L., & Yuryev, A. (2005). Duplication-divergence model of protein interaction network. Physical review E, 71(6), 061911.
 #' 
 #' @examples
+#' # Import netcom
+#' library(netcom)
+#' 
 #' size <- 10
 #' existing_network <- matrix(sample(c(0,1), size = size^2, replace = TRUE), nrow = size, ncol = size)
 #' new_network_prep <- matrix(0, nrow = size + 1, ncol = size + 1)
@@ -39,14 +42,14 @@ grow_DD <- function(matrix, x, divergence, link = 0, connected = FALSE, retcon =
         matrix[x, ] <- matrix[duplication, ]
 
         ## Connect new node to copied node
-        if (runif(1) < link) {
+        if (stats::runif(1) < link) {
         matrix[x, duplication] <- 1
         matrix[duplication, x] <- 1
         }
 
         for (i in 1:w) {
             if (matrix[x, i] == 1) {
-                if (runif(1) <= divergence) {
+                if (stats::runif(1) <= divergence) {
                     matrix[x, i] <- 0
                 }
             }

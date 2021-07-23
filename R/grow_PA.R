@@ -23,6 +23,9 @@
 #' @references Barabási, A. L., & Albert, R. (1999). Emergence of scaling in random networks. science, 286(5439), 509-512.
 #' 
 #' @examples
+#' # Import netcom
+#' library(netcom)
+#' 
 #' size <- 10
 #' existing_network <- matrix(sample(c(0,1), size = size^2, replace = TRUE), nrow = size, ncol = size)
 #' new_network_prep <- matrix(0, nrow = size + 1, ncol = size + 1)
@@ -59,8 +62,8 @@ grow_PA <- function(matrix, x, power, sum_v_max = "sum", nascent_help = TRUE, re
     }
 
 
-    out_new <- 1 * (runif(w) <= out_ratio)
-    in_new <- 1 * (runif(w) <= in_ratio)
+    out_new <- 1 * (stats::runif(w) <= out_ratio)
+    in_new <- 1 * (stats::runif(w) <= in_ratio)
 
     matrix[x, 1:x] = c(in_new, 0)
 

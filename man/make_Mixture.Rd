@@ -17,13 +17,23 @@ make_Mixture(
 )
 }
 \arguments{
-\item{directed}{Binary variable determining if the network is directed, resulting in off-diagonal asymmetry in the adjacency matrix.}
+\item{mechanism}{A vector of mechanism names corresponding to the mechanisms each node acts in accordance with. Note that the first two mechanisms are irrelevant because the first two nodes default to connecting to each other. Currently supported mechanisms: "ER" (Erdos-Renyi random), "PA", (Preferential Attachment), "DD", (Duplication and Divergence), "DM" (Duplication and Mutation), "SW", (Small-World), and "NM" (Niche Model).}
+
+\item{directed}{A binary variable determining if the network is directed, resulting in off-diagonal asymmetry in the adjacency matrix. Either a single value or a vector of values the same length as the mechanism input vector.}
+
+\item{parameter}{Parameter of each node's mechanism. Either a single value or a vector of values the same length as the mechanism input vector.}
+
+\item{kind}{Either `grow` or `rewire`, and determines if the nodes specified in the mechanism input vector are to be rewired or grown. Either a single value or a vector of values the same length as the mechanism input vector. The number of `grow` nodes, excluding the first two which are always a pair of bidirectionally connected nodes, is the size of the final network.}
 
 \item{niches}{Used by the Niche Model to determine which nodes interact. Needs to be a vector of the same length as the number of nodes, and range between zero and one.}
 
 \item{retcon}{Binary variable determining if already existing nodes can attach to new nodes. Defaults to FALSE.}
 
-\item{sequence}{A vector of mechanism names corresponding to the mechanisms each node acts in accordance with. Needs to be the same length as the number of nodes in the network. Note that the first two mechanisms are irrelevant because the first two nodes default to connecting to each other. Currently supported mechanisms: "ER" (Erdos-Renyi random), "PA", (Preferential Attachment), "DD", (Duplication and Divergence), "DM" (Duplication and Mutation), "SW", (Small-World), and "NM" (Niche Model).}
+\item{link_DD}{Defaults to 0. A second parameter in the DD (Duplication & Divergence). Currently only one parameter per mechanism can be specified.}
+
+\item{link_DM}{Defaults to 0. A second parameter in the DM (Duplication & Mutation). Currently only one parameter per mechanism can be specified.}
+
+\item{force_connected}{Defaults to FALSE. Determines if nodes can be added to the growing network that are disconnected. If TRUE, this is prevented by re-determining the offending node's edges until the network is connected.}
 }
 \value{
 An unweighted mixture mechanism adjacency matrix.

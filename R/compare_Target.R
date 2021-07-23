@@ -31,6 +31,9 @@
 #' @references Langendorf, R. E., & Burgess, M. G. (2020). Empirically Classifying Network Mechanisms. arXiv preprint arXiv:2012.15863.
 #' 
 #' @examples
+#' # Import netcom
+#' library(netcom)
+#' 
 #' # Adjacency matrix
 #' size <- 10
 #' comparisons <- 50
@@ -88,8 +91,11 @@ compare_Target <- function(target, networks, net_size, net_kind, method = "DD", 
             cluster <- parallel::makeCluster(cores, outfile = "")
             doParallel::registerDoParallel(cluster)
 
+            ## Define %dopar% relative to its package so can use normally
+            `%dopar%` <- foreach::`%dopar%`
+
             ## Parallelized network alignment
-            D_netcom <- foreach (net = 1:length(networks), .combine = c, .packages = c("tibble", "dplyr", "netcom")) %dopar% {        
+            D_netcom <- foreach::foreach (net = 1:length(networks), .combine = c, .packages = c("tibble", "dplyr", "netcom")) foreach::`%dopar%` {
                 if (verbose) {print(paste0("Aligning ", net, " of ", length(networks), " networks."))}
 
                 output <- netcom::align(target,
@@ -101,7 +107,7 @@ compare_Target <- function(target, networks, net_size, net_kind, method = "DD", 
             }
 
             ## Stop backend
-            stopCluster(cluster)
+            parallel::stopCluster(cluster)
         }
 
         return_vector <- D_netcom
@@ -127,16 +133,16 @@ compare_Target <- function(target, networks, net_size, net_kind, method = "DD", 
             zero_rows <- which(rowSums(equilibrium_net) == 0)
             diag(equilibrium_net)[zero_rows] = 1
             equilibrium_net = sweep(equilibrium_net, 1, Matrix::rowSums(equilibrium_net, na.rm = TRUE), FUN = "/")
-            equilibrium_net = equilibrium_net %^% 5
+            equilibrium_net = expm::`%^%`(equilibrium_net, 5)
 
             eq_igraph_graph <- igraph::graph_from_adjacency_matrix(equilibrium_net, mode = "directed", weighted = TRUE, diag = TRUE, add.colnames = NULL, add.rownames = NA)
 
             if ("communities" %in% DD_kind) {
-                community_sizes <- igraph::graph_from_adjacency_matrix(target, mode = "undirected", weighted = TRUE, diag = TRUE, add.colnames = NULL, add.rownames = NA) %>% igraph::cluster_fast_greedy(weights = NULL) %>% sizes() %>% sort(decreasing = TRUE)
+                community_sizes <- igraph::graph_from_adjacency_matrix(target, mode = "undirected", weighted = TRUE, diag = TRUE, add.colnames = NULL, add.rownames = NA) %>% igraph::cluster_fast_greedy(weights = NULL) %>% igraph::sizes() %>% sort(decreasing = TRUE)
             }
 
             if ("eq_communities" %in% DD_kind) {
-                eq_community_sizes <- igraph::graph_from_adjacency_matrix(equilibrium_net, mode = "undirected", weighted = TRUE, diag = TRUE, add.colnames = NULL, add.rownames = NA) %>% igraph::cluster_fast_greedy(weights = NULL) %>% sizes() %>% sort(decreasing = TRUE)
+                eq_community_sizes <- igraph::graph_from_adjacency_matrix(equilibrium_net, mode = "undirected", weighted = TRUE, diag = TRUE, add.colnames = NULL, add.rownames = NA) %>% igraph::cluster_fast_greedy(weights = NULL) %>% igraph::sizes() %>% sort(decreasing = TRUE)
             }
 
             for (DD_kind_name in seq_along(DD_kind)) {
@@ -173,11 +179,11 @@ compare_Target <- function(target, networks, net_size, net_kind, method = "DD", 
                     "spectral_decomposition" = igraph::embed_adjacency_matrix(igraph_graph, no = nrow(target)-1)$X %>% rowSums(),
                     "eq_spectral_decomposition" = igraph::embed_adjacency_matrix(eq_igraph_graph, no = nrow(equilibrium_net)-1)$X %>% rowSums(),
 
-                    "alpha" = igraph::alpha_centrality(igraph_graph, nodes = V(igraph_graph), alpha = 10, loops = TRUE, exo = 1, weights = NULL, tol = 1e-07, sparse = FALSE),
-                    "eq_alpha" = igraph::alpha_centrality(eq_igraph_graph, nodes = V(eq_igraph_graph), alpha = 10, loops = TRUE, exo = 1, weights = NULL, tol = 1e-07, sparse = FALSE),
+                    "alpha" = igraph::alpha_centrality(igraph_graph, nodes = igraph::V(igraph_graph), alpha = 10, loops = TRUE, exo = 1, weights = NULL, tol = 1e-07, sparse = FALSE),
+                    "eq_alpha" = igraph::alpha_centrality(eq_igraph_graph, nodes = igraph::V(eq_igraph_graph), alpha = 10, loops = TRUE, exo = 1, weights = NULL, tol = 1e-07, sparse = FALSE),
 
-                    "page_rank" = igraph::page_rank(igraph_graph, algo = c("prpack", "arpack", "power"), vids = V(igraph_graph), directed = TRUE, damping = 0.85, personalized = NULL, weights = NULL, options = NULL)$vector,
-                    "eq_page_rank" = igraph::page_rank(eq_igraph_graph, algo = c("prpack", "arpack", "power"), vids = V(eq_igraph_graph), directed = TRUE, damping = 0.85, personalized = NULL, weights = NULL, options = NULL)$vector,
+                    "page_rank" = igraph::page_rank(igraph_graph, algo = c("prpack", "arpack", "power"), vids = igraph::V(igraph_graph), directed = TRUE, damping = 0.85, personalized = NULL, weights = NULL, options = NULL)$vector,
+                    "eq_page_rank" = igraph::page_rank(eq_igraph_graph, algo = c("prpack", "arpack", "power"), vids = igraph::V(eq_igraph_graph), directed = TRUE, damping = 0.85, personalized = NULL, weights = NULL, options = NULL)$vector,
 
                     "communities" = rep(seq_along(community_sizes), community_sizes),
                     "eq_communities" = rep(seq_along(eq_community_sizes), eq_community_sizes),
@@ -207,7 +213,6 @@ compare_Target <- function(target, networks, net_size, net_kind, method = "DD", 
                     DD_target[which(is.infinite(DD_target))] = 0
                 }
 
-                # DD_target_combined = c(DD_target_combined, DD_target)
                 DD_target_combined[[DD_kind_name]] = DD_target
             }
 
@@ -233,11 +238,11 @@ compare_Target <- function(target, networks, net_size, net_kind, method = "DD", 
                 eq_igraph_graph <- igraph::graph_from_adjacency_matrix(equilibrium_net, mode = "directed", weighted = TRUE, diag = TRUE, add.colnames = NULL, add.rownames = NA)
 
                 if ("communities" %in% DD_kind) {
-                    community_sizes <- igraph::graph_from_adjacency_matrix(networks[[net]], mode = "undirected", weighted = TRUE, diag = TRUE, add.colnames = NULL, add.rownames = NA) %>% igraph::cluster_fast_greedy(weights = NULL) %>% sizes() %>% sort(decreasing = TRUE)
+                    community_sizes <- igraph::graph_from_adjacency_matrix(networks[[net]], mode = "undirected", weighted = TRUE, diag = TRUE, add.colnames = NULL, add.rownames = NA) %>% igraph::cluster_fast_greedy(weights = NULL) %>% igraph::sizes() %>% sort(decreasing = TRUE)
                 }
 
                 if ("eq_communities" %in% DD_kind) {
-                    eq_community_sizes <- igraph::graph_from_adjacency_matrix(equilibrium_net, mode = "undirected", weighted = TRUE, diag = TRUE, add.colnames = NULL, add.rownames = NA) %>% igraph::cluster_fast_greedy(weights = NULL) %>% sizes() %>% sort(decreasing = TRUE)
+                    eq_community_sizes <- igraph::graph_from_adjacency_matrix(equilibrium_net, mode = "undirected", weighted = TRUE, diag = TRUE, add.colnames = NULL, add.rownames = NA) %>% igraph::cluster_fast_greedy(weights = NULL) %>% igraph::sizes() %>% sort(decreasing = TRUE)
                 }
 
                 for (DD_kind_name in seq_along(DD_kind)) {
@@ -274,11 +279,11 @@ compare_Target <- function(target, networks, net_size, net_kind, method = "DD", 
                         "spectral_decomposition" = igraph::embed_adjacency_matrix(igraph_graph, no = nrow(networks[[net]])-1)$X %>% rowSums(),
                         "eq_spectral_decomposition" = igraph::embed_adjacency_matrix(eq_igraph_graph, no = nrow(equilibrium_net)-1)$X %>% rowSums(),
 
-                        "alpha" = igraph::alpha_centrality(igraph_graph, nodes = V(igraph_graph), alpha = 10, loops = TRUE, exo = 1, weights = NULL, tol = 1e-07, sparse = FALSE),
-                        "eq_alpha" = igraph::alpha_centrality(eq_igraph_graph, nodes = V(eq_igraph_graph), alpha = 10, loops = TRUE, exo = 1, weights = NULL, tol = 1e-07, sparse = FALSE),
+                        "alpha" = igraph::alpha_centrality(igraph_graph, nodes = igraph::V(igraph_graph), alpha = 10, loops = TRUE, exo = 1, weights = NULL, tol = 1e-07, sparse = FALSE),
+                        "eq_alpha" = igraph::alpha_centrality(eq_igraph_graph, nodes = igraph::V(eq_igraph_graph), alpha = 10, loops = TRUE, exo = 1, weights = NULL, tol = 1e-07, sparse = FALSE),
                         
-                        "page_rank" = igraph::page_rank(igraph_graph, algo = c("prpack", "arpack", "power"), vids = V(igraph_graph), directed = TRUE, damping = 0.85, personalized = NULL, weights = NULL, options = NULL)$vector,
-                        "eq_page_rank" = igraph::page_rank(eq_igraph_graph, algo = c("prpack", "arpack", "power"), vids = V(eq_igraph_graph), directed = TRUE, damping = 0.85, personalized = NULL, weights = NULL, options = NULL)$vector,
+                        "page_rank" = igraph::page_rank(igraph_graph, algo = c("prpack", "arpack", "power"), vids = igraph::V(igraph_graph), directed = TRUE, damping = 0.85, personalized = NULL, weights = NULL, options = NULL)$vector,
+                        "eq_page_rank" = igraph::page_rank(eq_igraph_graph, algo = c("prpack", "arpack", "power"), vids = igraph::V(eq_igraph_graph), directed = TRUE, damping = 0.85, personalized = NULL, weights = NULL, options = NULL)$vector,
 
                         "communities" = rep(seq_along(community_sizes), community_sizes),
                         "eq_communities" = rep(seq_along(eq_community_sizes), eq_community_sizes),
@@ -311,12 +316,11 @@ compare_Target <- function(target, networks, net_size, net_kind, method = "DD", 
 
                     if (size_different) {
                         Position <- seq(from = 0, to = 1, length = length(DD))
-                        Points <- tibble(Position = Position, DD = DD)
+                        Points <- tibble::tibble(Position = Position, DD = DD)
 
                         Position_c <- seq(from = 0, to = 1, length = Length)
-                        Points_c <- apply(Points, 2, function(u) spline(Position, u, xout = Position_c)$y) %>% as_tibble()
+                        Points_c <- apply(Points, 2, function(u) stats::spline(Position, u, xout = Position_c)$y) %>% tibble::as_tibble()
 
-                        # DD_combined = c(DD_combined, Points_c$DD)
                         DD_combined[[DD_kind_name]] = Points_c$DD
                     } else {
                         DD_combined[[DD_kind_name]] = DD
@@ -325,8 +329,6 @@ compare_Target <- function(target, networks, net_size, net_kind, method = "DD", 
 
                 }
 
-
-                # DD_difference_each <- {}
                 DD_difference_each <- rep(NA, length(DD_kind))
                 for (DD_kind_name in seq_along(DD_kind)) {
                     DD_1 <- DD_target_combined[[DD_kind_name]]
@@ -499,10 +501,10 @@ compare_Target <- function(target, networks, net_size, net_kind, method = "DD", 
 
                 if (size_different) {
                     Position <- seq(from = 0, to = 1, length = length(DD))
-                    Points <- tibble(Position = Position, DD = DD)
+                    Points <- tibble::tibble(Position = Position, DD = DD)
 
                     Position_c <- seq(from = 0, to = 1, length = Length)
-                    Points_c <- apply(Points, 2, function(u) spline(Position, u, xout = Position_c)$y) %>% as_tibble()
+                    Points_c <- apply(Points, 2, function(u) stats::spline(Position, u, xout = Position_c)$y) %>% tibble::as_tibble()
 
                     D_DD[net] = sqrt( sum( ((DD_target - Points_c$DD)^2) ) )
                 } else {

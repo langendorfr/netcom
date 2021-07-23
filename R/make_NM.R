@@ -19,11 +19,14 @@
 #' @references Williams, R. J., & Martinez, N. D. (2000). Simple rules yield complex food webs. Nature, 404(6774), 180-183.
 #'
 #' @examples
+#' # Import netcom
+#' library(netcom)
+#' 
 #' # Network size (number of nodes)
 #' size <- 10
 #' 
 #' # Create niche values for each member of the system (node)
-#' niches <- runif(n = size)
+#' niches <- stats::runif(n = size)
 #' 
 #' # Make network according to the Niche Model
 #' make_NM(size = size, niches = niches)
@@ -49,7 +52,7 @@ make_NM <- function(size, net_kind, niches, connectance = 0.1, directed = TRUE, 
     for (x in 1:size) {
         n_i <- niches[x]
         
-        r_i <- 1-((1-runif(1))^(1/beta))
+        r_i <- 1-((1-stats::runif(1))^(1/beta))
 
         ## NEW
         r_i = r_i * n_i
@@ -60,7 +63,7 @@ make_NM <- function(size, net_kind, niches, connectance = 0.1, directed = TRUE, 
         #     r_i = 2 * n_i
         # }
 
-        c_i <- runif(n = 1, 
+        c_i <- stats::runif(n = 1, 
                      min = min(n_i, r_i/2), ## Do not allow c_i to be greater than n_i
                      max = n_i)
 

@@ -18,7 +18,6 @@ Imports:
     stats,
     dplyr,
     tibble,
-    stats,
     clue,
     expm,
     igraph,
@@ -26,7 +25,9 @@ Imports:
     pdist,
     pracma,
     vegan,
-    magrittr
+    magrittr,
+    parallel,
+    doParallel
 RoxygenNote: 7.1.1
 Suggests: 
     rmarkdown,

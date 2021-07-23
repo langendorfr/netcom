@@ -8,6 +8,8 @@
 #' 
 #' @param rewire Small-World parameter specifying the probability each edge is randomly rewired, allowing for the possiblity of bridges between connected communities.
 #' 
+#' @param directed Binary variable determining if the network is directed, resulting in off-diagonal asymmetry in the adjacency matrix.
+#' 
 #' @details Rewires a node in a network according to the Small-World mechanism.
 #'
 #' @return An adjacency matrix.
@@ -15,6 +17,9 @@
 #' @references Watts, D. J., & Strogatz, S. H. (1998). Collective dynamics of ‘small-world’networks. nature, 393(6684), 440-442.
 #' 
 #' @examples
+#' # Import netcom
+#' library(netcom)
+#' 
 #' size <- 10
 #' existing_network <- matrix(sample(c(0,1), size = size^2, replace = TRUE), nrow = size, ncol = size)
 #' new_network_prep <- matrix(0, nrow = size + 1, ncol = size + 1)
@@ -65,7 +70,7 @@ stir_SW <- function(matrix, x, rewire, directed) {
             ## Do not allow self-loops so remove column x
             e_possible <- which(matrix[x, -x] == 0)
 
-            if (runif(1) <= rewire && length(e_possible) != 0) {
+            if (stats::runif(1) <= rewire && length(e_possible) != 0) {
                 e_new <- sample(e_possible, 1)
                 matrix[x, e] = 0
                 matrix[x, e_new] = 1

@@ -19,6 +19,9 @@
 #' @references Erdos, P. and Renyi, A., On random graphs, Publicationes Mathematicae 6, 290–297 (1959).
 #' 
 #' @examples
+#' # Import netcom
+#' library(netcom)
+#' 
 #' size <- 10
 #' existing_network <- matrix(sample(c(0,1), size = size^2, replace = TRUE), nrow = size, ncol = size)
 #' new_network_prep <- matrix(0, nrow = size + 1, ncol = size + 1)
@@ -31,10 +34,10 @@ grow_ER <- function(matrix, x, p, retcon = FALSE, directed = TRUE) {
     w <- x-1
 
     ## Add zero because no self loops; diag(matrix) = 0
-    matrix[x, 1:x] = c(1 * (runif(w) <= p), 0)
+    matrix[x, 1:x] = c(1 * (stats::runif(w) <= p), 0)
 
     if (retcon == TRUE) {
-        matrix[1:x, x] = c(1 * (runif(w) <= p), 0)
+        matrix[1:x, x] = c(1 * (stats::runif(w) <= p), 0)
     } else {
         matrix[1:x, x] = 0
     }

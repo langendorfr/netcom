@@ -10,6 +10,8 @@
 #' 
 #' @param link Probability that the new node attaches to the node it duplicates. Defaults to 0.
 #' 
+#' @param directed Binary variable determining if the network is directed, resulting in off-diagonal asymmetry in the adjacency matrix.
+#' 
 #' @param force_connected Binary argument determining if the newly grown node has to be connected to the existing network. Defaults to FALSE, to prevent rare computational slow-downs when it is unlikely to create a connected network. Defaults to FALSE.
 #' 
 #' @details Different from Duplication & Mutation models in that edges can only be lost.
@@ -19,6 +21,9 @@
 #' @references Ispolatov, I., Krapivsky, P. L., & Yuryev, A. (2005). Duplication-divergence model of protein interaction network. Physical review E, 71(6), 061911.
 #' 
 #' @examples
+#' # Import netcom
+#' library(netcom)
+#' 
 #' size <- 10
 #' existing_network <- matrix(sample(c(0,1), size = size^2, replace = TRUE), nrow = size, ncol = size)
 #' new_network_prep <- matrix(0, nrow = size + 1, ncol = size + 1)
@@ -36,7 +41,7 @@ stir_DD <- function(matrix, x, divergence, link, directed, force_connected = FAL
         matrix[x, ] <- matrix[duplication, ]
 
         ## Connect new node to copied node
-        if (runif(1) < link) {
+        if (stats::runif(1) < link) {
         matrix[x,duplication] <- 1
         matrix[duplication,x] <- 1
         }
@@ -44,7 +49,7 @@ stir_DD <- function(matrix, x, divergence, link, directed, force_connected = FAL
         for (i in ids) {
             ##!! Do this differently than grow_DD, which uses `if (matrix[i, x] == 1)`
             if (matrix[x, i] == 1) {
-                if (runif(1) < divergence) {
+                if (stats::runif(1) < divergence) {
                     matrix[x, i] <- 0
 
                     if (!directed) {

@@ -25,6 +25,9 @@
 #' @references Ispolatov, I., Krapivsky, P. L., & Yuryev, A. (2005). Duplication-divergence model of protein interaction network. Physical review E, 71(6), 061911.
 #' 
 #' @examples
+#' # Import netcom
+#' library(netcom)
+#' 
 #' size <- 10
 #' existing_network <- matrix(sample(c(0,1), size = size^2, replace = TRUE), nrow = size, ncol = size)
 #' new_network_prep <- matrix(0, nrow = size + 1, ncol = size + 1)
@@ -41,7 +44,7 @@ grow_DM <- function(matrix, x, divergence, mutation = 0, link = 0, connected = F
         matrix[x, ] <- matrix[duplication, ]
 
         ## Connect new node to copied node
-        if (runif(1) < link) {
+        if (stats::runif(1) < link) {
         matrix[x, duplication] <- 1
         matrix[duplication, x] <- 1
         }
@@ -49,26 +52,17 @@ grow_DM <- function(matrix, x, divergence, mutation = 0, link = 0, connected = F
         for (i in 1:w) {
 
             if (matrix[x, i] == 1) {
-                if (runif(1) <= divergence) {
+                if (stats::runif(1) <= divergence) {
                     matrix[x, i] <- 0
                 }
             } else if (matrix[x, i] == 0) {
-                if (runif(1) <= mutation) {
+                if (stats::runif(1) <= mutation) {
                     matrix[x, i] <- 0
                 }
             } else {
                 stop("Weighted edge detected. Only binary networks are supported in this release.")
             }
 
-                                        # if (runif(1) <= divergence) {
-
-                                        #     if (matrix[x, i] == 0) {
-                                        #         matrix[x, i] <- 1
-                                        #     } else if (matrix[x, i] == 1) {
-                                        #         matrix[x, i] <- 0
-                                        #     }
-
-                                        # }
         }
 
         if (retcon == TRUE) {

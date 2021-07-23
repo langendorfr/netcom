@@ -16,9 +16,9 @@ make_Null(
   neighborhood,
   DD_kind,
   DD_weight,
+  directed,
   resolution_min = 0.01,
   resolution_max = 0.99,
-  directed = TRUE,
   power_max = 5,
   connectance_max = 0.5,
   divergence_max = 0.5,
@@ -27,7 +27,6 @@ make_Null(
   size_different = FALSE,
   cause_orientation = "row",
   max_norm = FALSE,
-  DD_resize = "smaller",
   verbose = FALSE
 )
 }
@@ -44,17 +43,19 @@ make_Null(
 
 \item{net_size}{Number of nodes in the network.}
 
+\item{iters}{Number of replicates in the null distribution. Note that length(null_dist) = ((iters^2)-iters)/2.}
+
 \item{method}{This determines the method used to compare networks at the heart of the classification. Currently "DD" (Degree Distribution) and "align" (the align function which compares networks by the entropy of diffusion on them) are supported. Future versions will allow user-defined methods.}
 
 \item{neighborhood}{The range of nodes that form connected communities. Note: This implementation results in overlap of communities.}
 
-\item{DD_kind}{= A vector of network properties to be used to compare networks. Defaults to "all", which is the average of the in- and out-degrees.}
+\item{DD_kind}{= A vector of network properties to be used to compare networks.}
 
-\item{resolution_min}{= The minimum parameter value to consider. Zero is not used because in many processes it results in degenerate systems (e.g. entirely unconnected networks). Currently process agnostic. Future versions will accept a vector of values, one for each process. Defaults to 0.01.}
+\item{DD_weight}{= A vector of weights for the relative importance of the network properties in DD_kind being used to compare networks. Should be the same length as DD_kind.}
+
+\item{directed}{Whether the target network is directed.}
 
 \item{resolution_max}{The maximum parameter value to consider. One is not used because in many processes it results in degenerate systems (e.g. entirely connected networks). Currently process agnostic. Future versions will accept a vector of values, one for each process. Defaults to 0.99.}
-
-\item{directed}{Whether the target network is directed. Defaults to TRUE.}
 
 \item{power_max}{= Defaults to 5. The maximum power of attachment in the Preferential Attachment process (PA).}
 
@@ -66,21 +67,15 @@ make_Null(
 
 \item{cores}{= Defaults to 1. The number of cores to run the classification on. When set to 1 parallelization will be ignored.}
 
-\item{size_different}{If there is a difference in the size of the networks used in the null distribution. Defaults to FALSE.}
+\item{size_different}{If there is a difference in the size of the networks used in the null distribution. Defaults to FALSE.
+
+#' @param resolution_min = The minimum parameter value to consider. Zero is not used because in many processes it results in degenerate systems (e.g. entirely unconnected networks). Currently process agnostic. Future versions will accept a vector of values, one for each process. Defaults to 0.01.}
 
 \item{cause_orientation}{= The orientation of directed adjacency matrices. Defaults to "row".}
 
 \item{max_norm}{Binary variable indicating if each network property should be normalized so its max value (if a node-level property) is one. Defaults to FALSE.}
 
-\item{DD_resize}{= If networks being compared are a different size, this parameter determines if upscaling "larger" or downscaling "smaller" occurs. Unlikely to be relevant here. Defaults to "smaller".}
-
 \item{verbose}{= Defaults to FALSE. Whether to print all messages.}
-
-\item{resolution}{The first step is to find the version of each process most similar to the target network. This parameter sets the number of parameter values to search across. Decrease to improve performance, but at the cost of accuracy. Defaults to 100.}
-
-\item{reps}{Defaults to 3. The number of networks to simulate for each parameter. More replicates increases accuracy by making the estimation of the parameter that produces networks most similar to the target network less idiosyncratic.}
-
-\item{mutation_max}{= Defaults to 0.5. The maximum mutation parameter for the Duplication and Mutation mechanism.}
 }
 \value{
 A list. The first element contains the networks. The second contains their corresponding parameters.

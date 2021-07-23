@@ -11,7 +11,6 @@ compare(
   cause_orientation = "row",
   DD_kind = "all",
   DD_weight = 1,
-  DD_resize = "smaller",
   max_norm = FALSE,
   size_different = FALSE,
   cores = 1,
@@ -35,6 +34,8 @@ compare(
 
 \item{max_norm}{Binary variable indicating if each network property should be normalized so its max value (if a node-level property) is one. Defaults to FALSE.}
 
+\item{size_different}{Defaults to FALSE. If TRUE, will ensure the node-level properties being compared are vectors of the same length, which is accomplished using splines.}
+
 \item{cores}{Defaults to 1. The number of cores to run the classification on. When set to 1 parallelization will be ignored.}
 
 \item{diffusion_sampling}{Base of the power to use to nonlinearly sample the diffusion kernels if method = "align". Defaults to 2.}
@@ -42,13 +43,9 @@ compare(
 \item{diffusion_limit}{Number of markov steps in the diffusion kernels if method = "align". Defaults to 10.}
 
 \item{verbose}{Defaults to TRUE. Whether to print all messages.}
-
-\item{target}{The network be compared.}
-
-\item{net_size}{Size}
 }
 \value{
-A dataframe with 3 columns and as many rows as processes being tested (5 by default). The first column lists the processes. The second lists the p-value on the null hypothesis that the target network did come from that row's process. The third column gives the estimated parameter for that particular process.
+A square matrix with dimensions equal to the number of networks being compared, where the ij element is the comparison of networks i and j.
 }
 \description{
 Compares one network to a list of many networks.

@@ -17,6 +17,9 @@
 #' @references Ispolatov, I., Krapivsky, P. L., & Yuryev, A. (2005). Duplication-divergence model of protein interaction network. Physical review E, 71(6), 061911.
 #' 
 #' @examples
+#' # Import netcom
+#' library(netcom)
+#' 
 #' size <- 10
 #' existing_network <- matrix(sample(c(0,1), size = size^2, replace = TRUE), nrow = size, ncol = size)
 #' new_network_prep <- matrix(0, nrow = size + 1, ncol = size + 1)
@@ -44,7 +47,7 @@ make_DD <- function(size, net_kind, divergence, directed = TRUE) {
             ## Change each edge with probability divergence
             edges <- which(matrix[node, ] != 0)
             for (e in edges) {
-                if (runif(1) <= divergence) {
+                if (stats::runif(1) <= divergence) {
                     matrix[node, e] = 0
 
                     if (directed == FALSE) {
@@ -69,7 +72,7 @@ make_DD <- function(size, net_kind, divergence, directed = TRUE) {
 
             ## Change each edge with probability divergence
             for (e in 1:nrow(edgelist_duplication)) {
-                if (runif(1) <= divergence) {
+                if (stats::runif(1) <= divergence) {
                     edgelist_duplication = matrix(edgelist_duplication[-e,], ncol = 2)
                 }
             }

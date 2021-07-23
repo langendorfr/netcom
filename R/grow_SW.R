@@ -21,6 +21,9 @@
 #' @references Watts, D. J., & Strogatz, S. H. (1998). Collective dynamics of ‘small-world’networks. nature, 393(6684), 440-442.
 #' 
 #' @examples
+#' # Import netcom
+#' library(netcom)
+#' 
 #' size <- 10
 #' existing_network <- matrix(sample(c(0,1), size = size^2, replace = TRUE), nrow = size, ncol = size)
 #' new_network_prep <- matrix(0, nrow = size + 1, ncol = size + 1)
@@ -67,7 +70,7 @@ grow_SW <- function(matrix, x, rewire, connected = FALSE, retcon = FALSE, direct
         out_edges <- which(matrix[x, 1:w] != 0)
         if (length(out_edges) != w) {
             for (e in out_edges) {
-                if (runif(1) <= rewire) {
+                if (stats::runif(1) <= rewire) {
                     e_possible <- which(matrix[x, 1:w] == 0)
                     e_new <- sample(e_possible, 1)
                     

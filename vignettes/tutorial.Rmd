@@ -44,11 +44,12 @@ Once installed simply load the package and you will have access to all of its fu
 
 ```{r Setup, message = FALSE}
 library(netcom)     # This library
-library(igraph)     # General puprose network library
-library(dplyr)      # Data manipulation
-library(tibble)     # Table data format
+library(tibble)     # Data format
+library(dplyr)      # Data processing
+library(reshape2)   # Data manipulation
 library(expm)       # Matrix multiplication
-library(ggplot2)    # Plotting
+library(igraph)     # General puprose network library
+library(ggplot2)    # Plotting using the grammar of graphics
 library(ggraph)     # Graph plotting extension for ggplot2
 library(ggfortify)  # Statistical plotting extension for ggplot2
 ```
@@ -74,7 +75,7 @@ Note that both ways of simulating networks (growing and rewiring) involve assign
 As an example, here is a recipe for a realistically complex mixture network:
 
 ```{r Easily simulate mixture network, fig.height = 4, fig.width = 4, fig.align = "left"}
-## 1. Start by creating a sequence of network evolutions. There are four components to this sequence that can be defined for each step in the network's evolution, or once which will be used for every step in the newtwork's evolution.
+## Start by creating a sequence of network evolutions. There are four components to this sequence that can be defined for each step in the network's evolution, or once which will be used for every step in the newtwork's evolution.
 mechanism <- c(
     rep("ER", 7),
     rep("PA", 2),
@@ -99,12 +100,11 @@ directed <- c(
     rep(TRUE, 3)
 )
 
-## 2. Simulate a network according to the rules of this system evolution.
+## Simulate a network according to the rules of this system evolution.
 network <- make_Mixture(mechanism = mechanism, kind = kind, parameter = parameter, directed = directed)
 
 
-## Finally, plot the simulated network. netcom typically stores networks as matrices,
-## so to plot a network you will have to transform it into a linked list.
+## Finally, plot the network you've simulated.
 network %>% 
     melt() %>% 
     filter(value == 1) %>% 
@@ -118,7 +118,7 @@ network %>%
                        end_cap = circle(4, "mm"))
 ```
 
-This is a system that grows randomly at first, adding seven nodes that attach to other nodes according to the Erdos-Renyi (ER) random model. Note the first three elements of _kind_ are _"grow"_ signifying these are growth events. The next two events are _"rewire"_ signifying rewiring events. These do not change the size of the network (number of nodes). Only the edges between currently existing nodes are affected, as happens for the next two events where two nodes are rewired according to the Preferential Attachment (PA) model. These events include all currently existing nodes so a rewiring event can result in a node interacting with a node that was grown (added to the network) after it. Using *make_Mixture()* you can specify realistically complicated network evolutions by specifying changing governing dynamics in the sequences contained in the input parameters _mechanism_, _kind_, _parameter_, and _directed_.
+This is a system that grows randomly at first, adding seven nodes that attach to other nodes according to the Erdos-Renyi (ER) random model. Note the first three elements of _kind_ are _"grow"_ signifying these are events where. The next two events are _"rewire"_ signifying rewiring events. These do not change the size of the network (number of nodes). Only the edges between currently existing nodes are affected, as happens for the next two events where two nodes are rewired according to the Preferential Attachment (PA) model. These events include all currently existing nodes so a rewiring event can result in a node interacting with a node that was grown (added to the network) after it. Using *make_Mixture()* you can specify realistically complicated network evolutions by specifying changing governing dynamics in the sequences contained in the input parameters _mechanism_, _kind_, _parameter_, and _directed_.
 
 
 # Comparing Networks

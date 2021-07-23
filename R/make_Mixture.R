@@ -1,14 +1,24 @@
 #' @title Make a Mixture Mechanism Network
 #'
 #' @description Creates a network by iteratively adding or rewiring nodes, each capable of attaching to existing nodes according to a user-specified mechanism.
-#'
-#' @param sequence A vector of mechanism names corresponding to the mechanisms each node acts in accordance with. Needs to be the same length as the number of nodes in the network. Note that the first two mechanisms are irrelevant because the first two nodes default to connecting to each other. Currently supported mechanisms: "ER" (Erdos-Renyi random), "PA", (Preferential Attachment), "DD", (Duplication and Divergence), "DM" (Duplication and Mutation), "SW", (Small-World), and "NM" (Niche Model).
 #' 
-#' @param directed Binary variable determining if the network is directed, resulting in off-diagonal asymmetry in the adjacency matrix.
+#' @param mechanism A vector of mechanism names corresponding to the mechanisms each node acts in accordance with. Note that the first two mechanisms are irrelevant because the first two nodes default to connecting to each other. Currently supported mechanisms: "ER" (Erdos-Renyi random), "PA", (Preferential Attachment), "DD", (Duplication and Divergence), "DM" (Duplication and Mutation), "SW", (Small-World), and "NM" (Niche Model).
+#' 
+#' @param directed A binary variable determining if the network is directed, resulting in off-diagonal asymmetry in the adjacency matrix. Either a single value or a vector of values the same length as the mechanism input vector.
+#' 
+#' @param parameter Parameter of each node's mechanism. Either a single value or a vector of values the same length as the mechanism input vector.
+#' 
+#' @param kind Either `grow` or `rewire`, and determines if the nodes specified in the mechanism input vector are to be rewired or grown. Either a single value or a vector of values the same length as the mechanism input vector. The number of `grow` nodes, excluding the first two which are always a pair of bidirectionally connected nodes, is the size of the final network.
 #'
 #' @param niches Used by the Niche Model to determine which nodes interact. Needs to be a vector of the same length as the number of nodes, and range between zero and one.
 #' 
 #' @param retcon Binary variable determining if already existing nodes can attach to new nodes. Defaults to FALSE.
+#' 
+#' @param link_DD Defaults to 0. A second parameter in the DD (Duplication & Divergence). Currently only one parameter per mechanism can be specified.
+#' 
+#' @param link_DM Defaults to 0. A second parameter in the DM (Duplication & Mutation). Currently only one parameter per mechanism can be specified.
+#' 
+#' @param force_connected Defaults to FALSE. Determines if nodes can be added to the growing network that are disconnected. If TRUE, this is prevented by re-determining the offending node's edges until the network is connected.
 #' 
 #' @details This function grows, one node at a time, a mixture mechanism network. As each node is added to the growing network it can attach to existing nodes by its own node-specific mechanism. A sequence of mechanism names must be provided. Note: Currently each mechanism is assumed to have a single governing parameter.
 #'
@@ -17,9 +27,36 @@
 #' @references Langendorf, R. E., & Burgess, M. G. (2020). Empirically Classifying Network Mechanisms. arXiv preprint arXiv:2012.15863.
 #' 
 #' @examples
-#' # Mechanisms
-#' sequence <- c("gER", "gER", "gER", "rPA", "rPA", "gER", "gER")
-#' network <- make_Mixture(sequence)
+#' # Import netcom
+#' library(netcom)
+#' 
+#' # Start by creating a sequence of network evolutions. There are four components to this sequence that can be defined for each step in the network's evolution, or once which will be used for every step in the newtwork's evolution.
+#' mechanism <- c(
+#'     rep("ER", 7),
+#'     rep("PA", 2),
+#'     rep("ER", 3)
+#' )
+#' 
+#' kind <- c(
+#'     rep("grow", 7),
+#'     rep("rewire", 2),
+#'     rep("grow", 3)
+#' )
+#' 
+#' parameter <- c(
+#'     rep(0.3, 7),
+#'     rep(2, 2),
+#'     rep(0.3, 3)
+#' )
+
+#' directed <- c(
+#'     rep(TRUE, 7),
+#'     rep(FALSE, 2),
+#'     rep(TRUE, 3)
+#' )
+#' 
+#' # Simulate a network according to the rules of this system evolution.
+#' network <- make_Mixture(mechanism = mechanism, kind = kind, parameter = parameter, directed = directed)
 #' 
 #' @export
 
@@ -66,7 +103,7 @@ make_Mixture <- function(mechanism, directed, parameter, kind, niches, retcon = 
 
     ## Assign niches for NM (the Niche Model) so they will be constant across calls to grow_CM
     if (missing(niches)) {
-        niches <- runif(size) %>% sort()
+        niches <- stats::runif(size) %>% sort()
     } else {
         # Sort to be safe with use-supplied niches
         niches = niches %>% sort()

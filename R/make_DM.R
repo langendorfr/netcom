@@ -19,6 +19,9 @@
 #' @references Ispolatov, I., Krapivsky, P. L., & Yuryev, A. (2005). Duplication-divergence model of protein interaction network. Physical review E, 71(6), 061911.
 #' 
 #' @examples
+#' # Import netcom
+#' library(netcom)
+#' 
 #' size <- 10
 #' existing_network <- matrix(sample(c(0,1), size = size^2, replace = TRUE), nrow = size, ncol = size)
 #' new_network_prep <- matrix(0, nrow = size + 1, ncol = size + 1)
@@ -48,7 +51,7 @@ make_DM <- function(size, net_kind, divergence, mutation, directed = FALSE) {
             edges <- matrix[node, 1:node]
             for (e in seq_along(edges)) {
                 if (edges[e] == 1) {
-                    if (runif(1) <= divergence) {
+                    if (stats::runif(1) <= divergence) {
                         matrix[node, e] = 0
                         
                         if (directed == FALSE) {
@@ -56,7 +59,7 @@ make_DM <- function(size, net_kind, divergence, mutation, directed = FALSE) {
                         }
                     }
                 } else if (edges[e] == 0) {
-                    if (runif(1) <= mutation) {
+                    if (stats::runif(1) <= mutation) {
                         matrix[node, e] = 1
 
                         if (directed == FALSE) {
@@ -73,32 +76,7 @@ make_DM <- function(size, net_kind, divergence, mutation, directed = FALSE) {
         return(matrix)
 
     } else if (net_kind == "list") {
-        # edgelist <- matrix(nrow = 0, ncol = 2)
-        # edgelist = rbind(edgelist, c(1,2))
-        # edgelist = rbind(edgelist, c(2,1))
 
-        # ## Start with node three because first two nodes are part of the initial network
-        # for (node in 3:size) {
-        #     duplication <- sample(1:(node-1), 1)
-        #     edgelist_duplication <- matrix(edgelist[edgelist[,1] == duplication, ], ncol = 2)
-        #     edgelist_duplication[,1] = node
-
-        #     ## Change each edge with probability divergence
-        #     for (e in 1:nrow(edgelist_duplication)) {
-        #         if (runif(1) <= divergence) {
-        #             edgelist_duplication = matrix(edgelist_duplication[-e,], ncol = 2)
-        #         }
-        #     }
-
-        #     if (directed == FALSE) {
-        #         edgelist_duplication_mirror <- cbind(edgelist_duplication[,2], edgelist_duplication[,1])
-        #         edgelist_duplication = rbind(edgelist_duplication, edgelist_duplication_mirror)
-        #     }
-
-        #     edgelist = rbind(edgelist, edgelist_duplication)
-        # }
-
-        # return(edgelist)
         stop("Edge lists are not supported for Duplication & Mutation models (make_DM) in this release. Set net_kind = `matrix`.")
 
     } else {

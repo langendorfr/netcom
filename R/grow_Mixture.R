@@ -35,6 +35,9 @@
 #' @references Langendorf, R. E., & Burgess, M. G. (2020). Empirically Classifying Network Mechanisms. arXiv preprint arXiv:2012.15863.
 #' 
 #' @examples
+#' # Import netcom
+#' library(netcom)
+#' 
 #' # Mechanisms
 #' sequence <- c("ER", "SW", "SW", "ER", "PA")
 #' network <- grow_Mixture(sequence)
@@ -51,7 +54,7 @@ grow_Mixture <- function(sequence, niches, p_ER = 0.5, power_PA = 2, divergence_
 
     ## Assign niches for NM (the Niche Model) so they will be constant across calls to grow_CM
     if (missing(niches)) {
-        niches <- runif(size) %>% sort()
+        niches <- stats::runif(size) %>% sort()
     } else {
         # Sort to be safe with use-supplied niches
         niches = niches %>% sort()

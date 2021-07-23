@@ -6,23 +6,19 @@
 #' 
 #' @param net_size Number of nodes in the network.
 #' 
+#' @param iters Number of replicates in the null distribution. Note that length(null_dist) = ((iters^2)-iters)/2.
+#' 
 #' @param neighborhood The range of nodes that form connected communities. Note: This implementation results in overlap of communities.
 #' 
-#' @param directed Whether the target network is directed. Defaults to TRUE.
+#' @param directed Whether the target network is directed.
 #' 
-#' @param DD_kind = A vector of network properties to be used to compare networks. Defaults to "all", which is the average of the in- and out-degrees.
+#' @param DD_kind = A vector of network properties to be used to compare networks.
+#' 
+#' @param DD_weight = A vector of weights for the relative importance of the network properties in DD_kind being used to compare networks. Should be the same length as DD_kind.
 #' 
 #' @param net_kind If the network is an adjacency matrix ("matrix") or an edge list ("list"). Defaults to "matrix".
 #' 
 #' @param mechanism_kind Either "canonical" or "grow" can be used to simulate networks. If "grow" is used, note that here it will only simulate pure mixtures made of a single mechanism.
-#' 
-#' @param resolution The first step is to find the version of each process most similar to the target network. This parameter sets the number of parameter values to search across. Decrease to improve performance, but at the cost of accuracy. Defaults to 100.
-#' 
-#' @param resolution_min = The minimum parameter value to consider. Zero is not used because in many processes it results in degenerate systems (e.g. entirely unconnected networks). Currently process agnostic. Future versions will accept a vector of values, one for each process. Defaults to 0.01.
-#' 
-#' @param resolution_max The maximum parameter value to consider. One is not used because in many processes it results in degenerate systems (e.g. entirely connected networks). Currently process agnostic. Future versions will accept a vector of values, one for each process. Defaults to 0.99.
-#' 
-#' @param reps Defaults to 3. The number of networks to simulate for each parameter. More replicates increases accuracy by making the estimation of the parameter that produces networks most similar to the target network less idiosyncratic.
 #' 
 #' @param process Name of mechanism. Currently only "ER", "PA", "DD", "DM" "SW", and "NM" are supported. Future versions will accept user-defined network-generating functions and associated parameters. ER = Erdos-Renyi random. PA = Preferential Attachment. DD = Duplication and Divergence. DM = Duplication and Mutation. SW = Small World. NM = Niche Model.
 #' 
@@ -32,15 +28,15 @@
 #'
 #' @param size_different If there is a difference in the size of the networks used in the null distribution. Defaults to FALSE.
 #' 
-#' @param DD_resize = If networks being compared are a different size, this parameter determines if upscaling "larger" or downscaling "smaller" occurs. Unlikely to be relevant here. Defaults to "smaller".
+#' #' @param resolution_min = The minimum parameter value to consider. Zero is not used because in many processes it results in degenerate systems (e.g. entirely unconnected networks). Currently process agnostic. Future versions will accept a vector of values, one for each process. Defaults to 0.01.
+#' 
+#' @param resolution_max The maximum parameter value to consider. One is not used because in many processes it results in degenerate systems (e.g. entirely connected networks). Currently process agnostic. Future versions will accept a vector of values, one for each process. Defaults to 0.99.
 #' 
 #' @param power_max = Defaults to 5. The maximum power of attachment in the Preferential Attachment process (PA).
 #' 
 #' @param connectance_max = Defaults to 0.5. The maximum connectance parameter for the Niche Model.
 #' 
 #' @param divergence_max = Defaults to 0.5. The maximum divergence parameter for the Duplication and Divergence/Mutation mechanisms.
-#' 
-#' @param mutation_max = Defaults to 0.5. The maximum mutation parameter for the Duplication and Mutation mechanism.
 #' 
 #' @param best_fit_sd Defaults to 0.01. Standard Deviation used to simulate networks with a similar but not identical best fit parameter. This is important because simulating networks with the identical parameter artificially inflates the false negative rate by assuming the best fit parameter is the true parameter. For large resolution and reps values this will become true, but also computationally intractable for realistically large systems.
 #' 
@@ -59,11 +55,14 @@
 #' @references Langendorf, R. E., & Burgess, M. G. (2020). Empirically Classifying Network Mechanisms. arXiv preprint arXiv:2012.15863.
 #' 
 #' @examples
+#' # Import netcom
+#' library(netcom)
+#' 
 #' make_Systematic(net_size = 10)
 #' 
 #' @export
 
-make_Null <- function(input_network, net_kind, mechanism_kind, process, parameter, net_size, iters, method, neighborhood, DD_kind, DD_weight, resolution_min = 0.01, resolution_max = 0.99, directed = TRUE, power_max = 5, connectance_max = 0.5, divergence_max = 0.5, best_fit_sd = 0, cores = 1, size_different = FALSE, cause_orientation = "row", max_norm = FALSE, DD_resize = "smaller", verbose = FALSE) {
+make_Null <- function(input_network, net_kind, mechanism_kind, process, parameter, net_size, iters, method, neighborhood, DD_kind, DD_weight, directed, resolution_min = 0.01, resolution_max = 0.99, power_max = 5, connectance_max = 0.5, divergence_max = 0.5, best_fit_sd = 0, cores = 1, size_different = FALSE, cause_orientation = "row", max_norm = FALSE, verbose = FALSE) {
 
     null_list <- switch(mechanism_kind,
                         "canonical" = make_Null_canonical(input_network = input_network,
@@ -83,7 +82,6 @@ make_Null <- function(input_network, net_kind, mechanism_kind, process, paramete
                                                             cores = cores,
                                                             directed = directed,
                                                             size_different = size_different,
-                                                            DD_resize = DD_resize,
                                                             cause_orientation = cause_orientation,
                                                             max_norm = max_norm,
                                                             verbose = verbose),
@@ -104,7 +102,6 @@ make_Null <- function(input_network, net_kind, mechanism_kind, process, paramete
                                                     cores = cores,
                                                     directed = directed,
                                                     size_different = size_different,
-                                                    DD_resize = DD_resize,
                                                     cause_orientation = cause_orientation,
                                                     max_norm = max_norm,
                                                     verbose = verbose))

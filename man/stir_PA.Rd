@@ -21,6 +21,8 @@ stir_PA(
 
 \item{power}{Power of attachment, which determines how much new nodes prefer to attach to nodes that have many edges compared to few. Needs to be positive.}
 
+\item{directed}{Binary variable determining if the network is directed, resulting in off-diagonal asymmetry in the adjacency matrix.}
+
 \item{retcon}{Binary variable determining if already existing nodes can attach to new nodes. Defaults to FALSE.}
 
 \item{sum_v_max}{Degree distributions must be normalized, either by their "max" or "sum". Defaults to "max".}

@@ -8,6 +8,8 @@
 #' 
 #' @param power Power of attachment, which determines how much new nodes prefer to attach to nodes that have many edges compared to few. Needs to be positive.
 #' 
+#' @param directed Binary variable determining if the network is directed, resulting in off-diagonal asymmetry in the adjacency matrix.
+#' 
 #' @param retcon Binary variable determining if already existing nodes can attach to new nodes. Defaults to FALSE.
 #' 
 #' @param sum_v_max Degree distributions must be normalized, either by their "max" or "sum". Defaults to "max".
@@ -21,6 +23,9 @@
 #' @references Barabási, A. L., & Albert, R. (1999). Emergence of scaling in random networks. science, 286(5439), 509-512.
 #' 
 #' @examples
+#' # Import netcom
+#' library(netcom)
+#' 
 #' size <- 10
 #' existing_network <- matrix(sample(c(0,1), size = size^2, replace = TRUE), nrow = size, ncol = size)
 #' new_network_prep <- matrix(0, nrow = size + 1, ncol = size + 1)
@@ -66,8 +71,8 @@ stir_PA <- function(matrix, x, power, directed, retcon = FALSE, sum_v_max = "max
         in_ratio[which(is.na(in_ratio))] = 0
     }
 
-    out_new <- 1 * (runif(n-1) <= out_ratio)
-    in_new <- 1 * (runif(n-1) <= in_ratio)
+    out_new <- 1 * (stats::runif(n-1) <= out_ratio)
+    in_new <- 1 * (stats::runif(n-1) <= in_ratio)
 
     if (retcon == TRUE) {
         stop("Retcon functionality missing.")

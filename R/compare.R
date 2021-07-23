@@ -1,12 +1,8 @@
 #' @title Compare Networks Many-to-Many
 #'
 #' @description Compares one network to a list of many networks.
-#'
-#' @param target The network be compared.
 #' 
 #' @param networks The networks being compared to the target network
-#' 
-#' @param net_size Size
 #' 
 #' @param net_kind If the network is an adjacency matrix ("matrix") or an edge list ("list"). Defaults to "matrix".
 #' 
@@ -19,6 +15,8 @@
 #' @param DD_weight = Weights of each network property in DD_kind. Defaults to 1, which is equal weighting for each property.
 #' 
 #' @param max_norm Binary variable indicating if each network property should be normalized so its max value (if a node-level property) is one. Defaults to FALSE.
+#' 
+#' @param size_different Defaults to FALSE. If TRUE, will ensure the node-level properties being compared are vectors of the same length, which is accomplished using splines.
 #'
 #' @param cores Defaults to 1. The number of cores to run the classification on. When set to 1 parallelization will be ignored.
 #' 
@@ -30,11 +28,14 @@
 #' 
 #' @details Note: Currently each process is assumed to have a single governing parameter.
 #'
-#' @return A dataframe with 3 columns and as many rows as processes being tested (5 by default). The first column lists the processes. The second lists the p-value on the null hypothesis that the target network did come from that row's process. The third column gives the estimated parameter for that particular process.
+#' @return A square matrix with dimensions equal to the number of networks being compared, where the ij element is the comparison of networks i and j.
 #' 
 #' @references Langendorf, R. E., & Burgess, M. G. (2020). Empirically Classifying Network Mechanisms. arXiv preprint arXiv:2012.15863.
 #' 
 #' @examples
+#' # Import netcom
+#' library(netcom)
+#' 
 #' # Adjacency matrix
 #' size <- 10
 #' comparisons <- 50
@@ -51,8 +52,12 @@
 #' compare(networks = networks)
 #' 
 #' @export
+#' 
+#' @importFrom parallel makeCluster
+#' 
+#' @importFrom doParallel registerDoParallel
 
-compare <- function(networks, net_kind = "matrix", method = "DD", cause_orientation = "row", DD_kind = "all", DD_weight = 1, DD_resize = "smaller", max_norm = FALSE, size_different = FALSE, cores = 1, diffusion_sampling = 2, diffusion_limit = 10, verbose = FALSE) {
+compare <- function(networks, net_kind = "matrix", method = "DD", cause_orientation = "row", DD_kind = "all", DD_weight = 1, max_norm = FALSE, size_different = FALSE, cores = 1, diffusion_sampling = 2, diffusion_limit = 10, verbose = FALSE) {
 
     if ((length(DD_weight) == 1) & (length(DD_kind) > 1)) {
         DD_weight = rep(DD_weight, length(DD_kind)) / length(DD_kind)
@@ -70,14 +75,17 @@ compare <- function(networks, net_kind = "matrix", method = "DD", cause_orientat
                     if(net_2 > net_1) {
                         # if (verbose == TRUE) { print(c(net_1, net_2)) }
 
-                        alignment <- netcom::align(networks[[net_1]], 
-                                                    networks[[net_2]], 
-                                                    base = diffusion_sampling,
-                                                    max_duration = diffusion_limit,
-                                                    characterization = "entropy", 
-                                                    normalization = FALSE)$score
-                        D_netcom[net_1, net_2] = alignment
-                        D_netcom[net_2, net_1] = alignment
+                        alignment <- align(
+                            networks[[net_1]], 
+                            networks[[net_2]], 
+                            base = diffusion_sampling,
+                            max_duration = diffusion_limit,
+                            characterization = "entropy", 
+                            normalization = FALSE
+                        )
+
+                        D_netcom[net_1, net_2] = alignment$score
+                        D_netcom[net_2, net_1] = alignment$score
                     }
                 }
             }
@@ -88,24 +96,28 @@ compare <- function(networks, net_kind = "matrix", method = "DD", cause_orientat
             cluster <- parallel::makeCluster(cores, outfile = "")
             doParallel::registerDoParallel(cluster)
 
+            ## Define %dopar% relative to its package so can use normally
+            `%dopar%` <- foreach::`%dopar%`
+
             ## Network Alignment
-            D_netcom <- foreach (net_1 = 1:length(networks), .combine = rbind, .packages = c("tibble", "dplyr", "netcom")) %dopar% {        
+            D_netcom <- foreach::foreach (net_1 = 1:length(networks), .combine = rbind, .packages = c("tibble", "dplyr", "netcom")) %dopar% {
                 j_output <- rep(NA, length(networks))
                 for (net_2 in 1:length(networks)) {
                     #  if (verbose == TRUE) { print(c(net_1, net_2)) }
                 
-                    j_output[net_2] <- netcom::align(networks[[net_1]], 
-                                                networks[[net_2]], 
-                                                base = diffusion_sampling,
-                                                max_duration = diffusion_limit, 
-                                                characterization = "entropy", 
-                                                normalization = FALSE)$score
+                    j_output[net_2] <- align(
+                        networks[[net_1]], 
+                        networks[[net_2]], 
+                        base = diffusion_sampling,
+                        max_duration = diffusion_limit, 
+                        characterization = "entropy", 
+                        normalization = FALSE)$score
                 }
                 
                 return(j_output) 
             }
 
-            stopCluster(cluster)
+            parallel::stopCluster(cluster)
         }
 
         return_matrix <- D_netcom
@@ -144,7 +156,7 @@ compare <- function(networks, net_kind = "matrix", method = "DD", cause_orientat
                 zero_rows <- which(rowSums(equilibrium_net) == 0)
                 diag(equilibrium_net)[zero_rows] = 1
                 equilibrium_net = sweep(equilibrium_net, 1, Matrix::rowSums(equilibrium_net, na.rm = TRUE), FUN = "/")
-                equilibrium_net = equilibrium_net %^% 5
+                equilibrium_net = expm::`%^%`(equilibrium_net, 5)
 
                 eq_igraph_graph <- igraph::graph_from_adjacency_matrix(equilibrium_net, mode = "directed", weighted = TRUE, diag = TRUE, add.colnames = NULL, add.rownames = NA)
 
@@ -189,11 +201,11 @@ compare <- function(networks, net_kind = "matrix", method = "DD", cause_orientat
                         "spectral_decomposition" = igraph::embed_adjacency_matrix(igraph_graph, no = nrow(networks[[net]])-1)$X %>% rowSums(),
                         "eq_spectral_decomposition" = igraph::embed_adjacency_matrix(eq_igraph_graph, no = nrow(equilibrium_net)-1)$X %>% rowSums(),
 
-                        "alpha" = igraph::alpha_centrality(igraph_graph, nodes = V(igraph_graph), alpha = 10, loops = TRUE, exo = 1, weights = NULL, tol = 1e-07, sparse = FALSE),
-                        "eq_alpha" = igraph::alpha_centrality(eq_igraph_graph, nodes = V(eq_igraph_graph), alpha = 10, loops = TRUE, exo = 1, weights = NULL, tol = 1e-07, sparse = FALSE),
+                        "alpha" = igraph::alpha_centrality(igraph_graph, nodes = igraph::V(igraph_graph), alpha = 10, loops = TRUE, exo = 1, weights = NULL, tol = 1e-07, sparse = FALSE),
+                        "eq_alpha" = igraph::alpha_centrality(eq_igraph_graph, nodes = igraph::V(eq_igraph_graph), alpha = 10, loops = TRUE, exo = 1, weights = NULL, tol = 1e-07, sparse = FALSE),
 
-                        "page_rank" = igraph::page_rank(igraph_graph, algo = c("prpack", "arpack", "power"), vids = V(igraph_graph), directed = TRUE, damping = 0.85, personalized = NULL, weights = NULL, options = NULL)$vector,
-                        "eq_page_rank" = igraph::page_rank(eq_igraph_graph, algo = c("prpack", "arpack", "power"), vids = V(eq_igraph_graph), directed = TRUE, damping = 0.85, personalized = NULL, weights = NULL, options = NULL)$vector,
+                        "page_rank" = igraph::page_rank(igraph_graph, algo = c("prpack", "arpack", "power"), vids = igraph::V(igraph_graph), directed = TRUE, damping = 0.85, personalized = NULL, weights = NULL, options = NULL)$vector,
+                        "eq_page_rank" = igraph::page_rank(eq_igraph_graph, algo = c("prpack", "arpack", "power"), vids = igraph::V(eq_igraph_graph), directed = TRUE, damping = 0.85, personalized = NULL, weights = NULL, options = NULL)$vector,
 
                         "communities" = rep(seq_along(community_sizes), community_sizes),
                         "eq_communities" = rep(seq_along(eq_community_sizes), eq_community_sizes),
@@ -224,7 +236,6 @@ compare <- function(networks, net_kind = "matrix", method = "DD", cause_orientat
                         DD_net[which(is.infinite(DD_net))] = 0
                     }
 
-                    # DD_combined = c(DD_combined, DD_net)
                     DD_combined[[DD_kind_name]] = DD_net
 
                 }
@@ -261,12 +272,8 @@ compare <- function(networks, net_kind = "matrix", method = "DD", cause_orientat
                                     stop("Error in compare(). DD_* should be either 1 or 2.")
                                 }
 
-
-                                # Position_c <- seq(from = 0, to = 1, length = length(DD_smaller))
-                                # Points_c <- tibble(Position = Position_c, DD = DD_1)
-
                                 Position_c <- seq(from = min(DD_larger), to = max(DD_larger), length = length(DD_smaller))
-                                DD_larger = stats::spline(DD_larger, xout = Position_c)$y   # %>% as_tibble()
+                                DD_larger = stats::spline(DD_larger, xout = Position_c)$y
                             } else {
 
                                 ## Equal size networks so does not matter which is the smaller/larger one
@@ -309,16 +316,6 @@ compare <- function(networks, net_kind = "matrix", method = "DD", cause_orientat
                 for (net_2 in seq_along(networks)) {
                     if(net_2 > net_1) {
                         # if (verbose == TRUE) { print(c(net_1, net_2)) }
-
-                        ## Skip because edge lists do not inherently contain the number of nodes (zero degree nodes are missing)
-                        ## Assume all networks have size net_size
-                        # if (DD_resize == "smaller")
-                        #     net_size <- min(nrow(networks[[net_1]]), nrow(networks[[net_2]]))
-                        # else if (DD_resize == "larger") {
-                        #     net_size <- max(nrow(networks[[net_1]]), nrow(networks[[net_2]]))
-                        # } else {
-                        #     stop("DD_resize parameter unknown.")
-                        # }
 
                         ## First network's Degree Distribution
                         comparison_net <- networks[[net_1]]
@@ -389,10 +386,10 @@ compare <- function(networks, net_kind = "matrix", method = "DD", cause_orientat
 
                         if (size_different) {
                             Position_1 <- seq(from = 0, to = 1, length = length(DD_1))
-                            Points_1 <- tibble(Position = Position_1, DD = DD_1)
+                            Points_1 <- tibble::tibble(Position = Position_1, DD = DD_1)
 
                             Position_c_1 <- seq(from = 0, to = 1, length = net_size)
-                            Points_c_1 <- apply(Points_1, 2, function(u) spline(Position_1, u, xout = Position_c_1)$y) %>% as_tibble()
+                            Points_c_1 <- apply(Points_1, 2, function(u) stats::spline(Position_1, u, xout = Position_c_1)$y) %>% tibble::as_tibble()
                         }
 
 
@@ -467,10 +464,10 @@ compare <- function(networks, net_kind = "matrix", method = "DD", cause_orientat
 
                         if (size_different) {
                             Position_2 <- seq(from = 0, to = 1, length = length(DD_2))
-                            Points_2 <- tibble(Position = Position_2, DD = DD_2)
+                            Points_2 <- tibble::tibble(Position = Position_2, DD = DD_2)
 
                             Position_c_2 <- seq(from = 0, to = 1, length = net_size)
-                            Points_c_2 <- apply(Points_2, 2, function(u) spline(Position_2, u, xout = Position_c_2)$y) %>% as_tibble()
+                            Points_c_2 <- apply(Points_2, 2, function(u) stats::spline(Position_2, u, xout = Position_c_2)$y) %>% tibble::as_tibble()
 
 
                             ## Comapre the Degree Distributions of the two networks

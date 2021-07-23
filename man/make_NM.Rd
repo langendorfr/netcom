@@ -37,7 +37,7 @@ Creates a single network according to the Niche Model. Can be directed or undire
 size <- 10
 
 # Create niche values for each member of the system (node)
-niches <- runif(n = size)
+niches <- stats::runif(n = size)
 
 # Make network according to the Niche Model
 make_NM(size = size, niches = niches)

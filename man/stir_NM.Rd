@@ -4,7 +4,7 @@
 \alias{stir_NM}
 \title{Stirs a Niche Model Network}
 \usage{
-stir_NM(matrix, x, niches, connectance = 0.5, directed = TRUE)
+stir_NM(matrix, x, niches, directed, connectance = 0.2)
 }
 \arguments{
 \item{matrix}{Existing network to experience rewiring (stirring).}
@@ -13,11 +13,9 @@ stir_NM(matrix, x, niches, connectance = 0.5, directed = TRUE)
 
 \item{niches}{Vector of length x, with values between zero and one corresponding to each node's niche.}
 
-\item{connectance}{Niche Model parameter specifying the expected connectivity of the network, which determines for a given node the niche space window within which it attaches to every other node. Defaults to 0.2.}
-
 \item{directed}{Binary variable determining if the network is directed, resulting in off-diagonal asymmetry in the adjacency matrix. Defaults to TRUE.}
 
-\item{retcon}{Binary variable determining if already existing nodes can attach to new nodes. Defaults to FALSE.}
+\item{connectance}{Niche Model parameter specifying the expected connectivity of the network, which determines for a given node the niche space window within which it attaches to every other node. Defaults to 0.2.}
 }
 \value{
 An adjacency matrix.

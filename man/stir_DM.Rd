@@ -23,6 +23,8 @@ stir_DM(
 
 \item{mutation}{Probability that the new node gains edges not associated with the node it duplicates. Needs to be between zero and one.}
 
+\item{directed}{Binary variable determining if the network is directed, resulting in off-diagonal asymmetry in the adjacency matrix.}
+
 \item{link}{Probability that the new node attaches to the node it duplicates. Defaults to 0.}
 
 \item{force_connected}{Binary argument determining if the newly grown node has to be connected to the existing network. Defaults to FALSE, to prevent rare computational slow-downs when it is unlikely to create a connected network. Defaults to FALSE.}
