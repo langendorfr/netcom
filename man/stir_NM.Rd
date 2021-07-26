@@ -4,7 +4,7 @@
 \alias{stir_NM}
 \title{Stirs a Niche Model Network}
 \usage{
-stir_NM(matrix, x, niches, directed, connectance = 0.2)
+stir_NM(matrix, x, niches, directed = TRUE, connectance = 0.2)
 }
 \arguments{
 \item{matrix}{Existing network to experience rewiring (stirring).}
@@ -27,6 +27,9 @@ Stirs an already existing network by rewiring a node according to the Niche Mode
 Stirs a node in a Niche Model network.
 }
 \examples{
+# Import netcom
+library(netcom)
+
 size <- 10
 existing_network <- matrix(sample(c(0,1), size = size^2, replace = TRUE), nrow = size, ncol = size)
 new_network_prep <- matrix(0, nrow = size + 1, ncol = size + 1)

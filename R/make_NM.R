@@ -33,7 +33,7 @@
 #' 
 #' @export
 
-make_NM <- function(size, net_kind, niches, connectance = 0.1, directed = TRUE, grow = FALSE) {
+make_NM <- function(size, niches, net_kind = "matrix", connectance = 0.1, directed = TRUE, grow = FALSE) {
 
     if (net_kind == "matrix") {
         matrix <- matrix(0, 

@@ -4,7 +4,7 @@
 \alias{stir_SW}
 \title{Stirs a Small-World Network}
 \usage{
-stir_SW(matrix, x, rewire, directed)
+stir_SW(matrix, x, rewire, directed = TRUE)
 }
 \arguments{
 \item{matrix}{Existing network to experience growth.}
@@ -25,6 +25,9 @@ Stirs an already existing network by rewiring a node according to the Small-Worl
 Rewires a node in a network according to the Small-World mechanism.
 }
 \examples{
+# Import netcom
+library(netcom)
+
 size <- 10
 existing_network <- matrix(sample(c(0,1), size = size^2, replace = TRUE), nrow = size, ncol = size)
 new_network_prep <- matrix(0, nrow = size + 1, ncol = size + 1)

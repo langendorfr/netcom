@@ -4,7 +4,14 @@
 \alias{stir_DD}
 \title{Sitrs a Duplication and Divergence Network}
 \usage{
-stir_DD(matrix, x, divergence, link, directed, force_connected = FALSE)
+stir_DD(
+  matrix,
+  x,
+  divergence,
+  directed = TRUE,
+  link = 0,
+  force_connected = FALSE
+)
 }
 \arguments{
 \item{matrix}{Existing network to be rewired (stirred).}
@@ -13,9 +20,9 @@ stir_DD(matrix, x, divergence, link, directed, force_connected = FALSE)
 
 \item{divergence}{Probability that the new node loses edges associated with the node it duplicates. Needs to be between zero and one.}
 
-\item{link}{Probability that the new node attaches to the node it duplicates. Defaults to 0.}
-
 \item{directed}{Binary variable determining if the network is directed, resulting in off-diagonal asymmetry in the adjacency matrix.}
+
+\item{link}{Probability that the new node attaches to the node it duplicates. Defaults to 0.}
 
 \item{force_connected}{Binary argument determining if the newly grown node has to be connected to the existing network. Defaults to FALSE, to prevent rare computational slow-downs when it is unlikely to create a connected network. Defaults to FALSE.}
 }
@@ -29,6 +36,9 @@ Stirs an already existing network by rewiring a node according to the Duplicatio
 Different from Duplication & Mutation models in that edges can only be lost.
 }
 \examples{
+# Import netcom
+library(netcom)
+
 size <- 10
 existing_network <- matrix(sample(c(0,1), size = size^2, replace = TRUE), nrow = size, ncol = size)
 new_network_prep <- matrix(0, nrow = size + 1, ncol = size + 1)

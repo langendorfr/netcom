@@ -25,6 +25,8 @@ classify(
   resolution_max = 0.99,
   reps = 3,
   processes = c("ER", "PA", "DM", "SW", "NM"),
+  test = "empirical",
+  best_fit_finder = "systematic",
   power_max = 5,
   connectance_max = 0.5,
   divergence_max = 0.5,
@@ -69,6 +71,10 @@ classify(
 
 \item{processes}{Defaults to c("ER", "PA", "DD", "SW", "NM"). Vector of process abbreviations. Currently only the default five are supported. Future versions will accept user-defined network-generating functions and associated parameters. ER = Erdos-Renyi random. PA = Preferential Attachment. DD = Duplication and Divergence. SW = Small World. NM = Niche Model.}
 
+\item{test}{Defaults to "empirical". The test used to distinguish the null distribution of comparisons between the network being classified and the networks simulated according to a hypothesized mechanism(s), with a particular best-fitting parameter. "empirical" finds how many simulated networks were on average farther from each other than the network being classified is. "KS" uses a KS test. "WMWU" uses a Wilcoxon-Mann-Whitney-U test.}
+
+\item{best_fit_finder}{Defaults to "systematic". Determines how the best-fitting parameter of each mechanism specified in processes is found. "systematic" tries every parameter value from resolution_min to resolution_max with a step size of resolution_max - resolution_min / resolution. "optim_L-BFGS-B" uses the L-BFGS-B optimizer in the optimx package. "optim_GenSA" uses the GenSA optimizer in the GenSA package.}
+
 \item{power_max}{Defaults to 5. The maximum power of attachment in the Preferential Attachment process (PA).}
 
 \item{connectance_max}{= Defaults to 0.5. The maximum connectance parameter for the Niche Model.}
@@ -105,6 +111,9 @@ Tests a network against hypothetical generating processes using a comparative ne
 Note: Currently each process is assumed to have a single governing parameter.
 }
 \examples{
+# Import netcom
+library(netcom)
+
 # Adjacency matrix
 size <- 10
 network <- matrix(sample(c(0,1), size = size^2, replace = TRUE), nrow = size, ncol = size)

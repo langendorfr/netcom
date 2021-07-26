@@ -30,7 +30,7 @@
 #' 
 #' @export
 
-stir_NM <- function(matrix, x, niches, directed, connectance = 0.2) {
+stir_NM <- function(matrix, x, niches, directed = TRUE, connectance = 0.2) {
     ids <- (1:ncol(matrix))[-x]
     # w <- x-1
 

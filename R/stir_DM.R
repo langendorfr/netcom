@@ -30,11 +30,11 @@
 #' existing_network <- matrix(sample(c(0,1), size = size^2, replace = TRUE), nrow = size, ncol = size)
 #' new_network_prep <- matrix(0, nrow = size + 1, ncol = size + 1)
 #' new_network_prep[1:size, 1:size] = existing_network
-#' new_network <- stir_DM(matrix = new_network_prep, x = size + 1, divergence = 0.5)
+#' new_network <- stir_DM(matrix = new_network_prep, x = size + 1, divergence = 0.5, mutation = 0.21)
 #' 
 #' @export
 
-stir_DM <- function(matrix, x, divergence, mutation, directed, link = 0, force_connected = FALSE) {
+stir_DM <- function(matrix, x, divergence, mutation, directed = TRUE, link = 0, force_connected = FALSE) {
     ids <- (1:ncol(matrix))[-x]
 
     DD <- function() {

@@ -29,6 +29,9 @@ Grows an already existing network by adding a node according to the Niche Model 
 Stirs a node in a Niche Model network.
 }
 \examples{
+# Import netcom
+library(netcom)
+
 size <- 10
 existing_network <- matrix(sample(c(0,1), size = size^2, replace = TRUE), nrow = size, ncol = size)
 new_network_prep <- matrix(0, nrow = size + 1, ncol = size + 1)

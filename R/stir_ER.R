@@ -30,7 +30,7 @@
 #' 
 #' @export
 
-stir_ER <- function(matrix, x, p, directed, retcon = FALSE) {
+stir_ER <- function(matrix, x, p, directed = TRUE, retcon = FALSE) {
     w <- x-1
     n <- ncol(matrix)
 

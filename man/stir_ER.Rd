@@ -4,7 +4,7 @@
 \alias{stir_ER}
 \title{Stir an Erdos-Renyi Random Network}
 \usage{
-stir_ER(matrix, x, p, directed, retcon = FALSE)
+stir_ER(matrix, x, p, directed = TRUE, retcon = FALSE)
 }
 \arguments{
 \item{matrix}{Existing network to experience growth.}
@@ -27,6 +27,9 @@ Stirs an already existing network by rewiring a node according to the Erdos-Reny
 Different from Duplication & Mutation models in that edges can only be lost.
 }
 \examples{
+# Import netcom
+library(netcom)
+
 size <- 10
 existing_network <- matrix(sample(c(0,1), size = size^2, replace = TRUE), nrow = size, ncol = size)
 new_network_prep <- matrix(0, nrow = size + 1, ncol = size + 1)

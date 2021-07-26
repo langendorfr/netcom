@@ -60,6 +60,9 @@ Creates a network by iteratively adding nodes, each capable of attaching to exis
 This function grows, one node at a time, a mixture mechanism network. As each node is added to the growing network it can attach to existing nodes by its own node-specific mechanism. A sequence of mechanism names must be provided. Note: Currently each mechanism is assumed to have a single governing parameter.
 }
 \examples{
+# Import netcom
+library(netcom)
+
 # Mechanisms
 sequence <- c("ER", "SW", "SW", "ER", "PA")
 network <- stir_Mixture(sequence)

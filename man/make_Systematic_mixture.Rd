@@ -66,6 +66,9 @@ Creates a list of networks that systematically spans mechanisms and their respec
 Produces ground-truthing network data.
 }
 \examples{
+# Import netcom
+library(netcom)
+
 make_Systematic(net_size = 10)
 
 }

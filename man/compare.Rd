@@ -54,6 +54,9 @@ Compares one network to a list of many networks.
 Note: Currently each process is assumed to have a single governing parameter.
 }
 \examples{
+# Import netcom
+library(netcom)
+
 # Adjacency matrix
 size <- 10
 comparisons <- 50

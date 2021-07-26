@@ -106,9 +106,9 @@ network <- make_Mixture(mechanism = mechanism, kind = kind, parameter = paramete
 
 ## Finally, plot the network you've simulated.
 network %>% 
-    melt() %>% 
-    filter(value == 1) %>% 
-    ggraph(layout = "stress") + 
+    reshape2::melt() %>% 
+    dplyr::filter(value == 1) %>% 
+    ggraph::ggraph(layout = "stress") + 
         theme_void() +
         geom_node_point(size = 10,
                         color = "slateblue") +
@@ -118,7 +118,11 @@ network %>%
                        end_cap = circle(4, "mm"))
 ```
 
-This is a system that grows randomly at first, adding seven nodes that attach to other nodes according to the Erdos-Renyi (ER) random model. Note the first three elements of _kind_ are _"grow"_ signifying these are events where. The next two events are _"rewire"_ signifying rewiring events. These do not change the size of the network (number of nodes). Only the edges between currently existing nodes are affected, as happens for the next two events where two nodes are rewired according to the Preferential Attachment (PA) model. These events include all currently existing nodes so a rewiring event can result in a node interacting with a node that was grown (added to the network) after it. Using *make_Mixture()* you can specify realistically complicated network evolutions by specifying changing governing dynamics in the sequences contained in the input parameters _mechanism_, _kind_, _parameter_, and _directed_.
+This is a system that grows randomly at first, adding seven nodes that attach to other nodes according to the Erdos-Renyi (ER) random model. Note the first three elements of _kind_ are _"grow"_ signifying these are events where nodes are added to the network. The next two events are _"rewire"_ which does not add any new nodes. Instead, an existing node replays its mechanism in the context of the currently existing network.
+
+Using *make_Mixture()* you can specify dynamic network evolutions. Picture 
+
+by specifying changing governing dynamics in the sequences contained in the input parameters _mechanism_, _kind_, _parameter_, and _directed_.
 
 
 # Comparing Networks
@@ -175,7 +179,7 @@ diag(comparisons) = 0
 
 ## PCA of comparisons
 stats::prcomp(comparisons) %>%
-    autoplot(
+    ggplot2::autoplot(
         data = tibble(
             Kind = c(
                 rep("Duplication & Divergence", num_networks),

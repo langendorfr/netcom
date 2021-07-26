@@ -32,7 +32,7 @@
 #' 
 #' @export
 
-stir_DD <- function(matrix, x, divergence, link, directed, force_connected = FALSE) {
+stir_DD <- function(matrix, x, divergence, directed = TRUE, link = 0, force_connected = FALSE) {
     ids <- (1:ncol(matrix))[-x]
 
     DD <- function() {

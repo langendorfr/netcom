@@ -10,6 +10,8 @@
 #' 
 #' @param kind Either `grow` or `rewire`, and determines if the nodes specified in the mechanism input vector are to be rewired or grown. Either a single value or a vector of values the same length as the mechanism input vector. The number of `grow` nodes, excluding the first two which are always a pair of bidirectionally connected nodes, is the size of the final network.
 #'
+#' @param size Typically not specified. The size of the network depends on how many `grow` events are part of the `kind` input sequence. This should only be used when all four components of the network evolution (`mechanism`, `kind`, `parameter`, and `directed`) are single name inputs instead of vectors.
+#' 
 #' @param niches Used by the Niche Model to determine which nodes interact. Needs to be a vector of the same length as the number of nodes, and range between zero and one.
 #' 
 #' @param retcon Binary variable determining if already existing nodes can attach to new nodes. Defaults to FALSE.
@@ -30,7 +32,11 @@
 #' # Import netcom
 #' library(netcom)
 #' 
-#' # Start by creating a sequence of network evolutions. There are four components to this sequence that can be defined for each step in the network's evolution, or once which will be used for every step in the newtwork's evolution.
+#' # Start by creating a sequence of network evolutions. 
+#' # There are four components to this sequence that can each be defined for every step 
+#' # in the network's evolution. Or, you can also specify a component once which will 
+#' # be used for every step in the newtwork's evolution.
+#' 
 #' mechanism <- c(
 #'     rep("ER", 7),
 #'     rep("PA", 2),
@@ -56,26 +62,56 @@
 #' )
 #' 
 #' # Simulate a network according to the rules of this system evolution.
-#' network <- make_Mixture(mechanism = mechanism, kind = kind, parameter = parameter, directed = directed)
+#' network <- make_Mixture(
+#'      mechanism = mechanism, 
+#'      kind = kind, 
+#'      parameter = parameter, 
+#'      directed = directed
+#' )
 #' 
 #' @export
 
-make_Mixture <- function(mechanism, directed, parameter, kind, niches, retcon = FALSE, link_DD = 0, link_DM = 0, force_connected = FALSE) {
+make_Mixture <- function(mechanism, directed, parameter, kind, size, niches, retcon = FALSE, link_DD = 0, link_DM = 0, force_connected = FALSE) {
 
-    ## Old way of all information being in a single `sequence` vector that gets parsed
-    # if (ncol(as.data.frame(do.call(rbind, strsplit(sequence, "_")))) == 3) {
-    #     sequence_pars <- as.data.frame(do.call(rbind, strsplit(sequence, "_")))[[2]] %>% as.numeric()
-    #     if (all(as.data.frame(do.call(rbind, strsplit(sequence, "_")))[[3]] %in% c("grow", "rewire"))) {
-    #         sequence = paste0(substr(as.data.frame(do.call(rbind, strsplit(sequence, "_")))[[3]], 1, 1), as.data.frame(do.call(rbind, strsplit(sequence, "_")))[[1]])
-    #     } else {
-    #         stop("Sequence's third variable, after the second underscore, must be either 'grow' or 'rewire'. For example: sequence <- c('SW_0.15_grow', 'SW_0.6_rewire', 'SW_0.2_grow', 'SW_0.2_grow')")
-    #     }
-    # } else if (ncol(as.data.frame(do.call(rbind, strsplit(sequence, "_")))) == 2) {
-    #     sequence_pars <- as.data.frame(do.call(rbind, strsplit(sequence, "_")))[[2]] %>% as.numeric()
-    #     sequence = paste0("g", as.data.frame(do.call(rbind, strsplit(sequence, "_")))[[1]])
-    # }
+    ## Check that the input components are of matching lengths if not a single value
+    component_sizes <- {}
+    if (!missing(mechanism)) {
+        component_sizes = c(component_sizes, length(mechanism))
+    }
+    if (!missing(directed)) {
+        component_sizes = c(component_sizes, length(directed))
+    }
+    if (!missing(parameter)) {
+        component_sizes = c(component_sizes, length(parameter))
+    }
+    if (!missing(kind)) {
+        component_sizes = c(component_sizes, length(kind))
+    }
 
-    ## New way of having a vector for each piece of information
+    if (length(component_sizes) == 0) {
+            stop("All four input components (`mechanism`, `kind`, `parameter`, and `directed`) are missing. Specify at least one of them.")
+    }
+
+    system_sizes <- unique(component_sizes)
+    system_sizes_vectors <- system_sizes[which(system_sizes != 1)]
+
+    if (length(system_sizes_vectors) > 1) {
+        stop("Make sure all four input components are either a single value or vectors of the same length. These correspond to node events in the evolution of the network. Every event must have all four components.")
+    }
+
+    if (max(system_sizes) > 1) {
+        ## Okay to overwrite the input variable `size` because the previous if statement
+        ## ensures that either `kind` is a single value or the same length as any other
+        ## input component.
+        size = max(system_sizes)
+    }
+
+    if (length(mechanism) == 1) {
+        if (missing(size)) {
+            stop("If all four input components (`mechanism`, `kind`, `parameter`, and `directed`) are a single value, use the `size` input to specify the size of the network.")
+        }
+        mechanism = rep(mechanism, size)
+    }
 
     ## Handle missing kind which can be assumed to be "grow"
     ## All other information (mechanism, directed, and kind) should be specified
@@ -94,7 +130,13 @@ make_Mixture <- function(mechanism, directed, parameter, kind, niches, retcon = 
         directed = rep(directed, length(mechanism))
     }
 
-    size <- sum(kind == "grow")
+    ## Okay to overwrite the input variable `size` (possible for the second
+    ## time) because the network evolution has been specified or an error
+    ## thrown by this point.
+    # if (size != sum(kind == "grow")) {
+    #     stop("The specified `size` is different from the specified number of `grow` events.")
+    # }
+    size = sum(kind == "grow")
     matrix <- matrix(0, size, size)
 
     ## Start with the first two nodes connected

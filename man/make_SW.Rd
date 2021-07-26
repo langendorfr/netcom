@@ -4,16 +4,16 @@
 \alias{make_SW}
 \title{Makes a Small-World Network}
 \usage{
-make_SW(size, net_kind, rewire, neighborhood, directed = FALSE)
+make_SW(size, rewire, neighborhood, net_kind = "matrix", directed = FALSE)
 }
 \arguments{
 \item{size}{The number of nodes in the network. Must be a positive integer.}
 
-\item{net_kind}{The format of the network. Currently must be either `matrix` or `list`.x}
-
 \item{rewire}{Small-World parameter specifying the probability each edge is randomly rewired, allowing for the possiblity of bridges between connected communities.}
 
 \item{neighborhood}{The range of nodes that form connected communities. Note: This implementation results in overlap of communities.}
+
+\item{net_kind}{The format of the network. Currently must be either `matrix` or `list`.x}
 
 \item{directed}{Binary variable determining if the network is directed, resulting in off-diagonal asymmetry in the adjacency matrix. Defaults to TRUE.}
 }
@@ -27,11 +27,17 @@ Make an already existing network according to the Small-World mechanism.
 Rewires a node in a network according to the Small-World mechanism.
 }
 \examples{
+# Import netcom
+library(netcom)
+
+# Network size (number of nodes)
 size <- 10
-existing_network <- matrix(sample(c(0,1), size = size^2, replace = TRUE), nrow = size, ncol = size)
-new_network_prep <- matrix(0, nrow = size + 1, ncol = size + 1)
-new_network_prep[1:size, 1:size] = existing_network
-new_network <- make_SW(matrix = new_network_prep, x = size + 1, rewire = 0.213)
+
+# Rewiring parameter
+rewire <- 0.2
+
+# Make network according to the Small-World mechanism
+make_SW(size = size, net_kind = "matrix", rewire = rewire)
 
 }
 \references{

@@ -9,7 +9,7 @@ stir_DM(
   x,
   divergence,
   mutation,
-  directed,
+  directed = TRUE,
   link = 0,
   force_connected = FALSE
 )
@@ -39,11 +39,14 @@ Stirs an already existing network by rewiring a node according to the Duplicatio
 Different from Duplication & Mutation models in that edges can only be lost.
 }
 \examples{
+# Import netcom
+library(netcom)
+
 size <- 10
 existing_network <- matrix(sample(c(0,1), size = size^2, replace = TRUE), nrow = size, ncol = size)
 new_network_prep <- matrix(0, nrow = size + 1, ncol = size + 1)
 new_network_prep[1:size, 1:size] = existing_network
-new_network <- stir_DM(matrix = new_network_prep, x = size + 1, divergence = 0.5)
+new_network <- stir_DM(matrix = new_network_prep, x = size + 1, divergence = 0.5, mutation = 0.21)
 
 }
 \references{

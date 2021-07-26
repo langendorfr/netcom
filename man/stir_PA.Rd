@@ -8,7 +8,7 @@ stir_PA(
   matrix,
   x,
   power,
-  directed,
+  directed = TRUE,
   retcon = FALSE,
   sum_v_max = "max",
   nascent_help = TRUE
@@ -39,6 +39,9 @@ Stirs an already existing network by rewiring a node according to the Preferenti
 Rewires a node in a network according to the Preferential Attachment mechanism.
 }
 \examples{
+# Import netcom
+library(netcom)
+
 size <- 10
 existing_network <- matrix(sample(c(0,1), size = size^2, replace = TRUE), nrow = size, ncol = size)
 new_network_prep <- matrix(0, nrow = size + 1, ncol = size + 1)

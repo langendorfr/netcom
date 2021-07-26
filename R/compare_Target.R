@@ -40,7 +40,7 @@
 #' network_target <- matrix(sample(c(0,1), size = size^2, replace = TRUE), nrow = size, ncol = size)
 #' network_others <- list()
 #' for (net in 1:comparisons) {
-#'      networks_others[[net]] = matrix(
+#'      network_others[[net]] = matrix(
 #'          sample(
 #'              c(0,1),
 #'              size = size^2,
@@ -48,11 +48,11 @@
 #'          nrow = size,
 #'          ncol = size)
 #' }
-#' compare_Target(target = network_target, networks = networks_others, net_size = size, method = "DD")
+#' compare_Target(target = network_target, networks = network_others, net_size = size, method = "DD")
 #' 
 #' @export
 
-compare_Target <- function(target, networks, net_size, net_kind, method = "DD", cause_orientation = "row", DD_kind = "all", DD_weight = 1, max_norm = FALSE, cores = 1, verbose = FALSE) {
+compare_Target <- function(target, networks, net_size, net_kind = "matrix", method = "DD", cause_orientation = "row", DD_kind = "all", DD_weight = 1, max_norm = FALSE, cores = 1, verbose = FALSE) {
 
     if (length(c(nrow(target), sapply(networks, nrow)) %>% unique()) == 1) {
         size_different = FALSE
@@ -95,7 +95,7 @@ compare_Target <- function(target, networks, net_size, net_kind, method = "DD", 
             `%dopar%` <- foreach::`%dopar%`
 
             ## Parallelized network alignment
-            D_netcom <- foreach::foreach (net = 1:length(networks), .combine = c, .packages = c("tibble", "dplyr", "netcom")) foreach::`%dopar%` {
+            D_netcom <- foreach::foreach (net = 1:length(networks), .combine = c, .packages = c("tibble", "dplyr", "netcom")) %dopar% {
                 if (verbose) {print(paste0("Aligning ", net, " of ", length(networks), " networks."))}
 
                 output <- netcom::align(target,
@@ -233,7 +233,7 @@ compare_Target <- function(target, networks, net_size, net_kind, method = "DD", 
                 zero_rows <- which(rowSums(equilibrium_net) == 0)
                 diag(equilibrium_net)[zero_rows] = 1
                 equilibrium_net = sweep(equilibrium_net, 1, Matrix::rowSums(equilibrium_net, na.rm = TRUE), FUN = "/")
-                equilibrium_net = equilibrium_net %^% 5
+                equilibrium_net = expm::`%^%`(equilibrium_net, 5)
 
                 eq_igraph_graph <- igraph::graph_from_adjacency_matrix(equilibrium_net, mode = "directed", weighted = TRUE, diag = TRUE, add.colnames = NULL, add.rownames = NA)
 

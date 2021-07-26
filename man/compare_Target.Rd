@@ -8,7 +8,7 @@ compare_Target(
   target,
   networks,
   net_size,
-  net_kind,
+  net_kind = "matrix",
   method = "DD",
   cause_orientation = "row",
   DD_kind = "all",
@@ -51,13 +51,16 @@ Compares one network to a list of many networks.
 Note: Currently each process is assumed to have a single governing parameter.
 }
 \examples{
+# Import netcom
+library(netcom)
+
 # Adjacency matrix
 size <- 10
 comparisons <- 50
 network_target <- matrix(sample(c(0,1), size = size^2, replace = TRUE), nrow = size, ncol = size)
 network_others <- list()
 for (net in 1:comparisons) {
-     networks_others[[net]] = matrix(
+     network_others[[net]] = matrix(
          sample(
              c(0,1),
              size = size^2,
@@ -65,7 +68,7 @@ for (net in 1:comparisons) {
          nrow = size,
          ncol = size)
 }
-compare_Target(target = network_target, networks = networks_others, net_size = size, method = "DD")
+compare_Target(target = network_target, networks = network_others, net_size = size, method = "DD")
 
 }
 \references{

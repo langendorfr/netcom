@@ -22,15 +22,18 @@
 #' # Import netcom
 #' library(netcom)
 #' 
+#' # Network size (number of nodes)
 #' size <- 10
-#' existing_network <- matrix(sample(c(0,1), size = size^2, replace = TRUE), nrow = size, ncol = size)
-#' new_network_prep <- matrix(0, nrow = size + 1, ncol = size + 1)
-#' new_network_prep[1:size, 1:size] = existing_network
-#' new_network <- make_SW(matrix = new_network_prep, x = size + 1, rewire = 0.213)
+#' 
+#' # Rewiring parameter
+#' rewire <- 0.2
+#' 
+#' # Make network according to the Small-World mechanism
+#' make_SW(size = size, net_kind = "matrix", rewire = rewire)
 #' 
 #' @export
 
-make_SW <- function(size, net_kind, rewire, neighborhood, directed = FALSE) {
+make_SW <- function(size, rewire, neighborhood, net_kind = "matrix", directed = FALSE) {
     ## Default neighborhood is one-tenth the network's size
     if (missing(neighborhood)) {
         neighborhood = max(1, round(size/10))

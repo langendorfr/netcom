@@ -28,7 +28,7 @@
 #' 
 #' @export
 
-stir_SW <- function(matrix, x, rewire, directed) {
+stir_SW <- function(matrix, x, rewire, directed = TRUE) {
     ids <- (1:ncol(matrix))[-x]
 
     out_degree <- rowSums(as.matrix(matrix[-x, -x]))

@@ -25,11 +25,17 @@ Makes a network according to the Duplication and Divergence mechanism.
 Different from Duplication & Mutation models in that edges can only be lost.
 }
 \examples{
+# Import netcom
+library(netcom)
+
+# Network size (number of nodes)
 size <- 10
-existing_network <- matrix(sample(c(0,1), size = size^2, replace = TRUE), nrow = size, ncol = size)
-new_network_prep <- matrix(0, nrow = size + 1, ncol = size + 1)
-new_network_prep[1:size, 1:size] = existing_network
-new_network <- make_DD(matrix = new_network_prep, x = size + 1, divergence = 0.5)
+
+# Divergence parameter
+divergence <- 0.237
+
+# Make network according to the Duplication & Divergence mechanism
+make_DD(size = size, net_kind = "matrix", divergence = divergence)
 
 }
 \references{

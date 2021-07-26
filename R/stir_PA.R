@@ -34,7 +34,7 @@
 #' 
 #' @export
 
-stir_PA <- function(matrix, x, power, directed, retcon = FALSE, sum_v_max = "max", nascent_help = TRUE) {
+stir_PA <- function(matrix, x, power, directed = TRUE, retcon = FALSE, sum_v_max = "max", nascent_help = TRUE) {
     # w <- x-1
     n <- ncol(matrix)
 

@@ -52,6 +52,8 @@ make_Null_canonical(
 
 \item{directed}{Whether the target network is directed.}
 
+\item{resolution_min}{= The minimum parameter value to consider. Zero is not used because in many processes it results in degenerate systems (e.g. entirely unconnected networks). Currently process agnostic. Future versions will accept a vector of values, one for each process. Defaults to 0.01.}
+
 \item{resolution_max}{The maximum parameter value to consider. One is not used because in many processes it results in degenerate systems (e.g. entirely connected networks). Currently process agnostic. Future versions will accept a vector of values, one for each process. Defaults to 0.99.}
 
 \item{power_max}{= Defaults to 5. The maximum power of attachment in the Preferential Attachment process (PA).}
@@ -64,9 +66,7 @@ make_Null_canonical(
 
 \item{cores}{= Defaults to 1. The number of cores to run the classification on. When set to 1 parallelization will be ignored.}
 
-\item{size_different}{If there is a difference in the size of the networks used in the null distribution. Defaults to FALSE.
-
-#' @param resolution_min = The minimum parameter value to consider. Zero is not used because in many processes it results in degenerate systems (e.g. entirely unconnected networks). Currently process agnostic. Future versions will accept a vector of values, one for each process. Defaults to 0.01.}
+\item{size_different}{If there is a difference in the size of the networks used in the null distribution. Defaults to FALSE.}
 
 \item{cause_orientation}{= The orientation of directed adjacency matrices. Defaults to "row".}
 
@@ -84,6 +84,9 @@ Creates a null distribution for a mechanism and parameter combination.
 Produces ground-truthing network data.
 }
 \examples{
+# Import netcom
+library(netcom)
+
 make_Systematic(net_size = 10)
 
 }
