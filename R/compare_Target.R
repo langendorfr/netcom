@@ -406,7 +406,7 @@ compare_Target <- function(target, networks, net_size, net_kind = "matrix", meth
                                 DD_node_out <- target[relevant_edges_out, 3] %>% sum()
 
                                 relevent_edges_in <- target[,2] == n
-                                DD_node_int <- target[relevent_edges_in, 3] %>% sum()
+                                DD_node_in <- target[relevent_edges_in, 3] %>% sum()
 
                                 DD_vector = c(DD_vector, DD_node_out, DD_node_in)
                             }
@@ -478,7 +478,7 @@ compare_Target <- function(target, networks, net_size, net_kind = "matrix", meth
                                         DD_node_out <- comparison_net[relevant_edges_out, 3] %>% sum()
 
                                         relevent_edges_in <- comparison_net[,2] == n
-                                        DD_node_int <- comparison_net[relevent_edges_in, 3] %>% sum()
+                                        DD_node_in <- comparison_net[relevent_edges_in, 3] %>% sum()
 
                                         DD_vector = c(DD_vector, DD_node_out, DD_node_in)
                                     }

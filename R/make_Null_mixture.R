@@ -109,7 +109,8 @@ make_Null_mixture <- function(input_network, net_kind, process, parameter, net_s
                         networks[[counter]] <- mat
 
                     } else if (net_kind == "list") {
-                        edgelist <- net %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
+                        directed_name <- switch(directed, TRUE = "directed", FALSE = "undirected")
+                        edgelist <- mat %>% igraph::graph_from_adjacency_matrix(mode = directed_name) %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
                         networks[[counter]] = edgelist
 
                     } else {
@@ -133,7 +134,8 @@ make_Null_mixture <- function(input_network, net_kind, process, parameter, net_s
                         networks[[counter]] <- mat
 
                     } else if (net_kind == "list") {
-                        edgelist <- net %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
+                        directed_name <- switch(directed, TRUE = "directed", FALSE = "undirected")
+                        edgelist <- mat %>% igraph::graph_from_adjacency_matrix(mode = directed_name) %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
                         networks[[counter]] = edgelist
 
                     } else {
@@ -157,7 +159,8 @@ make_Null_mixture <- function(input_network, net_kind, process, parameter, net_s
                         networks[[counter]] <- mat
 
                     } else if (net_kind == "list") {
-                        edgelist <- net %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
+                        directed_name <- switch(directed, TRUE = "directed", FALSE = "undirected")
+                        edgelist <- mat %>% igraph::graph_from_adjacency_matrix(mode = directed_name) %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
                         networks[[counter]] = edgelist
 
                     } else {
@@ -184,7 +187,8 @@ make_Null_mixture <- function(input_network, net_kind, process, parameter, net_s
                         networks[[counter]] <- mat
 
                     } else if (net_kind == "list") {
-                        edgelist <- net %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
+                        directed_name <- switch(directed, TRUE = "directed", FALSE = "undirected")
+                        edgelist <- mat %>% igraph::graph_from_adjacency_matrix(mode = directed_name) %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
                         networks[[counter]] = edgelist
 
                     } else {
@@ -208,7 +212,8 @@ make_Null_mixture <- function(input_network, net_kind, process, parameter, net_s
                         networks[[counter]] <- mat
 
                     } else if (net_kind == "list") {
-                        edgelist <- net %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
+                        directed_name <- switch(directed, TRUE = "directed", FALSE = "undirected")
+                        edgelist <- mat %>% igraph::graph_from_adjacency_matrix(mode = directed_name) %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
                         networks[[counter]] = edgelist
 
                     } else {
@@ -235,7 +240,8 @@ make_Null_mixture <- function(input_network, net_kind, process, parameter, net_s
                         networks[[counter]] <- mat
 
                     } else if (net_kind == "list") {
-                        edgelist <- net %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
+                        directed_name <- switch(directed, TRUE = "directed", FALSE = "undirected")
+                        edgelist <- mat %>% igraph::graph_from_adjacency_matrix(mode = directed_name) %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
                         networks[[counter]] = edgelist
 
                     } else {

@@ -94,7 +94,12 @@ make_Systematic_mixture <- function(net_size, neighborhood, directed = TRUE, net
                         networks[[counter]] <- mat
 
                     } else if (net_kind == "list") {
-                        edgelist <- net %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
+                        if (directed) {
+                            directed_name <- "directed"
+                        } else {
+                            directed_name <- "undirected"
+                        }
+                        edgelist <- mat %>% igraph::graph_from_adjacency_matrix(mode = directed_name) %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
                         networks[[counter]] = edgelist
 
                     } else {
@@ -119,7 +124,12 @@ make_Systematic_mixture <- function(net_size, neighborhood, directed = TRUE, net
                         networks[[counter]] <- mat
 
                     } else if (net_kind == "list") {
-                        edgelist <- net %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
+                        if (directed) {
+                            directed_name <- "directed"
+                        } else {
+                            directed_name <- "undirected"
+                        }
+                        edgelist <- mat %>% igraph::graph_from_adjacency_matrix(mode = directed_name) %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
                         networks[[counter]] = edgelist
 
                     } else {
@@ -145,7 +155,12 @@ make_Systematic_mixture <- function(net_size, neighborhood, directed = TRUE, net
                         networks[[counter]] <- mat
 
                     } else if (net_kind == "list") {
-                        edgelist <- net %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
+                        if (directed) {
+                            directed_name <- "directed"
+                        } else {
+                            directed_name <- "undirected"
+                        }
+                        edgelist <- mat %>% igraph::graph_from_adjacency_matrix(mode = directed_name) %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
                         networks[[counter]] = edgelist
 
                     } else {
@@ -173,7 +188,12 @@ make_Systematic_mixture <- function(net_size, neighborhood, directed = TRUE, net
                         networks[[counter]] <- mat
 
                     } else if (net_kind == "list") {
-                        edgelist <- net %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
+                        if (directed) {
+                            directed_name <- "directed"
+                        } else {
+                            directed_name <- "undirected"
+                        }
+                        edgelist <- mat %>% igraph::graph_from_adjacency_matrix(mode = directed_name) %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
                         networks[[counter]] = edgelist
 
                     } else {
@@ -200,7 +220,12 @@ make_Systematic_mixture <- function(net_size, neighborhood, directed = TRUE, net
                         networks[[counter]] <- mat
 
                     } else if (net_kind == "list") {
-                        edgelist <- net %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
+                        if (directed) {
+                            directed_name <- "directed"
+                        } else {
+                            directed_name <- "undirected"
+                        }
+                        edgelist <- mat %>% igraph::graph_from_adjacency_matrix(mode = directed_name) %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
                         networks[[counter]] = edgelist
 
                     } else {
@@ -228,7 +253,12 @@ make_Systematic_mixture <- function(net_size, neighborhood, directed = TRUE, net
                         networks[[counter]] <- mat
 
                     } else if (net_kind == "list") {
-                        edgelist <- net %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
+                        if (directed) {
+                            directed_name <- "directed"
+                        } else {
+                            directed_name <- "undirected"
+                        }
+                        edgelist <- mat %>% igraph::graph_from_adjacency_matrix(mode = directed_name) %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
                         networks[[counter]] = edgelist
 
                     } else {

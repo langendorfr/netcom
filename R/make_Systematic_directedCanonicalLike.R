@@ -4,8 +4,6 @@
 #'
 #' @param net_size Number of nodes in the network.
 #' 
-#' @param neighborhood The range of nodes that form connected communities. Note: This implementation results in overlap of communities.
-#' 
 #' @param directed Whether the target network is directed. Defaults to TRUE.
 #' 
 #' @param net_kind If the network is an adjacency matrix ("matrix") or an edge list ("list"). Defaults to "matrix".
@@ -46,7 +44,7 @@
 #' 
 #' @export
 
-make_Systematic_directedCanonicalLike <- function(net_size, neighborhood, directed = TRUE, net_kind = "matrix", resolution = 100, resolution_min = 0.01, resolution_max = 0.99, reps = 3, processes = c("ER", "PA", "DM", "SW", "NM"), power_max = 5, connectance_max = 0.5, divergence_max = 0.5, mutation_max = 0.5, cores = 1, verbose = TRUE) {
+make_Systematic_directedCanonicalLike <- function(net_size, directed = TRUE, net_kind = "matrix", resolution = 100, resolution_min = 0.01, resolution_max = 0.99, reps = 3, processes = c("ER", "PA", "DM", "SW", "NM"), power_max = 5, connectance_max = 0.5, divergence_max = 0.5, mutation_max = 0.5, cores = 1, verbose = TRUE) {
     ## Libraries
 
     ### Main Body ---
@@ -90,7 +88,12 @@ make_Systematic_directedCanonicalLike <- function(net_size, neighborhood, direct
                         networks[[counter]] <- mat
 
                     } else if (net_kind == "list") {
-                        edgelist <- net %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
+                        if (directed) {
+                            directed_name <- "directed"
+                        } else {
+                            directed_name <- "undirected"
+                        }
+                        edgelist <- mat %>% igraph::graph_from_adjacency_matrix(mode = directed_name) %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
                         networks[[counter]] = edgelist
 
                     } else {
@@ -115,7 +118,12 @@ make_Systematic_directedCanonicalLike <- function(net_size, neighborhood, direct
                         networks[[counter]] <- mat
 
                     } else if (net_kind == "list") {
-                        edgelist <- net %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
+                        if (directed) {
+                            directed_name <- "directed"
+                        } else {
+                            directed_name <- "undirected"
+                        }
+                        edgelist <- mat %>% igraph::graph_from_adjacency_matrix(mode = directed_name) %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
                         networks[[counter]] = edgelist
 
                     } else {
@@ -141,7 +149,12 @@ make_Systematic_directedCanonicalLike <- function(net_size, neighborhood, direct
                         networks[[counter]] <- mat
 
                     } else if (net_kind == "list") {
-                        edgelist <- net %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
+                        if (directed) {
+                            directed_name <- "directed"
+                        } else {
+                            directed_name <- "undirected"
+                        }
+                        edgelist <- mat %>% igraph::graph_from_adjacency_matrix(mode = directed_name) %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
                         networks[[counter]] = edgelist
 
                     } else {
@@ -168,7 +181,12 @@ make_Systematic_directedCanonicalLike <- function(net_size, neighborhood, direct
                         networks[[counter]] <- mat
 
                     } else if (net_kind == "list") {
-                        edgelist <- net %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
+                        if (directed) {
+                            directed_name <- "directed"
+                        } else {
+                            directed_name <- "undirected"
+                        }
+                        edgelist <- mat %>% igraph::graph_from_adjacency_matrix(mode = directed_name) %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
                         networks[[counter]] = edgelist
 
                     } else {
@@ -184,11 +202,6 @@ make_Systematic_directedCanonicalLike <- function(net_size, neighborhood, direct
 
                     rewire_SW <- master_par_systematic[i]
 
-                    # ## SW neighborhood parameter based on net_size if missing
-                    # if (missing(neighborhood)) {
-                    #     neighborhood = max(1, round(0.1 * net_size))
-                    # }
-
                     mat <- make_Mixture(
                         mechanism = rep(processes[p], net_size),
                         parameter = rewire_SW,
@@ -200,7 +213,12 @@ make_Systematic_directedCanonicalLike <- function(net_size, neighborhood, direct
                         networks[[counter]] <- mat
 
                     } else if (net_kind == "list") {
-                        edgelist <- net %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
+                        if (directed) {
+                            directed_name <- "directed"
+                        } else {
+                            directed_name <- "undirected"
+                        }
+                        edgelist <- mat %>% igraph::graph_from_adjacency_matrix(mode = directed_name) %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
                         networks[[counter]] = edgelist
 
                     } else {
@@ -228,7 +246,12 @@ make_Systematic_directedCanonicalLike <- function(net_size, neighborhood, direct
                         networks[[counter]] <- mat
 
                     } else if (net_kind == "list") {
-                        edgelist <- net %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
+                        if (directed) {
+                            directed_name <- "directed"
+                        } else {
+                            directed_name <- "undirected"
+                        }
+                        edgelist <- mat %>% igraph::graph_from_adjacency_matrix(mode = directed_name) %>% igraph::as.directed(mode = "mutual") %>% igraph::as_edgelist(names = TRUE)
                         networks[[counter]] = edgelist
 
                     } else {
