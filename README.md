@@ -4,11 +4,13 @@
 [![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/netcom)](https://cran.r-project.org/package=netcom)
 [![metacran downloads](https://cranlogs.r-pkg.org/badges/grand-total/netcom)](https://cran.r-project.org/package=netcom)
 
-`netcom` is an R package to infer system functioning by emprically comparing networks to each other.
+`netcom` is an R package to infer system functioning by emprically comparing networks to each other. There are many uses of this general approach to understanding network data. The vignette covers several common kinds of inference. More detailed descriptions of these approaches can be found in the following resources:
 
-Langendorf, R. E. & Burgess, M. G. (2020) Empirically classifying network mechanisms. arXiv preprint arXiv:2012.15863.
+- Langendorf, R. E. & Burgess, M. G. (2020) Empirically classifying network mechanisms. arXiv preprint arXiv:2012.15863.
 
-Langendorf, R. E. & Goldberg, D. S. (2019) Aligning statistical dynamics captures biological network functioning. arXiv preprint arXiv:1912.12551.
+- Langendorf, R. E. (2020). Using Structural Comparisons to Measure the Behavior of Complex Systems. In Evaluating Climate Change Impacts (pp. 123-137). Chapman and Hall/CRC.
+
+- Langendorf, R. E. & Goldberg, D. S. (2019) Aligning statistical dynamics captures biological network functioning. arXiv preprint arXiv:1912.12551.
 
 ## Installation
 
