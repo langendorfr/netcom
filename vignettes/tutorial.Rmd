@@ -144,7 +144,7 @@ networks_undisturbed <- list()
 for (net in 1:num_networks) {
     networks_undisturbed[[net]] = make_Mixture(
         mechanism = rep("DD", 20), 
-        parameter = 0.15, 
+        parameter = 0.1, 
         directed = TRUE
     )
 }
@@ -154,7 +154,7 @@ networks_disturbed <- list()
 for (net in 1:num_networks) {
     networks_disturbed[[net]] = make_Mixture(
         mechanism = rep(c("DD", "DD", "DD", "ER", "ER", "ER", "DD", "DD"), 4),
-        parameter = rep(c(0.3, 0.3, 0.3, 0.76, 0.76, 0.76, 0.1, 0.1), 4),
+        parameter = rep(c(0.1, 0.1, 0.1, 0.76, 0.76, 0.76, 0.13, 0.2), 4),
         kind = rep(c("grow", "grow", "grow", "rewire", "rewire", "rewire", "grow", "grow"), 4),
         directed = TRUE
     )
@@ -205,7 +205,7 @@ We can combine network simulation and comparisons to test a hypothesized mechani
 ## Classification of an undisturbed Small-World network made above
 classify(
     network = networks_undisturbed[[1]], 
-    processes = c("SW", "DD", "NM", "PA", "ER", "DD"),
+    processes = c("SW", "DD", "NM", "PA", "ER"),
     directed = TRUE,
     mechanism_kind = "grow"
 )
@@ -213,7 +213,7 @@ classify(
 ## Classification of a disturbed Small-World network made above
 classify(
     network = networks_disturbed[[1]], 
-    processes = c("SW", "DD", "NM", "PA", "ER", "DD"),
+    processes = c("SW", "DD", "NM", "PA", "ER"),
     directed = TRUE,
     mechanism_kind = "grow"
 )
