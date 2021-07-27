@@ -32,9 +32,9 @@
 #' 
 #' @param canonical Defautls to FALSE. If TRUE the mechanisms are directed or undirected in accordance with their canonical forms. This negates the value of `directed`.
 #' 
-#' @param cores = Defaults to 1. The number of cores to run the classification on. When set to 1 parallelization will be ignored.
+#' @param cores Defaults to 1. The number of cores to run the classification on. When set to 1 parallelization will be ignored.
 #' 
-#' @param verbose = Defaults to TRUE. Whether to print all messages.
+#' @param verbose Defaults to TRUE. Whether to print all messages.
 #'
 #' @details Produces ground-truthing network data.
 #'

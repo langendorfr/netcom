@@ -28,25 +28,25 @@
 #'
 #' @param size_different If there is a difference in the size of the networks used in the null distribution. Defaults to FALSE.
 #' 
-#' @param resolution_min = The minimum parameter value to consider. Zero is not used because in many processes it results in degenerate systems (e.g. entirely unconnected networks). Currently process agnostic. Future versions will accept a vector of values, one for each process. Defaults to 0.01.
+#' @param resolution_min The minimum parameter value to consider. Zero is not used because in many processes it results in degenerate systems (e.g. entirely unconnected networks). Currently process agnostic. Future versions will accept a vector of values, one for each process. Defaults to 0.01.
 #' 
 #' @param resolution_max The maximum parameter value to consider. One is not used because in many processes it results in degenerate systems (e.g. entirely connected networks). Currently process agnostic. Future versions will accept a vector of values, one for each process. Defaults to 0.99.
 #' 
-#' @param power_max = Defaults to 5. The maximum power of attachment in the Preferential Attachment process (PA).
+#' @param power_max Defaults to 5. The maximum power of attachment in the Preferential Attachment process (PA).
 #' 
-#' @param connectance_max = Defaults to 0.5. The maximum connectance parameter for the Niche Model.
+#' @param connectance_max Defaults to 0.5. The maximum connectance parameter for the Niche Model.
 #' 
-#' @param divergence_max = Defaults to 0.5. The maximum divergence parameter for the Duplication and Divergence/Mutation mechanisms.
+#' @param divergence_max Defaults to 0.5. The maximum divergence parameter for the Duplication and Divergence/Mutation mechanisms.
 #' 
 #' @param best_fit_sd Defaults to 0.01. Standard Deviation used to simulate networks with a similar but not identical best fit parameter. This is important because simulating networks with the identical parameter artificially inflates the false negative rate by assuming the best fit parameter is the true parameter. For large resolution and reps values this will become true, but also computationally intractable for realistically large systems.
 #' 
 #' @param max_norm Binary variable indicating if each network property should be normalized so its max value (if a node-level property) is one. Defaults to FALSE.
 #' 
-#' @param cause_orientation = The orientation of directed adjacency matrices. Defaults to "row".
+#' @param cause_orientation The orientation of directed adjacency matrices. Defaults to "row".
 #' 
-#' @param cores = Defaults to 1. The number of cores to run the classification on. When set to 1 parallelization will be ignored.
+#' @param cores Defaults to 1. The number of cores to run the classification on. When set to 1 parallelization will be ignored.
 #' 
-#' @param verbose = Defaults to FALSE. Whether to print all messages.
+#' @param verbose Defaults to FALSE. Whether to print all messages.
 #'
 #' @details Produces ground-truthing network data.
 #'

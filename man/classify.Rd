@@ -99,7 +99,7 @@ classify(
 
 \item{null_dist_trim}{= Number between zero and one that determines how much of each network comparison distribution (unknown network compared to simulated networks, simulated networks compared to each other) should be used. Prevents p-value convergence with large sample sizes. Defaults to 1, which means all comparisons are used (no trimming).}
 
-\item{verbose}{Defaults to TRUE. Whether to print all messages.}
+\item{verbose}{Defaults to FALSE. Whether to print all messages.}
 }
 \value{
 A dataframe with 3 columns and as many rows as processes being tested (5 by default). The first column lists the processes. The second lists the p-value on the null hypothesis that the target network did come from that row's process. The third column gives the estimated parameter for that particular process.

@@ -46,33 +46,33 @@ make_Null_mixture(
 
 \item{neighborhood}{The range of nodes that form connected communities. Note: This implementation results in overlap of communities.}
 
-\item{DD_kind}{= A vector of network properties to be used to compare networks.}
+\item{DD_kind}{A vector of network properties to be used to compare networks.}
 
-\item{DD_weight}{= A vector of weights for the relative importance of the network properties in DD_kind being used to compare networks. Should be the same length as DD_kind.}
+\item{DD_weight}{A vector of weights for the relative importance of the network properties in DD_kind being used to compare networks. Should be the same length as DD_kind.}
 
 \item{directed}{Whether the target network is directed.}
 
-\item{resolution_min}{= The minimum parameter value to consider. Zero is not used because in many processes it results in degenerate systems (e.g. entirely unconnected networks). Currently process agnostic. Future versions will accept a vector of values, one for each process. Defaults to 0.01.}
+\item{resolution_min}{The minimum parameter value to consider. Zero is not used because in many processes it results in degenerate systems (e.g. entirely unconnected networks). Currently process agnostic. Future versions will accept a vector of values, one for each process. Defaults to 0.01.}
 
 \item{resolution_max}{The maximum parameter value to consider. One is not used because in many processes it results in degenerate systems (e.g. entirely connected networks). Currently process agnostic. Future versions will accept a vector of values, one for each process. Defaults to 0.99.}
 
-\item{power_max}{= Defaults to 5. The maximum power of attachment in the Preferential Attachment process (PA).}
+\item{power_max}{Defaults to 5. The maximum power of attachment in the Preferential Attachment process (PA).}
 
-\item{connectance_max}{= Defaults to 0.5. The maximum connectance parameter for the Niche Model.}
+\item{connectance_max}{Defaults to 0.5. The maximum connectance parameter for the Niche Model.}
 
-\item{divergence_max}{= Defaults to 0.5. The maximum divergence parameter for the Duplication and Divergence/Mutation mechanisms.}
+\item{divergence_max}{Defaults to 0.5. The maximum divergence parameter for the Duplication and Divergence/Mutation mechanisms.}
 
 \item{best_fit_sd}{Defaults to 0.01. Standard Deviation used to simulate networks with a similar but not identical best fit parameter. This is important because simulating networks with the identical parameter artificially inflates the false negative rate by assuming the best fit parameter is the true parameter. For large resolution and reps values this will become true, but also computationally intractable for realistically large systems.}
 
-\item{cores}{= Defaults to 1. The number of cores to run the classification on. When set to 1 parallelization will be ignored.}
+\item{cores}{Defaults to 1. The number of cores to run the classification on. When set to 1 parallelization will be ignored.}
 
 \item{size_different}{If there is a difference in the size of the networks used in the null distribution. Defaults to FALSE.}
 
-\item{cause_orientation}{= The orientation of directed adjacency matrices. Defaults to "row".}
+\item{cause_orientation}{The orientation of directed adjacency matrices. Defaults to "row".}
 
 \item{max_norm}{Binary variable indicating if each network property should be normalized so its max value (if a node-level property) is one. Defaults to FALSE.}
 
-\item{verbose}{= Defaults to FALSE. Whether to print all messages.}
+\item{verbose}{Defaults to FALSE. Whether to print all messages.}
 }
 \value{
 A list. The first element contains the networks. The second contains their corresponding parameters.

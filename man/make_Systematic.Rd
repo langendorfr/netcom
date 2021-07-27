@@ -55,9 +55,9 @@ make_Systematic(
 
 \item{canonical}{Defautls to FALSE. If TRUE the mechanisms are directed or undirected in accordance with their canonical forms. This negates the value of `directed`.}
 
-\item{cores}{= Defaults to 1. The number of cores to run the classification on. When set to 1 parallelization will be ignored.}
+\item{cores}{Defaults to 1. The number of cores to run the classification on. When set to 1 parallelization will be ignored.}
 
-\item{verbose}{= Defaults to TRUE. Whether to print all messages.}
+\item{verbose}{Defaults to TRUE. Whether to print all messages.}
 }
 \value{
 A list. The first element contains the networks. The second contains their corresponding parameters.
