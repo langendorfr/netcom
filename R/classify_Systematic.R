@@ -70,6 +70,8 @@
 #' classify(network)
 #' 
 #' @export
+#' 
+#' @importFrom rlang .data
 
 classify_Systematic <- function(network, directed = FALSE, method = "DD", net_kind = "matrix", DD_kind = c("in", "out", "entropy_in", "entropy_out", "clustering_coefficient", "page_rank", "communities", "motifs_3", "motifs_4", "eq_in", "eq_out", "eq_entropy_in", "eq_entropy_out", "eq_clustering_coefficient", "eq_page_rank", "eq_communities", "eq_motifs_3", "eq_motifs_4"), DD_weight = c(0.0735367966, 0.0739940162, 0.0714523761, 0.0708156931, 0.0601296752, 0.0448072016, 0.0249793608, 0.0733125084, 0.0697029389, 0.0504358835, 0.0004016029, 0.0563752664, 0.0561878218, 0.0540490099, 0.0504347104, 0.0558106667, 0.0568270319, 0.0567474398), cause_orientation = "row", max_norm = FALSE, resolution = 100, resolution_min = 0.01, resolution_max = 0.99, reps = 3, processes = c("ER", "PA", "DM", "SW", "NM"), power_max = 5, connectance_max = 0.5, divergence_max = 0.5, mutation_max = 0.5, null_reps = 50, best_fit_kind = "avg", best_fit_sd = 1e-2, ks_dither = 0, ks_alternative = "two.sided", cores = 1, size_different = FALSE, null_dist_trim = 1, verbose = TRUE) {
 
@@ -141,27 +143,24 @@ classify_Systematic <- function(network, directed = FALSE, method = "DD", net_ki
     for (p in seq_along(processes)) {
         if (verbose) {print(paste0("Checking if the network is ", processes[p], "."))}
 
-        parameters_scored_process <- dplyr::filter(parameters_scored, Process == processes[p])
-
-        # print("parameters_scored_process")
-        # print(parameters_scored_process)
+        parameters_scored_process <- dplyr::filter(parameters_scored, .data$Process == processes[p])
 
         ## Use the min of the average
         ## Even for a given process and parameter there are many possible networks
 
         if (best_fit_kind == "avg") {
-            parameters_scored_process = parameters_scored_process %>% dplyr::group_by(Process, Parameter_Value) %>% dplyr::summarize(Distance = mean(Distance), .groups = "drop")
+            parameters_scored_process = parameters_scored_process %>% dplyr::group_by(.data$Process, .data$Parameter_Value) %>% dplyr::summarize(Distance = mean(.data$Distance), .groups = "drop")
         } else if (best_fit_kind == "min") {
-            parameters_scored_process = parameters_scored_process %>% dplyr::group_by(Process, Parameter_Value) %>% dplyr::summarize(Distance = min(Distance), .groups = "drop")
+            parameters_scored_process = parameters_scored_process %>% dplyr::group_by(.data$Process, .data$Parameter_Value) %>% dplyr::summarize(Distance = min(.data$Distance), .groups = "drop")
         } else if (best_fit_kind == "max") {
-            parameters_scored_process = parameters_scored_process %>% dplyr::group_by(Process, Parameter_Value) %>% dplyr::summarize(Distance = max(Distance), .groups = "drop")
+            parameters_scored_process = parameters_scored_process %>% dplyr::group_by(.data$Process, .data$Parameter_Value) %>% dplyr::summarize(Distance = max(.data$Distance), .groups = "drop")
         } else if (best_fit_kind == "median") {
-            parameters_scored_process = parameters_scored_process %>% dplyr::group_by(Process, Parameter_Value) %>% dplyr::summarize(Distance = stats::median(Distance), .groups = "drop")
+            parameters_scored_process = parameters_scored_process %>% dplyr::group_by(.data$Process, .data$Parameter_Value) %>% dplyr::summarize(Distance = stats::median(.data$Distance), .groups = "drop")
         } else {
             stop("best_fit_kind must be `avg`, `min`, or `max`.")
         }
 
-        best_fit <- dplyr::filter(parameters_scored_process, Distance == min(parameters_scored_process$Distance))
+        best_fit <- dplyr::filter(parameters_scored_process, .data$Distance == min(parameters_scored_process$Distance))
 
         ## Assuming there are multiple best fits, pick one randomly
         best_fit = best_fit[sample(1:nrow(best_fit), size = 1), ]
@@ -174,7 +173,7 @@ classify_Systematic <- function(network, directed = FALSE, method = "DD", net_ki
                                DD_kind = DD_kind,
                                DD_weight = DD_weight,
                                process = best_fit$Process, 
-                               parameter = best_fit$Parameter_Value, #2, #best_fit$Parameter_Value,
+                               parameter = best_fit$Parameter_Value,
                                power_max = power_max,
                                connectance_max = connectance_max,
                                divergence_max = divergence_max,

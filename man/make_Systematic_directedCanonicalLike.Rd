@@ -6,7 +6,6 @@
 \usage{
 make_Systematic_directedCanonicalLike(
   net_size,
-  neighborhood,
   directed = TRUE,
   net_kind = "matrix",
   resolution = 100,
@@ -24,8 +23,6 @@ make_Systematic_directedCanonicalLike(
 }
 \arguments{
 \item{net_size}{Number of nodes in the network.}
-
-\item{neighborhood}{The range of nodes that form connected communities. Note: This implementation results in overlap of communities.}
 
 \item{directed}{Whether the target network is directed. Defaults to TRUE.}
 

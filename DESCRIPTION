@@ -1,7 +1,7 @@
 Package: netcom
 Type: Package
 Title: NETwork COMparison inference
-Version: 2.1.2
+Version: 2.1.3
 Date: 2020-12-01
 Description: Infer system functioning with empirical NETwork COMparisons.
 Authors@R: c(
@@ -30,7 +30,12 @@ Imports:
     parallel,
     doParallel,
     optimx,
-    GenSA
+    GenSA,
+    rlang,
+    ggfortify,
+    ggplot2,
+    ggraph,
+    reshape2
 RoxygenNote: 7.1.1
 Suggests: 
     rmarkdown,

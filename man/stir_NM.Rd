@@ -34,7 +34,12 @@ size <- 10
 existing_network <- matrix(sample(c(0,1), size = size^2, replace = TRUE), nrow = size, ncol = size)
 new_network_prep <- matrix(0, nrow = size + 1, ncol = size + 1)
 new_network_prep[1:size, 1:size] = existing_network
-new_network <- stir_NM(matrix = new_network_prep, x = size + 1, connectance = 0.1, niches = runif(size + 1))
+new_network <- stir_NM(
+     matrix = new_network_prep, 
+     x = size + 1, 
+     connectance = 0.1, 
+     niches = runif(size + 1)
+)
 
 }
 \references{
