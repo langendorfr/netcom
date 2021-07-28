@@ -1,8 +1,8 @@
 Package: netcom
 Type: Package
 Title: NETwork COMparison inference
-Version: 2.1.3
-Date: 2020-12-01
+Version: 2.1.4
+Date: 2021-7-28
 Description: Infer system functioning with empirical NETwork COMparisons.
 Authors@R: c(
     person("Ryan", "Langendorf", role = c("aut", "cre"), email = "ryan.langendorf@colorado.edu"),
