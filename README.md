@@ -18,7 +18,7 @@ You can learn more about comparative inference in the following:
 
 - Langendorf, R. E. & Goldberg, D. S. (2019) Aligning statistical dynamics captures biological network functioning. arXiv preprint arXiv:1912.12551.
 
-You can install the **netcom** package two main ways.
+You can install the **netcom** package two main ways:
 
 1. A release version of the package can be installed from CRAN (the Comprehensive R Archive Network): https://cran.r-project.org/package=netcom.
 

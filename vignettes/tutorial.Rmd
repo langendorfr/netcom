@@ -26,7 +26,7 @@ options(digits = 2)
 # Abstract
 
 
-The __netcom__ package provides tools for inferring system functioning from network data by comparing networks to each other. This is where its name comes from: <b>net</b>work <b>com</b>parison. __netcom__ can compare networks describing any kind of empirical or theoretical system that can be stored as a matrix. Patterns in the resulting state space of inter-network distances capture system functioning, risk, and underlying mechanisms. This is particularly useful because network data are ubiquitous, reflecting a burgeoning systematics paradigm across science.
+The __netcom__ package provides tools for inferring system functioning from network data by comparing networks to each other. This is where its name comes from: <b>net</b>work <b>com</b>parisons. __netcom__ can compare networks describing any kind of empirical or theoretical system that can be stored as a matrix. Patterns in the resulting state space of inter-network distances capture system functioning, risk, and underlying mechanisms. This is particularly useful because network data are ubiquitous, reflecting a burgeoning systematics paradigm across science.
 
 # Installation
 
@@ -97,7 +97,7 @@ kind <- c(
 parameter <- c(
     rep(0.3, 7),
     rep(2, 2),
-    rep(0.2, 0.4, 0.3)
+    c(0.2, 0.4, 0.3)
 )
 
 directed <- c(
@@ -107,12 +107,12 @@ directed <- c(
 )
 
 ## Simulate a network according to the rules of this system evolution.
-network <- make_Mixture(mechanism = mechanism, kind = kind, parameter = parameter, directed = directed)
+network <- netcom::make_Mixture(mechanism = mechanism, kind = kind, parameter = parameter, directed = directed)
 ```
 
 This is a system that grows randomly at first, adding seven nodes that attach to other nodes according to the Erdos-Renyi (ER) random model. Note these first seven elements of _kind_ are _"grow"_ signifying these are events where nodes are added to the network. The next two events are _"rewire"_ which does not add any new nodes. Instead, an existing node replays its mechanism in the context of the currently existing network.
 
-![Diagram of this mixture network's evolution.](network_evolution_example.svg)
+![Diagram of this mixture network's evolution for 12 time steps.](network_evolution_example.svg)
 
 Please note that the first two steps in the network's evolution will always, regardless of the sequences you specify, result in two nodes that bidirectionally interact. This is because some mechanisms require an existing network. Preferential Attachment (PA) is like this. New nodes attach to existing nodes based on how many other nodes already share an edge with each existing node.
 
@@ -141,19 +141,18 @@ Aligning two networks is a common way to compare them to each other. This works 
 Network alignment offers useful insights at both the level of the entire network and the level of individual nodes. Paired nodes suggest variables that may serve similar functional roles in their respective systems, and may even respond similarly to disturbances. This kind of information sharing is particularly helpful in systems that are difficult to study but have closely related systems that are more common, for example a species that is endangered in one country but common in another. Zooming out to the level of entire networks, network alignment offers a way to map state spaces of systemic properties, structures, and functions. 
 
 ```{r Align networks, fig.height = 4, fig.width = 4, fig.align = "left"}
-## Create two sets of 5 networks each, all with 10 nodes. One of these sets is grown
-## according to the Small-World (SW) random mechanism. The other is also grown in this
-## manner, but with one randomly rewired nodes for every 2 nodes grown, mimicking a 
+## Create two sets of 100 networks each, all with 20 nodes. One of these sets is grown
+## according to the Duplication and Divergence mechanism (DD). The other is also grown in this
+## manner, but with one randomly rewired node for every three nodes grown, mimicking a 
 ## disturbed system.
-num_networks <- 10
+num_networks <- 100
 
 ## First set of undisturbed networks.
-## You can omit the '_grow' suffix which is the default, as long as every node is the be grown.
 networks_undisturbed <- list()
 for (net in 1:num_networks) {
-    networks_undisturbed[[net]] = make_Mixture(
+    networks_undisturbed[[net]] = netcom::make_Mixture(
         mechanism = rep("DD", 20), 
-        parameter = 0.1, 
+        parameter = 0.2, 
         directed = TRUE
     )
 }
@@ -161,38 +160,25 @@ for (net in 1:num_networks) {
 ## Second set of disturbed networks
 networks_disturbed <- list()
 for (net in 1:num_networks) {
-    networks_disturbed[[net]] = make_Mixture(
-        mechanism = rep(c("DD", "DD", "DD", "ER", "ER", "ER", "DD", "DD"), 4),
-        parameter = rep(c(0.1, 0.1, 0.1, 0.76, 0.76, 0.76, 0.13, 0.2), 4),
-        kind = rep(c("grow", "grow", "grow", "rewire", "rewire", "rewire", "grow", "grow"), 4),
+    networks_disturbed[[net]] = netcom::make_Mixture(
+        mechanism = rep(c("DD", "DD", "DD", "ER"), 5),
+        parameter = rep(c(0.2, 0.2, 0.2, 0.76), 5),
+        kind = rep(c("grow", "grow", "grow", "rewire"), 5),
         directed = TRUE
     )
 }
 
 ## Pairwise compare all of the networks to each other 
 networks <- c(networks_undisturbed, networks_disturbed)
-comparisons <- matrix(NA, nrow = length(networks), ncol = length(networks))
-for (row in 1:length(networks)) {
-    for (col in 1:length(networks)) {
-        
-        ## Take advantage of the symmetry of this alignment algorithm
-        if (col > row) {
-            comparisons[row, col] = align(networks[[row]], networks[[col]])$score
-            comparisons[col, row] = comparisons[row, col]
-        }
-
-    }
-}
-## Self-alignment always returns a zero distance so these can be added manually
-diag(comparisons) = 0
+comparisons <- netcom::compare(networks, method = "align")
 
 ## PCA of comparisons
 stats::prcomp(comparisons) %>%
     ggplot2::autoplot(
         data = tibble(
             Kind = c(
-                rep("Duplication & Divergence", num_networks),
-                rep("Disturbed Duplication & Divergence", num_networks)
+                rep("Undisturbed", num_networks),
+                rep("Disturbed", num_networks)
             )
         ), 
         colour = "Kind",
@@ -208,11 +194,11 @@ stats::prcomp(comparisons) %>%
 Aligning networks is not the only way to compare them. For example, the average degree (number of interactions) in a network can be compared. This does not tell you which nodes are most like each other between the two networks, but does allow you to make network-level inferences. It also more naturally allows for ensemble methods, where you compare networks as a weighted average of the differences across multiple characterizations.
 
 # Classifying Networks
-We can combine network simulation and comparisons to test a hypothesized mechanism against network data. Here the p-values are for the null hypothesis that the network was generated according to the particular mechanism being tested. Small p-values indicate the mechanism likely does not govern the system described by the network. Note that non-significant p-values do not prove the network was generated by that mechanism, only that it appears no more dissimilar to networks that are generated by that mechanism than they are to each other.
+We can combine network simulation and network comparisons to test a hypothesized mechanism against network data. Here the p-values are for the null hypothesis that the network was generated according to the particular mechanism being tested. Small p-values indicate the mechanism likely does not govern the system described by the network. Note that non-significant p-values do not prove the network was generated by that mechanism, only that it appears no more dissimilar to networks that are generated by that mechanism than they are to each other.
 
 ```{r Classify networks, fig.height = 4, fig.width = 4, fig.align = "left"}
 ## Classification of an undisturbed Small-World network made above
-classify(
+netcom::classify(
     network = networks_undisturbed[[1]], 
     processes = c("SW", "DD", "NM", "PA", "ER"),
     directed = TRUE,
@@ -220,7 +206,7 @@ classify(
 )
 
 ## Classification of a disturbed Small-World network made above
-classify(
+netcom::classify(
     network = networks_disturbed[[1]], 
     processes = c("SW", "DD", "NM", "PA", "ER"),
     directed = TRUE,
@@ -228,6 +214,6 @@ classify(
 )
 ```
 
-Pure mechanisms are readily inferred by comparing a network with many networks simualted from hypothesized mechanisms. Mixture mechanisms are not. This is because different mixtures can produce similar network structures. Fortunately, we can still functionally classify network data describing realistically complex systems governed by mixtures of mechanisms @langendorf2020empirically.
+Pure mechanisms are readily inferred by comparing a network with many networks simulated from hypothesized mechanisms. Mixture mechanisms are not. This is because different mixtures can produce similar network structures. Fortunately, you can still functionally classify network data describing realistically complex systems governed by mixtures of mechanisms @langendorf2020empirically.
 
 # References
