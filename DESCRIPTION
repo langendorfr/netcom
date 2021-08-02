@@ -1,6 +1,6 @@
 Package: netcom
 Type: Package
-Title: NETwork COMparison inference
+Title: NETwork COMparison Inference
 Version: 2.1.5
 Date: 2021-7-28
 Description: Infer system functioning with empirical NETwork COMparisons.

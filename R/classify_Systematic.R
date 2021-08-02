@@ -67,7 +67,10 @@
 #' # Adjacency matrix
 #' size <- 10
 #' network <- matrix(sample(c(0,1), size = size^2, replace = TRUE), nrow = size, ncol = size)
-#' classify(network)
+#' 
+#' # Classify this network
+#' # This can take several minutes to run
+#' \dontrun{classify(network, processes = c("ER", "PA", "DM", "SW", "NM"))}
 #' 
 #' @export
 #' 
