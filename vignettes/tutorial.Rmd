@@ -24,7 +24,9 @@ options(digits = 2)
 ```
 
 # Abstract
-Network data are ubiquitous, reflecting a burgeoning systematics paradigm across physical, natural, and social sciences. The __netcom__ package provides widely applicable tools for inferring system functioning from network data. To do this, __netcom__ compares networks to each other, across empirical classifications and theoretical models of system formation and/or functioning. This is where its name comes from: <b>net</b>work <b>com</b>parison. Patterns in the resulting state space of inter-network distances capture system functioning, risk, and underlying mechanisms.
+
+
+The __netcom__ package provides tools for inferring system functioning from network data by comparing networks to each other. This is where its name comes from: <b>net</b>work <b>com</b>parison. __netcom__ can compare networks describing any kind of empirical or theoretical system that can be stored as a matrix. Patterns in the resulting state space of inter-network distances capture system functioning, risk, and underlying mechanisms. This is particularly useful because network data are ubiquitous, reflecting a burgeoning systematics paradigm across science.
 
 # Installation
 
@@ -54,6 +56,8 @@ library(ggraph)     # Graph plotting extension for ggplot2
 library(ggfortify)  # Statistical plotting extension for ggplot2
 ```
 
+This vignette covers three primary uses of __netcom__: simulating, comparing, and classifying networks.
+
 # Simulating Networks
 
 Network simulation is a powerful way to study complex systems. By simulating networks according to different mechanisms (network generating recipes) you can study the kinds of systems that emerge. By comparing these networks to each other you can classify networks, and by comparing them to empirical network data you can quantify the probability that a particular mechanism is at play in a given real world system.
@@ -66,15 +70,17 @@ __netcom__ can simulate networks according to five common mechanisms:
 4. Small-World (SW) @watts1998collective
 5. Niche Model (NM) @williams2000simple
 
+A future version of __netcom__ will introduce the ability to add new mechanisms.
+
 There are two ways to simulate a mechanism. (i) Grow a network adding nodes one at a time. Each new node can only use information about already existing nodes in determining which to interact with (share an edge). (ii) Take an already formed network and have a node re-choose which of the other nodes to interact with (share an edge). This is called rewiring. Notably, the sequence of rewired nodes need not be a unique ordered list of the nodes in the network. Nodes can be rewired multiple times or never. Growing networks imparts a chronological hierarchy, where no edge is bidirectional. This captures system evolution where novel entites are introduced, but is less able to describe systems of continously interacting variables. Rewired networks are more appropriate here, but can be biased by the starting network and the order in which nodes are rewired. Also, rewiring nodes enough times to reach an equilibrium can be computationally intensive.
 
 ## Mixture Networks
 
 Note that both ways of simulating networks (growing and rewiring) involve assigning edges to one node at a time. This allows us to combine methods and mechanisms. We can simulate a network that grows, but every so often experiences rewiring, which may characterize disturbed systems. We can also simulate networks where nodes do not all act according to the same mechanism. These kinds of systems, which we call mixture networks, may be common @langendorf2020empirically.
 
-As an example, here is a recipe for a realistically complex mixture network:
+As an example, here is a recipe for a realistically complex mixture network with a dynamic evolution:
 
-```{r Easily simulate mixture network, fig.height = 4, fig.width = 4, fig.align = "left"}
+```{r Easily simulate dynamic mixture network, fig.height = 4, fig.width = 4, fig.align = "left"}
 ## Start by creating a sequence of network evolutions. There are four components to this sequence that can be defined for each step in the network's evolution, or once which will be used for every step in the newtwork's evolution.
 mechanism <- c(
     rep("ER", 7),
@@ -91,20 +97,27 @@ kind <- c(
 parameter <- c(
     rep(0.3, 7),
     rep(2, 2),
-    rep(0.3, 3)
+    rep(0.2, 0.4, 0.3)
 )
 
 directed <- c(
     rep(TRUE, 7),
     rep(FALSE, 2),
-    rep(TRUE, 3)
+    c(FALSE, FALSE, TRUE)
 )
 
 ## Simulate a network according to the rules of this system evolution.
 network <- make_Mixture(mechanism = mechanism, kind = kind, parameter = parameter, directed = directed)
+```
 
+This is a system that grows randomly at first, adding seven nodes that attach to other nodes according to the Erdos-Renyi (ER) random model. Note these first seven elements of _kind_ are _"grow"_ signifying these are events where nodes are added to the network. The next two events are _"rewire"_ which does not add any new nodes. Instead, an existing node replays its mechanism in the context of the currently existing network.
 
-## Finally, plot the network you've simulated.
+![Diagram of this mixture network's evolution.](network_evolution_example.svg)
+
+Please note that the first two steps in the network's evolution will always, regardless of the sequences you specify, result in two nodes that bidirectionally interact. This is because some mechanisms require an existing network. Preferential Attachment (PA) is like this. New nodes attach to existing nodes based on how many other nodes already share an edge with each existing node.
+
+```{r Plot te network, fig.height = 4, fig.width = 4, fig.align = "left"}
+## Lastly, plot the network you've simulated.
 network %>% 
     reshape2::melt() %>% 
     dplyr::filter(value == 1) %>% 
@@ -116,13 +129,9 @@ network %>%
                                      length = unit(3, "mm")),
                        start_cap = circle(4, "mm"),
                        end_cap = circle(4, "mm"))
-```
+``` 
 
-This is a system that grows randomly at first, adding seven nodes that attach to other nodes according to the Erdos-Renyi (ER) random model. Note the first three elements of _kind_ are _"grow"_ signifying these are events where nodes are added to the network. The next two events are _"rewire"_ which does not add any new nodes. Instead, an existing node replays its mechanism in the context of the currently existing network.
-
-Using *make_Mixture()* you can specify dynamic network evolutions. Picture 
-
-by specifying changing governing dynamics in the sequences contained in the input parameters _mechanism_, _kind_, _parameter_, and _directed_.
+Currently a network evolution has four components, the input parameters _mechanism_, _kind_, _parameter_, and _directed_. A future version of __netcom__ will introduce the ability to add new ones.
 
 
 # Comparing Networks
@@ -198,7 +207,7 @@ stats::prcomp(comparisons) %>%
 
 Aligning networks is not the only way to compare them. For example, the average degree (number of interactions) in a network can be compared. This does not tell you which nodes are most like each other between the two networks, but does allow you to make network-level inferences. It also more naturally allows for ensemble methods, where you compare networks as a weighted average of the differences across multiple characterizations.
 
-# Network Classification
+# Classifying Networks
 We can combine network simulation and comparisons to test a hypothesized mechanism against network data. Here the p-values are for the null hypothesis that the network was generated according to the particular mechanism being tested. Small p-values indicate the mechanism likely does not govern the system described by the network. Note that non-significant p-values do not prove the network was generated by that mechanism, only that it appears no more dissimilar to networks that are generated by that mechanism than they are to each other.
 
 ```{r Classify networks, fig.height = 4, fig.width = 4, fig.align = "left"}
