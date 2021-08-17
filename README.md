@@ -4,7 +4,7 @@
 [![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/netcom)](https://cran.r-project.org/package=netcom)
 [![metacran downloads](https://cranlogs.r-pkg.org/badges/grand-total/netcom)](https://cran.r-project.org/package=netcom)
 
-`netcom` is an R package to infer system functioning by emprically comparing networks to each other. There are many uses of this general approach to understanding network data. The vignette covers several common kinds of inference. Once installed, this can be opened by running:
+`netcom` is an R package to infer system functioning by empirically comparing networks to each other. There are many uses of this general approach to understanding network data. The vignette covers several common kinds of inference. Once installed, this can be opened by running:
 
 ```R
 vignette("tutorial", package = "netcom")
