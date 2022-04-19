@@ -204,8 +204,8 @@ compare <- function(networks, net_kind = "matrix", method = "DD", cause_orientat
                         "alpha" = igraph::alpha_centrality(igraph_graph, nodes = igraph::V(igraph_graph), alpha = 10, loops = TRUE, exo = 1, weights = NULL, tol = 1e-07, sparse = FALSE),
                         "eq_alpha" = igraph::alpha_centrality(eq_igraph_graph, nodes = igraph::V(eq_igraph_graph), alpha = 10, loops = TRUE, exo = 1, weights = NULL, tol = 1e-07, sparse = FALSE),
 
-                        "page_rank" = igraph::page_rank(igraph_graph, algo = c("prpack", "arpack", "power"), vids = igraph::V(igraph_graph), directed = TRUE, damping = 0.85, personalized = NULL, weights = NULL, options = NULL)$vector,
-                        "eq_page_rank" = igraph::page_rank(eq_igraph_graph, algo = c("prpack", "arpack", "power"), vids = igraph::V(eq_igraph_graph), directed = TRUE, damping = 0.85, personalized = NULL, weights = NULL, options = NULL)$vector,
+                        "page_rank" = igraph::page_rank(igraph_graph, algo = "prpack", vids = igraph::V(igraph_graph), directed = TRUE, damping = 0.85, personalized = NULL, weights = NULL, options = NULL)$vector,
+                        "eq_page_rank" = igraph::page_rank(eq_igraph_graph, algo = "prpack", vids = igraph::V(eq_igraph_graph), directed = TRUE, damping = 0.85, personalized = NULL, weights = NULL, options = NULL)$vector,
 
                         "communities" = rep(seq_along(community_sizes), community_sizes),
                         "eq_communities" = rep(seq_along(eq_community_sizes), eq_community_sizes),
