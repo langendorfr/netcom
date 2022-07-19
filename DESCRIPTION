@@ -1,8 +1,8 @@
 Package: netcom
 Type: Package
 Title: NETwork COMparison Inference
-Version: 2.1.5
-Date: 2021-7-28
+Version: 2.1.6
+Date: 2022-7-19
 Description: Infer system functioning with empirical NETwork COMparisons.
 Authors@R: c(
     person("Ryan", "Langendorf", role = c("aut", "cre"), email = "ryan.langendorf@colorado.edu"),
@@ -36,7 +36,7 @@ Imports:
     ggplot2,
     ggraph,
     reshape2
-RoxygenNote: 7.1.1
+RoxygenNote: 7.2.0
 Suggests: 
     rmarkdown,
     knitr,

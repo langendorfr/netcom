@@ -26,7 +26,7 @@ You can install the **netcom** package two main ways:
 install.packages("netcom").
 ```
 
-2. Alternatively, the (usually) more recent development version can be installed from GitHub: https://github.com/langendorfr/netcom. This can be accomplished with the **devtools** package. We recommend new users install the other version, from CRAN, which is has less functioning but has been more reliably tested.
+2. Alternatively, the (sometimes) more recent development version can be installed from GitHub: https://github.com/langendorfr/netcom. This can be accomplished with the **devtools** package. We recommend new users install the other version, from CRAN, which may have less functioning but has been more reliably tested.
 
 ```R
 install.packages("devtools")
