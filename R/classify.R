@@ -76,7 +76,7 @@
 #' 
 #' # Classify this network
 #' # This can take several minutes to run
-#' \dontrun{classify(network, processes = c("ER", "PA", "DM", "SW", "NM"))}
+#' \donttest{classify(network, processes = c("ER", "PA", "DM", "SW", "NM"))}
 #' 
 #' @export
 

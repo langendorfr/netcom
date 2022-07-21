@@ -120,7 +120,7 @@ network <- matrix(sample(c(0,1), size = size^2, replace = TRUE), nrow = size, nc
 
 # Classify this network
 # This can take several minutes to run
-\dontrun{classify(network, processes = c("ER", "PA", "DM", "SW", "NM"))}
+\donttest{classify(network, processes = c("ER", "PA", "DM", "SW", "NM"))}
 
 }
 \references{

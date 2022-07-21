@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 #   collapse = TRUE,
   comment = "#>"
 )
-options(digits = 2)
+old <- options(digits = 3)
 ```
 
 # Abstract
@@ -217,3 +217,7 @@ netcom::classify(
 Pure mechanisms are readily inferred by comparing a network with many networks simulated from hypothesized mechanisms. Mixture mechanisms are not. This is because different mixtures can produce similar network structures. Fortunately, you can still functionally classify network data describing realistically complex systems governed by mixtures of mechanisms @langendorf2020empirically.
 
 # References
+
+```{r, include = FALSE}
+options(old)
+```
