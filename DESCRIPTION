@@ -3,7 +3,7 @@ Type: Package
 Title: NETwork COMparison Inference
 Version: 2.1.6
 Date: 2022-7-19
-Description: Infer system functioning with empirical NETwork COMparisons. These methods are part of a growing paradigm in network science that uses relative comparisons of networks to infer mechanistic classifications and predict systemic interventions. They have been developed and applied in Langendorf and Burgess (2021) https://doi.org/10.1038/s41598-021-99251-7, Langendorf (2020) https://doi.org/10.1201/9781351190831-6, and Langendorf and Goldberg (2019) arXiv:1912.12551.
+Description: Infer system functioning with empirical NETwork COMparisons. These methods are part of a growing paradigm in network science that uses relative comparisons of networks to infer mechanistic classifications and predict systemic interventions. They have been developed and applied in Langendorf and Burgess (2021) <doi.org/10.1038/s41598-021-99251-7>, Langendorf (2020) <doi.org/10.1201/9781351190831-6>, and Langendorf and Goldberg (2019) <arXiv:1912.12551>.
 Authors@R: c(
     person("Ryan", "Langendorf", role = c("aut", "cre"), email = "ryan.langendorf@colorado.edu"),
     person("Debra", "Goldberg", role = "ctb", email = "debra@colorado.edu"),
