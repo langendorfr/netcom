@@ -1,7 +1,7 @@
 # netcom <img src="man/figures/netcom_sticker.png" align="right" width="120" />
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](http://www.gnu.org/licenses/gpl-3.0)
-[![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/netcom)](https://cran.r-project.org/package=netcom)
+[![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/netcom)](https://cran.r-project.org/package=netcom)
 [![metacran downloads](https://cranlogs.r-pkg.org/badges/grand-total/netcom)](https://cran.r-project.org/package=netcom)
 
 `netcom` is an R package to infer system functioning by empirically comparing networks to each other. There are many uses of this general approach to understanding network data. The vignette covers several common kinds of inference. Once installed, this can be opened by running:
